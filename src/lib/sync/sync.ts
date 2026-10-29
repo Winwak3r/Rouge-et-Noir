@@ -93,7 +93,8 @@ export async function syncCalendar(provider: FootballProvider): Promise<number> 
       homeTeamId: home.id,
       awayTeamId: away.id,
       rennesIsHome: m.home.externalId === provider.teamExternalId,
-      lastSyncedAt: new Date(),
+      // Pas de lastSyncedAt ici : cette date sert à espacer la récupération du DÉTAIL (cotes, feuille de match).
+      // La mettre à jour avec le calendrier retardait la récupération des cotes de plusieurs heures.
     };
 
     if (!existing) {
@@ -428,7 +429,7 @@ export interface SyncReport {
  * Synchro « intelligente », appelable aussi souvent qu'on veut (cron chaque minute, visite du site,
  * bouton admin) : elle ne fait que ce qui est nécessaire et ne tourne jamais deux fois en parallèle.
  */
-export async function runSmartSync(opts: { force?: boolean; reason: string }): Promise<SyncReport> {
+export async function runSmartSync(opts: { force?: boolean; reason: string; budgetMs?: number }): Promise<SyncReport> {
   if (!opts.force && (await since("last_sync_at")) < SYNC_INTERVALS.minGap) {
     return { skipped: "synchronisation récente", steps: [], errors: [] };
   }
@@ -501,7 +502,13 @@ export async function runSmartSync(opts: { force?: boolean; reason: string }): P
       orderBy: { kickoffAt: "asc" },
     });
 
+    const budget = opts.budgetMs ?? 40_000; // sous la limite de Vercel : la suite se fera à la synchro suivante
+    let postponed = 0;
     for (const m of candidates) {
+      if (Date.now() - started.getTime() > budget) {
+        postponed++;
+        continue;
+      }
       const upcoming = m.status === "SCHEDULED" && m.kickoffAt > now;
       const age = m.lastSyncedAt ? now.getTime() - m.lastSyncedAt.getTime() : Infinity;
       // Juste avant le match et sans feuille de match : on vérifie plus souvent.
@@ -516,6 +523,8 @@ export async function runSmartSync(opts: { force?: boolean; reason: string }): P
         return notes.join(", ") || "à jour";
       });
     }
+
+    if (postponed) report.steps.push(`${postponed} match(s) reporté(s) à la synchro suivante (temps limité)`);
 
     // Rappels par e-mail 2 h avant le verrouillage (si activés par l'admin)
     try {

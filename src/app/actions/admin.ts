@@ -80,10 +80,13 @@ export async function toggleUserRoleAction(_: AdminState, form: FormData): Promi
 
 // ─── Synchronisation et points ──────────────────────────────────────────────
 
-export async function syncNowAction(): Promise<void> {
+export async function syncNowAction(_: AdminState): Promise<AdminState> {
   await requireAdmin();
-  await runSmartSync({ force: true, reason: "manuel" });
+  const r = await runSmartSync({ force: true, reason: "manuel" });
   refresh("/admin", "/admin/matchs");
+  if (r.skipped) return { error: `Synchronisation non lancée : ${r.skipped}. Réessaie dans une minute.` };
+  if (r.errors.length) return { error: `Terminée avec ${r.errors.length} erreur(s) : ${r.errors[0]}` };
+  return { message: `Synchronisation terminée : ${r.steps.length} étape(s). Détail dans le journal ci-dessous.` };
 }
 
 /** Recalcul contrôlé des points d'un match, avec son barème d'origine (journalisé). */

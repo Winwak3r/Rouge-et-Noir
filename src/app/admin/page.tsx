@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { syncNowAction } from "@/app/actions/admin";
-import { SubmitButton } from "@/components/SubmitButton";
+import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
 import { formatStamp } from "@/lib/dates";
 import { vapidFromEnv } from "@/lib/push/webpush";
@@ -33,9 +33,7 @@ export default async function AdminHome() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-xl font-bold uppercase tracking-wide">Synchronisation (ESPN)</h2>
-          <form action={syncNowAction}>
-            <SubmitButton pendingLabel="Synchronisation…">Synchroniser maintenant</SubmitButton>
-          </form>
+          <ActionForm action={syncNowAction} className="flex flex-wrap items-center gap-2" submits={[{ label: "Synchroniser maintenant" }]} />
         </div>
         <Table
           empty="Aucune synchronisation pour l’instant."

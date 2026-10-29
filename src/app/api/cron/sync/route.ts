@@ -10,6 +10,7 @@ export async function GET(req: Request) {
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return new Response("Non autorisé", { status: 401 });
   }
-  const report = await runSmartSync({ reason: "auto" });
+  const force = new URL(req.url).searchParams.get("force") === "1";
+  const report = await runSmartSync({ reason: force ? "manuel" : "auto", force });
   return Response.json(report);
 }
