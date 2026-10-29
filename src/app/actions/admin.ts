@@ -430,3 +430,19 @@ export async function syncPhotosAction(_: AdminState): Promise<AdminState> {
     return { error: e instanceof Error ? e.message : "Mise à jour impossible." };
   }
 }
+
+/** Valide à la main l'adresse e-mail d'un participant (si l'e-mail de confirmation n'a pas pu lui parvenir). */
+export async function verifyUserEmailAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const userId = str(form, "userId");
+  const u = await prisma.user.findUnique({ where: { id: userId }, select: { pseudo: true, emailVerifiedAt: true } });
+  if (!u) return { error: "Participant introuvable." };
+  if (u.emailVerifiedAt) return { message: `${u.pseudo} est déjà validé.` };
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: userId }, data: { emailVerifiedAt: new Date() } }),
+    prisma.emailToken.deleteMany({ where: { userId, usedAt: null, newEmail: null } }), // ancien lien devenu inutile
+  ]);
+  await audit(admin.id, "VERIFY_EMAIL", "User", userId, { emailVerifiedAt: null }, { manual: true });
+  refresh("/admin/participants");
+  return { message: `Compte de ${u.pseudo} validé : il peut se connecter.` };
+}

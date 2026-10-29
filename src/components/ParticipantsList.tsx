@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { deleteUserAction, toggleUserActiveAction, toggleUserRoleAction } from "@/app/actions/admin";
+import { deleteUserAction, toggleUserActiveAction, toggleUserRoleAction, verifyUserEmailAction } from "@/app/actions/admin";
 import { ActionForm } from "./ActionForm";
 import { Avatar } from "./Avatar";
 
@@ -26,6 +26,21 @@ function Actions({ u, adminId }: { u: ParticipantRow; adminId: string }) {
   if (u.id === adminId) return <span className="text-xs text-neutral-500">C’est toi</span>;
   return (
     <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+      {!u.verified && (
+        <ActionForm
+          action={verifyUserEmailAction}
+          className={`flex flex-wrap items-center gap-1.5 ${small} [&_.btn-secondary]:border-green-600 [&_.btn-secondary]:text-green-700`}
+          submits={[
+            {
+              label: "Valider le compte",
+              primary: false,
+              confirm: `Valider à la main l’adresse de ${u.pseudo} (${u.email}) ? Il pourra se connecter sans cliquer sur le lien reçu par e-mail.`,
+            },
+          ]}
+        >
+          <input type="hidden" name="userId" value={u.id} />
+        </ActionForm>
+      )}
       {(u.isActive || u.role === "ADMIN") && (
         <ActionForm
           action={toggleUserRoleAction}
