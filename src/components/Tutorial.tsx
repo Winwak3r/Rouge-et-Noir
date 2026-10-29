@@ -8,6 +8,8 @@ interface Step {
   target: string; // valeur de l'attribut data-tour de l'élément à montrer
   title: string;
   text: string;
+  /** Barème affiché sous le texte (étape « Les règles ») */
+  scale?: boolean;
 }
 
 const STEPS: Step[] = [
@@ -32,6 +34,12 @@ const STEPS: Step[] = [
     text: "Ta position et tes points dans la ligue affichée. Touche ce bloc pour voir le classement complet des participants.",
   },
   {
+    target: "rules",
+    title: "Les règles",
+    text: "Tout le fonctionnement du jeu est expliqué ici. Pour le score, voici ce que rapporte chaque pronostic :",
+    scale: true,
+  },
+  {
     target: "standings",
     title: "Classements officiels",
     text: "Les classements officiels des compétitions du Stade Rennais, et les meilleurs buteurs.",
@@ -48,7 +56,17 @@ type Box = { top: number; left: number; width: number; height: number };
  * une bulle munie d'une flèche le désigne. Affichée une fois, sur l'accueil.
  * `waitForEvent` : attendre qu'une autre fenêtre (bienvenue dans la ligue) soit fermée.
  */
-export function Tutorial({ waitForEvent }: { waitForEvent?: string }) {
+export interface TutorialPoints {
+  exact: number;
+  goalDiff: number;
+  outcome: number;
+  wrong: number;
+  missing: number;
+}
+
+const fmt = (n: number) => `${n > 0 ? "+" : ""}${n} point${Math.abs(n) > 1 ? "s" : ""}`;
+
+export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; points: TutorialPoints }) {
   const pathname = usePathname();
   const [ready, setReady] = useState(!waitForEvent);
   const [steps, setSteps] = useState<Step[]>([]);
@@ -147,6 +165,30 @@ export function Tutorial({ waitForEvent }: { waitForEvent?: string }) {
         </p>
         <h2 className="mt-0.5 font-display text-xl font-bold uppercase tracking-wide">{step.title}</h2>
         <p className="mt-1.5 text-sm text-neutral-700">{step.text}</p>
+        {step.scale && (
+          <table className="mt-2 w-full text-sm">
+            <tbody className="divide-y divide-neutral-100">
+              {[
+                ["Score exact", points.exact],
+                ["Bon résultat et bon écart de buts", points.goalDiff],
+                ["Bon résultat, mauvais écart", points.outcome],
+                ["Mauvais résultat", points.wrong],
+                ["Aucun pronostic avant le coup d’envoi", points.missing],
+              ].map(([label, n]) => (
+                <tr key={label as string}>
+                  <td className="py-1 pr-2 text-neutral-700">{label}</td>
+                  <td
+                    className={`whitespace-nowrap py-1 text-right font-bold tabular-nums ${
+                      (n as number) > 0 ? "text-green-700" : (n as number) < 0 ? "text-red-700" : "text-neutral-500"
+                    }`}
+                  >
+                    {fmt(n as number)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
         <div className="mt-4 flex items-center justify-between gap-3">
           {/* Points de progression */}
           <span className="flex gap-1.5" aria-hidden>
