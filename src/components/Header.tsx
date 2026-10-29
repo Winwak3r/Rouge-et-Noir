@@ -9,6 +9,7 @@ import { Logo } from "./Logo";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { LeagueSwitcher } from "./LeagueSwitcher";
 import { LeagueWelcome } from "./LeagueWelcome";
+import { Tutorial } from "./Tutorial";
 import { cookies } from "next/headers";
 import { WELCOME_COOKIE } from "@/lib/league-rules";
 import { getLeagueLogos } from "@/lib/league-logos";
@@ -74,6 +75,8 @@ export async function Header() {
       {user && !user.emailVerifiedAt && <VerifyEmailBanner email={user.email} />}
       {/* Première connexion (ou aucune ligue) : rejoindre ou créer une ligue */}
       {user && membershipCount === 0 && <LeagueOnboarding canCreate logos={logos} />}
+      {/* Didacticiel : une fois, quand le joueur a sa première ligue (après la fenêtre de bienvenue s'il y en a une) */}
+      {user && !user.tutorialDoneAt && membershipCount > 0 && <Tutorial waitForEvent={welcomeLeague ? "league-welcome-closed" : undefined} />}
       {welcomeLeague && (
         <LeagueWelcome
           logos={logos}
@@ -129,7 +132,7 @@ export async function Header() {
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
             </Link>
-            <Link href="/classements-srfc" aria-label="Classements" className="hbtn">
+            <Link href="/classements-srfc" aria-label="Classements" data-tour="standings" className="hbtn">
               {rennes?.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={rennes.logoUrl} alt="" width={18} height={18} className="h-[18px] w-[18px] object-contain" />
@@ -166,6 +169,7 @@ export async function Header() {
             <div className="flex min-w-0 shrink gap-2.5">
               <Link
                 href="/classement"
+                data-tour="rank"
                 title="Voir le classement général des pronostics"
                 className="flex min-w-0 flex-1 flex-col gap-px rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors hover:border-neutral-400 sm:flex-none"
               >

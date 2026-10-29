@@ -509,7 +509,7 @@ export default async function HomePage() {
         )}
 
         {next ? (
-          <section className="space-y-3">
+          <section className="space-y-3" data-tour="calendar">
             <h2 className="text-xs font-bold uppercase tracking-wide text-neutral-500">Prochain match</h2>
             {renderMatch(next, { layout: "next" })}
           </section>
@@ -517,7 +517,7 @@ export default async function HomePage() {
           !top && <p className="card text-sm text-neutral-700">Le calendrier est en attente de nouvelles rencontres.</p>
         )}
 
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="calendar">
           <h2 className="text-xs font-bold uppercase tracking-wide text-neutral-500">Calendrier 2026/2027</h2>
           <CompetitionTabs
             defaultCode={(next ?? top)?.competition ?? "LIGUE_1"}

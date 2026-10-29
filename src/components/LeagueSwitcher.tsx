@@ -63,7 +63,7 @@ export function LeagueSwitcher({ leagues, activeId }: { leagues: L[]; activeId: 
 
   return (
     // @container : la largeur réellement disponible décide de l'affichage du texte
-    <div ref={ref} className="@container relative min-w-[3.25rem] max-w-[11rem] flex-1 sm:max-w-[15rem]">
+    <div ref={ref} data-tour="league" className="@container relative min-w-[3.25rem] max-w-[11rem] flex-1 sm:max-w-[15rem]">
       <button
         type="button"
         aria-haspopup="listbox"

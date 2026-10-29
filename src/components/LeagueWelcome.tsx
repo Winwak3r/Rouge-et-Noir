@@ -16,6 +16,7 @@ export function LeagueWelcome(props: {
   const close = () => {
     setOpen(false);
     void dismissWelcomeAction();
+    window.dispatchEvent(new Event("league-welcome-closed")); // le didacticiel peut commencer
   };
   const l = props.league;
   return (

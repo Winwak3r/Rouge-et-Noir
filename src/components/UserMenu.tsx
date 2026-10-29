@@ -38,7 +38,7 @@ export function UserMenu(props: {
 
   const item = "block w-full rounded px-3 py-2 text-left hover:bg-neutral-100";
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" data-tour="user-menu">
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-haspopup="menu" className="hbtn-pseudo">
         <Avatar userId={props.userId} pseudo={props.pseudo} at={props.avatarAt} size={20} className="ring-white/60" />
         <span className="max-w-[3.5rem] truncate sm:max-w-none">{props.pseudo}</span>

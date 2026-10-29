@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { logoutAction } from "@/app/actions/auth";
 import { AvatarEditor } from "@/components/AvatarEditor";
 import { ChangeEmailForm, ChangePasswordForm } from "@/components/forms";
+import { replayTutorialAction } from "@/app/actions/auth";
 import { PushToggle } from "@/components/PushToggle";
 import { EmailRemindersForm } from "@/components/AccountForms";
 import { requireUser } from "@/lib/auth/session";
@@ -35,6 +36,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           </p>
           </div>
         </div>
+        <form action={replayTutorialAction}>
+          <button type="submit" className="btn-secondary">
+            Revoir le didacticiel
+          </button>
+        </form>
         <form action={logoutAction}>
           <button type="submit" className="btn-secondary">
             Se déconnecter

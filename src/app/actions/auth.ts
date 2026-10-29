@@ -286,3 +286,17 @@ export async function requestEmailChangeAction(_: FormState, form: FormData): Pr
   await sendEmailChangeLink(user, email);
   return { success: `Lien envoyé à ${email}. Ton adresse actuelle reste valable jusqu’à la confirmation.` };
 }
+
+
+/** Didacticiel terminé (ou passé) : il ne s'affichera plus. */
+export async function completeTutorialAction(): Promise<void> {
+  const user = await getCurrentUser();
+  if (user) await prisma.user.update({ where: { id: user.id }, data: { tutorialDoneAt: new Date() } });
+}
+
+/** « Revoir le didacticiel » depuis Mon compte. */
+export async function replayTutorialAction(): Promise<void> {
+  const user = await requireUser();
+  await prisma.user.update({ where: { id: user.id }, data: { tutorialDoneAt: null } });
+  redirect("/");
+}
