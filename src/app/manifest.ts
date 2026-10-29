@@ -8,13 +8,14 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Pronostics des matchs du Stade Rennais FC.",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
+    background_color: "#ffffff", // fond blanc, comme celui du logo
     theme_color: "#e1001a",
     lang: "fr",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
-      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      // Android : icône « adaptative », avec une marge pour ne pas être rognée par la forme du téléphone
+      { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }
