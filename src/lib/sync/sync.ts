@@ -495,12 +495,18 @@ export async function runSmartSync(opts: { force?: boolean; reason: string; budg
           { status: { in: ["LIVE", "INTERRUPTED"] } },
           { status: "SCHEDULED", kickoffAt: { lte: now } }, // aurait dû commencer
           { status: "FINISHED", resultConfirmedAt: null },
-          { status: "FINISHED", resultConfirmedAt: { gte: new Date(now.getTime() - 24 * HOUR) } }, // corrections
+          // corrections éventuelles du résultat : seulement pour les matchs JOUÉS récemment
+          // (et non pour les vieux matchs confirmés lors du premier remplissage de la base)
+          { status: "FINISHED", resultConfirmedAt: { not: null }, kickoffAt: { gte: new Date(now.getTime() - 36 * HOUR) } },
           { status: "SCHEDULED", kickoffAt: { gt: now, lte: new Date(now.getTime() + SYNC_INTERVALS.oddsWindow) } },
         ],
       },
       orderBy: { kickoffAt: "asc" },
     });
+    // Priorités : 1) en cours, 2) à venir (cotes, feuille de match), 3) résultats à confirmer, 4) vérifications
+    const rank = (m: (typeof candidates)[number]) =>
+      m.status === "LIVE" || m.status === "INTERRUPTED" ? 0 : m.status === "SCHEDULED" ? 1 : m.resultConfirmedAt ? 3 : 2;
+    candidates.sort((a, b) => rank(a) - rank(b) || a.kickoffAt.getTime() - b.kickoffAt.getTime());
 
     const budget = opts.budgetMs ?? 40_000; // sous la limite de Vercel : la suite se fera à la synchro suivante
     let postponed = 0;
