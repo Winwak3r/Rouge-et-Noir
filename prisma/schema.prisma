@@ -1,0 +1,510 @@
+// Rouge & Noir — Les Pronostics — schéma Prisma (étape 1)
+// Base : PostgreSQL (Neon). Aligne le bloc datasource sur celui du projet F1
+// (même version de Prisma) au moment de créer le dépôt.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  PARTICIPANT
+  ADMIN
+}
+
+enum Competition {
+  LIGUE_1
+  EUROPA_LEAGUE
+  COUPE_DE_FRANCE
+}
+
+enum MatchStatus {
+  SCHEDULED   // à venir
+  POSTPONED   // reporté (nouvelle date inconnue ou à confirmer)
+  LIVE        // en cours (mi-temps comprise)
+  INTERRUPTED // interrompu / suspendu
+  FINISHED    // terminé côté fournisseur (résultat pas forcément confirmé)
+  CANCELLED   // annulé définitivement
+}
+
+enum ScoreCategory {
+  EXACT     // score exact
+  GOAL_DIFF // bon résultat + bon écart
+  OUTCOME   // bon résultat, mauvais écart
+  WRONG     // mauvais résultat
+  MISSING   // aucun pronostic avant le coup d'envoi
+}
+
+enum OddsSource {
+  PROVIDER // cote récupérée chez le fournisseur
+  ADMIN    // cote saisie par l'administrateur avant le match
+}
+
+enum SyncStatus {
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+// ─── Comptes ────────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  pseudo          String    @unique
+  email           String    @unique
+  passwordHash    String
+  role            Role      @default(PARTICIPANT)
+  isActive        Boolean   @default(true)
+  emailVerifiedAt DateTime?
+  // Incrémenté à chaque changement de mot de passe : déconnecte les autres appareils.
+  sessionVersion  Int       @default(0)
+  // Date de la photo de profil (null = pas de photo) ; sert aussi à rafraîchir le cache du navigateur.
+  avatarUpdatedAt DateTime?
+  // E-mail de rappel 2 h avant chaque match si le pronostic n'est pas saisi (désactivable dans « Mon compte »).
+  emailReminders  Boolean   @default(true)
+  // Ligue affichée (classement, pronostics des autres) quand le joueur est dans plusieurs ligues.
+  activeLeagueId  String?
+  // Date d'inscription : aucun -1 pour les matchs commencés avant cette date.
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  predictions  Prediction[]
+  results      PredictionResult[]
+  resetTokens  PasswordResetToken[]
+  adminActions AdminAuditLog[]
+  avatar       UserAvatar?
+  pushSubs     PushSubscription[]
+  emailTokens  EmailToken[]
+  leagues      LeagueMember[]
+  leaguesMade  League[]      @relation("LeagueCreator")
+}
+
+// ─── Ligues : groupes de joueurs qui jouent entre eux ───────────────────────
+
+enum LeagueRole {
+  ADMIN
+  MEMBER
+}
+
+model League {
+  id             String    @id @default(cuid())
+  name           String
+  description    String? // courte phrase affichée sous le nom (120 caractères au plus)
+  // Compétitions jouées dans la ligue : seuls leurs matchs comptent dans son classement
+  competitions   Competition[] @default([LIGUE_1, EUROPA_LEAGUE, COUPE_DE_FRANCE])
+  inviteCode     String    @unique // code et lien d'invitation (régénérable par un admin de la ligue)
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  imageUpdatedAt DateTime?
+
+  createdBy User?          @relation("LeagueCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  members   LeagueMember[]
+  image     LeagueImage?
+}
+
+model LeagueMember {
+  leagueId String
+  userId   String
+  role     LeagueRole @default(MEMBER)
+  isActive Boolean    @default(true) // false : suspendu par un admin de la ligue
+  joinedAt DateTime   @default(now())
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([leagueId, userId])
+  @@index([userId])
+}
+
+model LeagueImage {
+  leagueId  String   @id
+  data      Bytes
+  type      String
+  updatedAt DateTime @updatedAt
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+}
+
+// Lien de confirmation d'adresse e-mail envoyé à l'inscription.
+model EmailToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  // Changement d'adresse : la nouvelle adresse, appliquée quand le lien envoyé à celle-ci est ouvert
+  newEmail  String?
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// E-mail de rappel déjà envoyé (un seul par joueur et par match).
+model EmailSent {
+  userId  String
+  matchId String
+  sentAt  DateTime @default(now())
+
+  @@id([userId, matchId])
+}
+
+// Appareil abonné aux notifications. Le texte à afficher est déposé ici (pending*) avant le « réveil » :
+// le service worker vient le chercher, aucun contenu ne transite par le service de notification.
+model PushSubscription {
+  id           String    @id @default(cuid())
+  userId       String
+  endpoint     String    @unique
+  createdAt    DateTime  @default(now())
+  testAt       DateTime?
+  pendingTitle String?
+  pendingBody  String?
+  pendingUrl   String?
+  pendingAt    DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Rappel déjà envoyé (un seul par joueur et par match).
+model PushSent {
+  userId  String
+  matchId String
+  sentAt  DateTime @default(now())
+
+  @@id([userId, matchId])
+}
+
+// Message d'ouverture affiché une fois par appareil (repris de F1 Pronos).
+model Announcement {
+  id               String   @id @default("current")
+  title            String   @default("")
+  body             String   @default("")
+  askNotifications Boolean  @default(false)
+  active           Boolean  @default(false)
+  version          Int      @default(1)
+  updatedAt        DateTime @updatedAt
+}
+
+// Photo de profil (image carrée de 256 px, quelques dizaines de Ko), stockée en base.
+model UserAvatar {
+  userId    String   @id
+  data      Bytes
+  type      String // image/jpeg, image/png ou image/webp (vérifié d'après le contenu)
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Limitation des tentatives de connexion (par e-mail et par IP).
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  key       String // "email:<email>" ou "ip:<ip>"
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
+// ─── Saison, équipes, matchs ────────────────────────────────────────────────
+
+model Season {
+  id        String   @id @default(cuid())
+  label     String   @unique // "2026-2027"
+  startYear Int      @unique // 2026 (convention des fournisseurs)
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  matches Match[]
+  players Player[]
+}
+
+model Team {
+  id         String  @id @default(cuid())
+  externalId Int     @unique
+  name       String
+  shortName  String?
+  logoUrl    String?
+
+  homeMatches Match[] @relation("HomeTeam")
+  awayMatches Match[] @relation("AwayTeam")
+}
+
+model Match {
+  id           String      @id @default(cuid())
+  externalId   Int         @unique
+  seasonId     String
+  competition  Competition
+  matchday     Int? // J1, J2… (Ligue 1) / journée de phase de ligue (UEL)
+  stage        String? // "Phase de ligue", "Barrage", "32e de finale"…
+  isKnockout   Boolean     @default(false)
+  homeTeamId   String
+  awayTeamId   String
+  rennesIsHome Boolean
+  kickoffAt    DateTime // UTC, heure officielle (mise à jour en cas de report)
+  // Date limite fixée par l'admin, plus tôt que le coup d'envoi (null = coup d'envoi). Effacée si l'horaire change.
+  deadlineAt   DateTime?
+  // Feuille de match publiée (titulaires + remplaçants), en général 1 h avant le coup d'envoi.
+  lineupAt     DateTime?
+  // Simulation en cours (mode test) : état d'origine à restaurer ; la synchro ne touche pas au match.
+  simulation   Json?
+  status       MatchStatus @default(SCHEDULED)
+
+  // Score en direct : informatif, jamais utilisé pour attribuer des points.
+  liveHomeScore Int?
+  liveAwayScore Int?
+  liveMinute    Int?
+
+  // Résultat officiel (domicile / extérieur, comme le fournisseur).
+  regHomeScore Int? // fin du temps réglementaire
+  regAwayScore Int?
+  aetHomeScore Int? // après prolongation (cumulé), null si pas de prolongation
+  aetAwayScore Int?
+  penHomeScore Int? // tirs au but, jamais comptés dans le score pronostiqué
+  penAwayScore Int?
+
+  resultConfirmedAt DateTime? // résultat validé → points calculables
+  scoredAt          DateTime? // dernier calcul des points
+  rulesVersion      Int? // version du barème appliquée à ce match
+  lastSyncedAt      DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  season      Season             @relation(fields: [seasonId], references: [id])
+  homeTeam    Team               @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team               @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  goals       MatchGoal[]
+  cards       MatchCard[]
+  odds        PlayerOdds[]
+  lineup      MatchLineup[]
+  predictions Prediction[]
+  results     PredictionResult[]
+
+  @@index([seasonId, competition, kickoffAt])
+  @@index([status, kickoffAt])
+}
+
+model Player {
+  id          String  @id @default(cuid())
+  externalId  Int
+  seasonId    String
+  name        String
+  position    String?
+  shirtNumber Int?
+  photoUrl    String?
+  // false quand le joueur quitte l'effectif : il reste lié aux anciens pronostics.
+  isActive    Boolean @default(true)
+  // Fiche modifiée par l'admin : la synchro ne touche plus au nom, au poste, au numéro ni au statut.
+  adminLocked Boolean @default(false)
+  // Photo officielle de la saison (API-Football), prioritaire sur celle d'ESPN
+  officialPhotoUrl String?
+  // Photo déposée par l'admin (prioritaire sur tout le reste)
+  customPhotoAt    DateTime?
+
+  season      Season        @relation(fields: [seasonId], references: [id])
+  goals       MatchGoal[]
+  odds        PlayerOdds[]
+  lineups     MatchLineup[]
+  predictions Prediction[]
+  image       PlayerImage?
+
+  @@unique([externalId, seasonId])
+}
+
+// Joueurs rennais de la feuille de match (titulaires et remplaçants).
+model MatchLineup {
+  matchId  String
+  playerId String
+  starter  Boolean
+
+  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@id([matchId, playerId])
+}
+
+model MatchGoal {
+  id               String  @id @default(cuid())
+  matchId          String
+  externalEventKey String // clé stable dérivée du fournisseur (idempotence)
+  playerId         String? // joueur rennais, si identifié
+  scorerName       String
+  minute           Int?
+  extraMinute      Int?
+  forRennes        Boolean // le but compte pour Rennes au score
+  isOwnGoal        Boolean @default(false)
+  isPenalty        Boolean @default(false)
+
+  match  Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player? @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, externalEventKey])
+}
+
+// Cartons rouges (directs ou deuxième jaune) d'un match, affichés avec le score.
+model MatchCard {
+  id               String  @id @default(cuid())
+  matchId          String
+  externalEventKey String
+  playerName       String
+  forRennes        Boolean // carton reçu par un joueur rennais
+  minute           Int?
+  extraMinute      Int?
+  secondYellow     Boolean @default(false)
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, externalEventKey])
+}
+
+// Dernière cote « buteur à tout moment » connue avant le coup d'envoi.
+model PlayerOdds {
+  id        String     @id @default(cuid())
+  matchId   String
+  playerId  String
+  odds      Decimal    @db.Decimal(6, 2) // cote décimale
+  source    OddsSource
+  bookmaker String?
+  fetchedAt DateTime   @default(now())
+
+  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, playerId])
+}
+
+// ─── Pronostics et points ───────────────────────────────────────────────────
+
+model Prediction {
+  id               String      @id @default(cuid())
+  userId           String
+  matchId          String
+  // Toujours du point de vue de Rennes, quel que soit le terrain.
+  rennesGoals      Int
+  opponentGoals    Int
+  scorerId         String?
+  // Pari volontaire « Aucun buteur rennais » (exclusif avec scorerId).
+  noScorerPick     Boolean     @default(false)
+  // Cote figée au verrouillage : une variation ultérieure ne change rien.
+  scorerOdds       Decimal?    @db.Decimal(6, 2)
+  scorerOddsSource OddsSource?
+  // Dernière saisie du participant (seule date qui compte pour le verrouillage).
+  // updatedAt bouge aussi quand le serveur fige la cote : on ne s'en sert pas.
+  submittedAt      DateTime    @default(now())
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  lockedAt         DateTime?
+
+  user   User              @relation(fields: [userId], references: [id])
+  match  Match             @relation(fields: [matchId], references: [id])
+  scorer Player?           @relation(fields: [scorerId], references: [id])
+  result PredictionResult?
+
+  @@unique([userId, matchId])
+  @@index([matchId])
+}
+
+// Une ligne par participant et par match noté (y compris -1 sans pronostic).
+// Upsert sur (userId, matchId) : recalculer n'ajoute jamais de points en double.
+model PredictionResult {
+  id            String        @id @default(cuid())
+  userId        String
+  matchId       String
+  predictionId  String?       @unique
+  category      ScoreCategory
+  scorePoints   Int
+  scorerPoints  Int
+  totalPoints   Int
+  correctScorer Boolean       @default(false)
+  oddsUsed      Decimal?      @db.Decimal(6, 2)
+  usedFallback  Boolean       @default(false)
+  rulesVersion  Int
+  calculatedAt  DateTime      @default(now())
+
+  user       User        @relation(fields: [userId], references: [id])
+  match      Match       @relation(fields: [matchId], references: [id])
+  prediction Prediction? @relation(fields: [predictionId], references: [id])
+
+  @@unique([userId, matchId])
+  @@index([matchId])
+}
+
+// Versions du barème : un match clôturé garde la version qui lui a été appliquée.
+model ScoringRuleSet {
+  id          String   @id @default(cuid())
+  version     Int      @unique
+  rules       Json
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  createdById String?
+}
+
+// ─── Synchronisation et administration ──────────────────────────────────────
+
+model SyncLog {
+  id             String     @id @default(cuid())
+  kind           String // "calendar" | "live" | "result" | "squad" | "odds"
+  status         SyncStatus
+  startedAt      DateTime   @default(now())
+  finishedAt     DateTime?
+  requestsUsed   Int?
+  matchesUpdated Int        @default(0)
+  message        String?
+  details        Json?
+
+  @@index([kind, startedAt])
+}
+
+model AdminAuditLog {
+  id        String   @id @default(cuid())
+  adminId   String? // null si le compte de l'admin a été supprimé (le journal est conservé)
+  action    String // "CORRECT_SCORE", "RECALCULATE", "EDIT_PREDICTION"…
+  entity    String // "Match", "Prediction", "User", "ScoringRuleSet"…
+  entityId  String
+  before    Json?
+  after     Json?
+  reason    String?
+  createdAt DateTime @default(now())
+
+  admin User? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+}
+
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// Logo de compétition déposé par l'administrateur (remplace celui fourni par ESPN).
+model CompetitionLogo {
+  code      String   @id // LIGUE_1, EUROPA_LEAGUE, COUPE_DE_FRANCE
+  data      Bytes
+  type      String
+  updatedAt DateTime @updatedAt
+}
+
+// Photo d'un joueur déposée par l'administrateur.
+model PlayerImage {
+  playerId  String   @id
+  data      Bytes
+  type      String
+  updatedAt DateTime @updatedAt
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}

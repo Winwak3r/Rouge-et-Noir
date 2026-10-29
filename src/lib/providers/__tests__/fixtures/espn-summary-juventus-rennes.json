@@ -1,0 +1,1725 @@
+{
+ "_note": "Extrait réel ESPN, Juventus 2-2 Stade Rennais, 22/10/2026 (allégé).",
+ "header": {
+  "competitions": [
+   {
+    "date": "2026-10-22T16:45Z",
+    "status": {
+     "type": {
+      "id": "28",
+      "name": "STATUS_FULL_TIME",
+      "state": "post",
+      "completed": true,
+      "description": "Full Time",
+      "detail": "FT",
+      "shortDetail": "FT"
+     }
+    },
+    "competitors": [
+     {
+      "homeAway": "home",
+      "id": "111",
+      "score": "2",
+      "team": {
+       "id": "111",
+       "displayName": "Juventus"
+      }
+     },
+     {
+      "homeAway": "away",
+      "id": "169",
+      "score": "2",
+      "team": {
+       "id": "169",
+       "displayName": "Stade Rennais"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "keyEvents": [
+  {
+   "id": "54037099",
+   "type": {
+    "id": "80",
+    "text": "Kickoff",
+    "type": "kickoff"
+   },
+   "text": "First Half begins.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 0,
+    "displayValue": ""
+   },
+   "scoringPlay": false,
+   "shootout": false
+  },
+  {
+   "id": "54038493",
+   "type": {
+    "id": "70",
+    "text": "Goal",
+    "type": "goal"
+   },
+   "text": "Goal! Juventus 1, Rennes 0. Zeki Çelik (Juventus) right footed shot from the right side of the box to the bottom left corner. Assisted by Nick Woltemade with a through ball following a fast break.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 298,
+    "displayValue": "5'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "271873",
+      "displayName": "Zeki Çelik"
+     }
+    },
+    {
+     "athlete": {
+      "id": "298349",
+      "displayName": "Nick Woltemade"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54040661",
+   "type": {
+    "id": "70",
+    "text": "Goal",
+    "type": "goal"
+   },
+   "text": "Goal! Juventus 1, Rennes 1. Mousa Al Tamari (Rennes) right footed shot from very close range to the bottom left corner. Assisted by Bryan Reynolds with a headed pass.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 850,
+    "displayValue": "15'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "257489",
+      "displayName": "Mousa Al-Tamari"
+     }
+    },
+    {
+     "athlete": {
+      "id": "250758",
+      "displayName": "Bryan Reynolds"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54042233",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Federico Gatti (Juventus) is shown the yellow card for a bad foul.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1139,
+    "displayValue": "19'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "323147",
+      "displayName": "Federico Gatti"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54042235",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "text": "Delay in match because of an injury Brice Samba (Rennes).",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1191,
+    "displayValue": "20'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54042236",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1191,
+    "displayValue": "20'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54042605",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "text": "Delay over. They are ready to continue.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1238,
+    "displayValue": "21'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54042607",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1238,
+    "displayValue": "21'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54045092",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "text": "Delay in match because of an injury Mousa Al Tamari (Rennes).",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1861,
+    "displayValue": "32'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54044911",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1861,
+    "displayValue": "32'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54045693",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "text": "Delay over. They are ready to continue.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1932,
+    "displayValue": "33'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54045093",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1932,
+    "displayValue": "33'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54047485",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2408,
+    "displayValue": "41'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54047486",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2484,
+    "displayValue": "42'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54047740",
+   "type": {
+    "id": "98",
+    "text": "Penalty - Scored",
+    "type": "penalty---scored"
+   },
+   "text": "Goal! Juventus 1, Rennes 2. Boulaye Dia (Rennes) converts the penalty with a right footed shot to the bottom right corner.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2531,
+    "displayValue": "43'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "282381",
+      "displayName": "Boulaye Dia"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54049284",
+   "type": {
+    "id": "81",
+    "text": "Halftime",
+    "type": "halftime"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2700,
+    "displayValue": "45'+4'"
+   },
+   "scoringPlay": false,
+   "shootout": false
+  },
+  {
+   "id": "54049809",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Juventus. Pierre Kalulu replaces Zeki Çelik.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 2700,
+    "displayValue": "45'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "290129",
+      "displayName": "Pierre Kalulu"
+     }
+    },
+    {
+     "athlete": {
+      "id": "271873",
+      "displayName": "Zeki Çelik"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54049810",
+   "type": {
+    "id": "82",
+    "text": "Start 2nd Half",
+    "type": "start-2nd-half"
+   },
+   "text": "Second Half begins Juventus 1, Rennes 2.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 2700,
+    "displayValue": "45'"
+   },
+   "scoringPlay": false,
+   "shootout": false
+  },
+  {
+   "id": "54050990",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "text": "Delay in match because of an injury Aboubakar Nagida (Rennes).",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 2930,
+    "displayValue": "49'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54050991",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "text": "Delay in match because of an injury Pierre Kalulu (Juventus).",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 2930,
+    "displayValue": "49'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54051336",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "text": "Delay over. They are ready to continue.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3091,
+    "displayValue": "52'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54051571",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "text": "Delay over. They are ready to continue.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3091,
+    "displayValue": "52'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54053656",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Juventus. Nico González replaces Federico Gatti.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3554,
+    "displayValue": "60'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "76017",
+      "displayName": "Nico González"
+     }
+    },
+    {
+     "athlete": {
+      "id": "323147",
+      "displayName": "Federico Gatti"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54055146",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3859,
+    "displayValue": "65'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54055147",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3940,
+    "displayValue": "66'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54055306",
+   "type": {
+    "id": "98",
+    "text": "Penalty - Scored",
+    "type": "penalty---scored"
+   },
+   "text": "Goal! Juventus 2, Rennes 2. Nick Woltemade (Juventus) converts the penalty with a right footed shot to the centre of the goal.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3990,
+    "displayValue": "67'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "298349",
+      "displayName": "Nick Woltemade"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54059250",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Juventus. Jhon Lucumí replaces Lloyd Kelly.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4789,
+    "displayValue": "80'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "227697",
+      "displayName": "Jhon Lucumí"
+     }
+    },
+    {
+     "athlete": {
+      "id": "243787",
+      "displayName": "Lloyd Kelly"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54059251",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Juventus. Jérémie Boga replaces Randal Kolo Muani.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4799,
+    "displayValue": "80'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "206153",
+      "displayName": "Jérémie Boga"
+     }
+    },
+    {
+     "athlete": {
+      "id": "252971",
+      "displayName": "Randal Kolo Muani"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54059254",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Rennes. Sebastian Szymanski replaces Adrien Thomasson.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4814,
+    "displayValue": "81'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "243844",
+      "displayName": "Sebastian Szymanski"
+     }
+    },
+    {
+     "athlete": {
+      "id": "173266",
+      "displayName": "Adrien Thomasson"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54059252",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Rennes. Issa Soumaré replaces Boulaye Dia.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4817,
+    "displayValue": "81'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "297743",
+      "displayName": "Issa Soumaré"
+     }
+    },
+    {
+     "athlete": {
+      "id": "282381",
+      "displayName": "Boulaye Dia"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54059253",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Rennes. Eliezer Mayenda replaces Mousa Al Tamari.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4821,
+    "displayValue": "81'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "332862",
+      "displayName": "Eliezer Mayenda"
+     }
+    },
+    {
+     "athlete": {
+      "id": "257489",
+      "displayName": "Mousa Al-Tamari"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54059455",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Abdelhamid Aït Boudlal (Rennes) is shown the yellow card.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4865,
+    "displayValue": "82'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "169",
+    "displayName": "Stade Rennais"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "376339",
+      "displayName": "Abdelhamid Aït Boudlal"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54061426",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5381,
+    "displayValue": "90'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54061528",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400,
+    "displayValue": "90'+1'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "shootout": false
+  },
+  {
+   "id": "54061788",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Juventus. Kerim Alajbegovic replaces Andrea Cambiaso.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400,
+    "displayValue": "90'+1'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "111",
+    "displayName": "Juventus"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "391034",
+      "displayName": "Kerim Alajbegovic"
+     }
+    },
+    {
+     "athlete": {
+      "id": "308029",
+      "displayName": "Andrea Cambiaso"
+     }
+    }
+   ],
+   "shootout": false
+  },
+  {
+   "id": "54062299",
+   "type": {
+    "id": "83",
+    "text": "End Regular Time",
+    "type": "end-regular-time"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400,
+    "displayValue": "90'+9'"
+   },
+   "scoringPlay": false,
+   "shootout": false
+  }
+ ],
+ "odds": [
+  {
+   "provider": {
+    "name": "DraftKings"
+   }
+  },
+  {
+   "provider": {
+    "name": "Bet 365"
+   },
+   "bettingOdds": {
+    "playerOdds": {
+     "preMatchAnyTimeGoalScorer": [
+      {
+       "value": "5/4",
+       "player": "Jeremie Boga"
+      },
+      {
+       "value": "6/4",
+       "player": "Nick Woltemade"
+      },
+      {
+       "value": "6/4",
+       "player": "Randal Kolo Muani"
+      },
+      {
+       "value": "13/8",
+       "player": "Edon Zhegrova"
+      },
+      {
+       "value": "13/8",
+       "player": "Kerim Alajbegovic"
+      },
+      {
+       "value": "2/1",
+       "player": "Francisco Conceicao"
+      },
+      {
+       "value": "2/1",
+       "player": "Weston McKennie"
+      },
+      {
+       "value": "21/10",
+       "player": "Nicolas Gonzalez"
+      },
+      {
+       "value": "5/2",
+       "player": "Esteban Lepaul"
+      },
+      {
+       "value": "13/5",
+       "player": "Douglas Luiz"
+      },
+      {
+       "value": "11/4",
+       "player": "Boulaye Dia"
+      },
+      {
+       "value": "7/2",
+       "player": "Eliezer Mayenda"
+      },
+      {
+       "value": "15/4",
+       "player": "Mousa Tamari"
+      },
+      {
+       "value": "15/4",
+       "player": "Teun Koopmeiners"
+      },
+      {
+       "value": "9/2",
+       "player": "Arnaud Nordin"
+      },
+      {
+       "value": "9/2",
+       "player": "Augusto Owusu"
+      },
+      {
+       "value": "9/2",
+       "player": "Issa Soumare"
+      },
+      {
+       "value": "9/2",
+       "player": "Pape Sarr"
+      },
+      {
+       "value": "5/1",
+       "player": "Elias Legendre"
+      },
+      {
+       "value": "5/1",
+       "player": "Ludovic Blas"
+      },
+      {
+       "value": "6/1",
+       "player": "Andrea Cambiaso"
+      },
+      {
+       "value": "6/1",
+       "player": "Henrick Do Marcolino"
+      },
+      {
+       "value": "6/1",
+       "player": "Sebastian Szymanski"
+      },
+      {
+       "value": "13/2",
+       "player": "Adrien Thomasson"
+      },
+      {
+       "value": "13/2",
+       "player": "Djaoui Cisse"
+      },
+      {
+       "value": "15/2",
+       "player": "Bremer"
+      },
+      {
+       "value": "15/2",
+       "player": "Daniele Rugani"
+      },
+      {
+       "value": "15/2",
+       "player": "Federico Gatti"
+      },
+      {
+       "value": "15/2",
+       "player": "Mahdi Camara"
+      },
+      {
+       "value": "9/1",
+       "player": "Jhon Lucumi"
+      },
+      {
+       "value": "9/1",
+       "player": "Lloyd Kelly"
+      },
+      {
+       "value": "9/1",
+       "player": "Pierre Kalulu Kyatengwa"
+      },
+      {
+       "value": "9/1",
+       "player": "Przemyslaw Frankowski"
+      },
+      {
+       "value": "9/1",
+       "player": "Quentin Merlin"
+      },
+      {
+       "value": "9/1",
+       "player": "Valentin Rongier"
+      },
+      {
+       "value": "9/1",
+       "player": "Zeki Celik"
+      },
+      {
+       "value": "11/1",
+       "player": "Bryan Reynolds"
+      },
+      {
+       "value": "11/1",
+       "player": "Charlie Cresswell"
+      },
+      {
+       "value": "11/1",
+       "player": "Goncalo Oliveira"
+      },
+      {
+       "value": "11/1",
+       "player": "Mahamadou Nagida"
+      },
+      {
+       "value": "14/1",
+       "player": "Abdelhamid Ait Boudlal"
+      },
+      {
+       "value": "14/1",
+       "player": "Anthony Rouault"
+      }
+     ],
+     "liveAnyTimeGoalScorer": [
+      {
+       "value": "6/5",
+       "player": "Nick Woltemade"
+      },
+      {
+       "value": "6/5",
+       "player": "Randal Kolo Muani"
+      },
+      {
+       "value": "5/2",
+       "player": "Douglas Luiz"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "rosters": [
+  {
+   "homeAway": "home",
+   "team": {
+    "id": "111"
+   },
+   "roster": [
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "25",
+     "athlete": {
+      "id": "204082",
+      "displayName": "Guglielmo Vicario"
+     },
+     "position": {
+      "abbreviation": "G"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "3",
+     "athlete": {
+      "id": "258307",
+      "displayName": "Bremer"
+     },
+     "position": {
+      "abbreviation": "CD"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "6",
+     "athlete": {
+      "id": "243787",
+      "displayName": "Lloyd Kelly"
+     },
+     "position": {
+      "abbreviation": "CD-L"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "4",
+     "athlete": {
+      "id": "323147",
+      "displayName": "Federico Gatti"
+     },
+     "position": {
+      "abbreviation": "CD-R"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "8",
+     "athlete": {
+      "id": "258968",
+      "displayName": "Teun Koopmeiners"
+     },
+     "position": {
+      "abbreviation": "CM-L"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "22",
+     "athlete": {
+      "id": "256715",
+      "displayName": "Weston McKennie"
+     },
+     "position": {
+      "abbreviation": "CM-R"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "12",
+     "athlete": {
+      "id": "320074",
+      "displayName": "Douglas Luiz"
+     },
+     "position": {
+      "abbreviation": "AM"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "20",
+     "athlete": {
+      "id": "308029",
+      "displayName": "Andrea Cambiaso"
+     },
+     "position": {
+      "abbreviation": "LM"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "2",
+     "athlete": {
+      "id": "271873",
+      "displayName": "Zeki Çelik"
+     },
+     "position": {
+      "abbreviation": "RM"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "9",
+     "athlete": {
+      "id": "252971",
+      "displayName": "Randal Kolo Muani"
+     },
+     "position": {
+      "abbreviation": "CF-L"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "27",
+     "athlete": {
+      "id": "298349",
+      "displayName": "Nick Woltemade"
+     },
+     "position": {
+      "abbreviation": "CF-R"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "13",
+     "athlete": {
+      "id": "206153",
+      "displayName": "Jérémie Boga"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "23",
+     "athlete": {
+      "id": "121036",
+      "displayName": "Carlo Pinsoglio"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "17",
+     "athlete": {
+      "id": "391034",
+      "displayName": "Kerim Alajbegovic"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "26",
+     "athlete": {
+      "id": "227697",
+      "displayName": "Jhon Lucumí"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "31",
+     "athlete": {
+      "id": "76017",
+      "displayName": "Nico González"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "29",
+     "athlete": {
+      "id": "297337",
+      "displayName": "Pape Matar Sarr"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "15",
+     "athlete": {
+      "id": "290129",
+      "displayName": "Pierre Kalulu"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "33",
+     "athlete": {
+      "id": "138398",
+      "displayName": "Neto"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "51",
+     "athlete": {
+      "id": "3129035",
+      "displayName": "Antonio Stefano Merola"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "32",
+     "athlete": {
+      "id": "24412",
+      "displayName": "Juan Cabal"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    }
+   ]
+  },
+  {
+   "homeAway": "away",
+   "team": {
+    "id": "169"
+   },
+   "roster": [
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "30",
+     "athlete": {
+      "id": "164126",
+      "displayName": "Brice Samba"
+     },
+     "position": {
+      "abbreviation": "G"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "4",
+     "athlete": {
+      "id": "307713",
+      "displayName": "Charlie Cresswell"
+     },
+     "position": {
+      "abbreviation": "CD"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "24",
+     "athlete": {
+      "id": "291614",
+      "displayName": "Anthony Rouault"
+     },
+     "position": {
+      "abbreviation": "CD-L"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "48",
+     "athlete": {
+      "id": "376339",
+      "displayName": "Abdelhamid Aït Boudlal"
+     },
+     "position": {
+      "abbreviation": "CD-R"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "18",
+     "athlete": {
+      "id": "372260",
+      "displayName": "Mahamadou Nagida"
+     },
+     "position": {
+      "abbreviation": "LB"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "14",
+     "athlete": {
+      "id": "250758",
+      "displayName": "Bryan Reynolds"
+     },
+     "position": {
+      "abbreviation": "RB"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "21",
+     "athlete": {
+      "id": "207136",
+      "displayName": "Valentin Rongier"
+     },
+     "position": {
+      "abbreviation": "CM"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "45",
+     "athlete": {
+      "id": "268966",
+      "displayName": "Mahdi Camara"
+     },
+     "position": {
+      "abbreviation": "CM-L"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "28",
+     "athlete": {
+      "id": "173266",
+      "displayName": "Adrien Thomasson"
+     },
+     "position": {
+      "abbreviation": "CM-R"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "11",
+     "athlete": {
+      "id": "257489",
+      "displayName": "Mousa Al-Tamari"
+     },
+     "position": {
+      "abbreviation": "CF-L"
+     }
+    },
+    {
+     "starter": true,
+     "active": true,
+     "jersey": "22",
+     "athlete": {
+      "id": "282381",
+      "displayName": "Boulaye Dia"
+     },
+     "position": {
+      "abbreviation": "CF-R"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "12",
+     "athlete": {
+      "id": "332862",
+      "displayName": "Eliezer Mayenda"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "60",
+     "athlete": {
+      "id": "414191",
+      "displayName": "Kilian Belazzoug"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "65",
+     "athlete": {
+      "id": "398977",
+      "displayName": "Henrick Do Marcolino"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "17",
+     "athlete": {
+      "id": "243844",
+      "displayName": "Sebastian Szymanski"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "90",
+     "athlete": {
+      "id": "297743",
+      "displayName": "Issa Soumaré"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "5",
+     "athlete": {
+      "id": "401410",
+      "displayName": "Gonçalo Oliveira"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "26",
+     "athlete": {
+      "id": "313890",
+      "displayName": "Quentin Merlin"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "70",
+     "athlete": {
+      "id": "242738",
+      "displayName": "Arnaud Nordin"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "95",
+     "athlete": {
+      "id": "190806",
+      "displayName": "Przemyslaw Frankowski"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "16",
+     "athlete": {
+      "id": "217668",
+      "displayName": "Nicolas Lemaitre"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "6",
+     "athlete": {
+      "id": "355982",
+      "displayName": "Djaoui Cissé"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "starter": false,
+     "active": true,
+     "jersey": "10",
+     "athlete": {
+      "id": "223120",
+      "displayName": "Ludovic Blas"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    }
+   ]
+  }
+ ]
+}
