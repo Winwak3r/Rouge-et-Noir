@@ -1,5 +1,6 @@
 import { broadcastPushAction, saveAnnouncementAction, sendEmailRemindersNowAction, setEmailRemindersAction } from "@/app/actions/admin";
 import { emailRemindersEnabled } from "@/lib/email-reminders";
+import { emailConfigured } from "@/lib/email";
 import { canEditPrediction } from "@/lib/scoring/engine";
 import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
@@ -21,7 +22,7 @@ export default async function MessagesAdminPage() {
     }),
   ]);
   const nextOpen = upcoming.find((m) => canEditPrediction(m, now)) ?? null;
-  const emailConfigured = Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+  const emailReady = emailConfigured();
   const configured = Boolean(vapidFromEnv());
 
   return (
@@ -66,10 +67,10 @@ export default async function MessagesAdminPage() {
           2 h avant le verrouillage de chaque match, un e-mail part aux joueurs qui n’ont pas encore pronostiqué (adresse
           confirmée, rappels non désactivés dans leur compte). {emailUsers} joueur(s) concerné(s). Un seul e-mail par match et par joueur.
         </p>
-        {!emailConfigured && (
+        {!emailReady && (
           <div className="rounded-lg border border-orange-300 bg-orange-100 p-3 text-sm text-orange-800">
-            Envoi d’e-mails non configuré : sans <code>RESEND_API_KEY</code> et <code>EMAIL_FROM</code>, les e-mails s’affichent
-            seulement dans le terminal.
+            Envoi d’e-mails non configuré : renseigne <code>GMAIL_USER</code> et <code>GMAIL_APP_PASSWORD</code> (ou Resend). Sans
+            cela, les e-mails s’affichent seulement dans le terminal.
           </div>
         )}
         <div className="card space-y-3">
