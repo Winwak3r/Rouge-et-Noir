@@ -161,11 +161,25 @@ export function RegisterForm({ needsCode }: { needsCode: boolean }) {
   );
 }
 
+/** Avertissement : les e-mails du site peuvent arriver dans les indésirables. */
+export function SpamNotice() {
+  return (
+    <p role="note" className="flex gap-2 rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 text-sm text-amber-800">
+      <span aria-hidden>⚠️</span>
+      <span>
+        L’e-mail peut arriver dans tes <strong>courriers indésirables (spams)</strong>. Pense à vérifier ce dossier et, si
+        c’est le cas, marque-le comme « Non spam » pour recevoir les suivants normalement.
+      </span>
+    </p>
+  );
+}
+
 export function ForgotPasswordForm() {
   const [state, action] = useActionState(forgotPasswordAction, initial);
   return (
     <form action={action} className="space-y-4">
       <Field name="email" label="Adresse e-mail du compte" type="email" autoComplete="email" />
+      <SpamNotice />
       <Message state={state} />
       <Submit>Recevoir un lien</Submit>
     </form>
@@ -218,6 +232,7 @@ export function ChangeEmailForm({ current }: { current: string }) {
         Adresse actuelle : <strong>{current}</strong>
       </p>
       <Field name="email" label="Nouvelle adresse e-mail" type="email" autoComplete="email" />
+      <p className="text-xs text-neutral-500">Le lien de confirmation peut arriver dans les courriers indésirables (spams).</p>
       <Field name="password" label="Mot de passe actuel" type="password" autoComplete="current-password" />
       <Message state={state} />
       <Submit>Changer d’adresse</Submit>

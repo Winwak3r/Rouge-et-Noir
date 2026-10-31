@@ -131,8 +131,9 @@ export async function logoutAction(): Promise<void> {
 
 // ─── Mot de passe oublié ────────────────────────────────────────────────────
 
+const SPAM_HINT = " Pense à vérifier tes courriers indésirables (spams) si tu ne le vois pas d’ici quelques minutes.";
 const RESET_SENT =
-  "Si un compte existe avec cette adresse, un e-mail de réinitialisation vient d’être envoyé. Le lien est valable 1 heure.";
+  "Si un compte existe avec cette adresse, un e-mail de réinitialisation vient d’être envoyé. Le lien est valable 1 heure." + SPAM_HINT;
 
 export async function forgotPasswordAction(_: FormState, form: FormData): Promise<FormState> {
   const parsed = emailSchema.safeParse(str(form, "email"));
@@ -229,7 +230,7 @@ export async function resendVerificationAction(_: FormState): Promise<FormState>
   if (await isLimited(`verify:${user.id}`, { max: 3, windowMs: 60 * 60_000 }, false)) return { error: TOO_MANY };
   await recordAttempt(`verify:${user.id}`, true);
   await sendVerificationEmail(user);
-  return { success: `E-mail envoyé à ${user.email}.` };
+  return { success: `E-mail envoyé à ${user.email}.${SPAM_HINT}` };
 }
 
 /** Rappels par e-mail avant les matchs : activés ou non pour ce joueur. */
@@ -267,7 +268,7 @@ export async function resendVerificationByEmailAction(_: FormState, form: FormDa
   await recordAttempt(`verify-ip:${ip}`, true);
   const user = await prisma.user.findUnique({ where: { email } });
   if (user && user.isActive && !user.emailVerifiedAt) await sendVerificationEmail(user);
-  return { success: "Si un compte non confirmé existe avec cette adresse, un nouveau lien vient d’être envoyé." };
+  return { success: `Si un compte non confirmé existe avec cette adresse, un nouveau lien vient d’être envoyé.${SPAM_HINT}` };
 }
 
 
@@ -284,7 +285,7 @@ export async function requestEmailChangeAction(_: FormState, form: FormData): Pr
   if (await isLimited(`email-change:${user.id}`, LIMITS.resetPerEmail, false)) return { error: TOO_MANY };
   await recordAttempt(`email-change:${user.id}`, true);
   await sendEmailChangeLink(user, email);
-  return { success: `Lien envoyé à ${email}. Ton adresse actuelle reste valable jusqu’à la confirmation.` };
+  return { success: `Lien envoyé à ${email}. Ton adresse actuelle reste valable jusqu’à la confirmation.${SPAM_HINT}` };
 }
 
 
