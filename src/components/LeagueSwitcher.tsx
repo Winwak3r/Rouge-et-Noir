@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import { viewLeagueAction } from "@/app/actions/leagues";
 import { LeagueAvatar } from "./LeagueAvatar";
 
@@ -53,6 +53,28 @@ export function LeagueSwitcher({ leagues, activeId }: { leagues: L[]; activeId: 
   }, [leagues]);
 
   const sel = leagues.find((l) => l.id === current) ?? leagues[0];
+
+  // Le nom complet tient-il à côté de la photo ? Sinon : photo seule (bloc réduit à la photo).
+  const measure = useRef<HTMLSpanElement>(null);
+  const [compact, setCompact] = useState(false);
+  useLayoutEffect(() => {
+    const wrap = ref.current;
+    const row = wrap?.parentElement;
+    if (!wrap || !row) return;
+    const decide = () => {
+      const gap = parseFloat(getComputedStyle(row).columnGap || "0") || 0;
+      const others = [...row.children].filter((c) => c !== wrap && (c as HTMLElement).offsetParent !== null);
+      const used = others.reduce((sum, c) => sum + (c as HTMLElement).getBoundingClientRect().width, 0) + gap * others.length;
+      const available = row.clientWidth - used;
+      // photo 28 + chevron 12 + 2 espaces de 8 + marges 2×10 + bordure 2 + le nom complet
+      const needed = 28 + 12 + 16 + 20 + 2 + (measure.current?.offsetWidth ?? 0) + 2;
+      setCompact(available < needed);
+    };
+    decide();
+    const ro = new ResizeObserver(decide);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [sel.name]);
   const choose = (id: string) => {
     setOpen(false);
     if (id === current) return;
@@ -62,32 +84,37 @@ export function LeagueSwitcher({ leagues, activeId }: { leagues: L[]; activeId: 
   };
 
   return (
-    // @container : la largeur réellement disponible décide de l'affichage du texte
-    <div ref={ref} data-tour="league" className="@container relative min-w-0 flex-1 basis-0 sm:max-w-[15rem] sm:basis-auto">
+    <div ref={ref} data-tour="league" className="relative flex min-w-0 shrink">
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         title={sel.name}
-        className={`flex h-full w-full min-w-0 items-center justify-center gap-1 overflow-hidden rounded-[10px] border bg-neutral-50 px-1.5 py-1 @[8.5rem]:justify-between @[8.5rem]:gap-2 @[8.5rem]:px-2.5 @[8.5rem]:py-1.5 text-left transition-colors hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-noir ${
-          open ? "border-neutral-500" : "border-neutral-200"
-        }`}
+        className={`flex h-full min-w-0 items-center gap-2 rounded-[10px] border bg-neutral-50 py-1 text-left transition-colors hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-noir ${
+          compact ? "px-1.5" : "px-2.5"
+        } ${open ? "border-neutral-500" : "border-neutral-200"}`}
       >
-        {/* Image réduite quand la place manque : le chevron reste dans le bloc */}
-        <span className="shrink-0 [&>*]:!h-10 [&>*]:!w-10 @[8.5rem]:[&>*]:!h-7 @[8.5rem]:[&>*]:!w-7">
+        {/* Seule la photo quand le nom complet ne tient pas : le bloc se réduit alors à la photo */}
+        <span className={`shrink-0 ${compact ? "[&>*]:!h-9 [&>*]:!w-9" : ""}`}>
           <Logo l={sel} size={28} />
         </span>
-        {/* Pas la place pour « Ligue » : seul le logo s'affiche (le nom reste lu par les lecteurs d'écran) */}
-        <span className="sr-only @[8.5rem]:hidden">{sel.name}</span>
-        <span className="hidden min-w-0 flex-1 flex-col @[8.5rem]:flex">
-          <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-neutral-500">Ligue</span>
-          <span className={`truncate text-sm font-extrabold leading-tight ${pending ? "opacity-60" : ""}`}>{sel.name}</span>
-        </span>
+        {compact ? (
+          <span className="sr-only">Ligue : {sel.name}</span>
+        ) : (
+          <span className="flex min-w-0 flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-neutral-500">Ligue</span>
+            <span className={`whitespace-nowrap text-sm font-extrabold leading-tight ${pending ? "opacity-60" : ""}`}>{sel.name}</span>
+          </span>
+        )}
         <svg aria-hidden className={`shrink-0 text-rouge transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
+      {/* Mesure invisible du nom complet (même police) pour décider de l'affichage */}
+      <span ref={measure} aria-hidden className="pointer-events-none invisible absolute left-0 top-0 whitespace-nowrap text-sm font-extrabold">
+        {sel.name}
+      </span>
       {open && (
         <ul role="listbox" aria-label="Choisir la ligue affichée" className="absolute left-0 z-40 mt-1.5 w-max min-w-full max-w-[18rem] overflow-hidden rounded-xl border border-neutral-200 bg-surface p-1 shadow-lg">
           {leagues.map((l) => {

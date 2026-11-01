@@ -167,17 +167,17 @@ export async function Header() {
               />
             )}
           {user && (
-            <div className="flex min-w-0 flex-1 basis-0 gap-2.5 sm:flex-none sm:basis-auto">
+            <div className="flex shrink-0 gap-2.5">
               <Link
                 href="/classement"
                 data-tour="rank"
                 title="Voir le classement général des pronostics"
-                className="flex min-w-0 flex-1 flex-col gap-px rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors hover:border-neutral-400 sm:flex-none"
+                className="flex flex-col gap-px rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors hover:border-neutral-400"
               >
                 <span className="max-w-[9rem] truncate text-[10px] font-bold uppercase tracking-[0.08em] text-neutral-500">
                   {scope ? scope.name : "Général"} ›
                 </span>
-                <span className="text-lg font-extrabold leading-tight">
+                <span className="whitespace-nowrap text-lg font-extrabold leading-tight">
                   {rankText}
                   {standings && <span className="ml-1.5 text-xs font-semibold text-neutral-500">sur {standings.length}</span>}
                   <span className="mx-1.5 text-neutral-400">·</span>
