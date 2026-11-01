@@ -40,7 +40,7 @@ export default async function HomePage() {
   // Sans ligue : on ne voit que ses propres pronostics (pas ceux des autres joueurs du site)
   const inScope = scope ? { in: [...scope.memberIds] } : user ? { in: [user.id] } : undefined;
   const [matches, rules, users, allResults, predCounts, logos] = await Promise.all([
-    prisma.match.findMany({ orderBy: { kickoffAt: "asc" }, include: { homeTeam: true, awayTeam: true, goals: true, cards: true } }),
+    prisma.match.findMany({ orderBy: { kickoffAt: "asc" }, include: { homeTeam: true, awayTeam: true, goals: true, cards: true, events: true } }),
     getActiveRules(),
     prisma.user.findMany({
       where: { isActive: true, ...(inScope ? { id: inScope } : {}) },
@@ -354,6 +354,7 @@ export default async function HomePage() {
         score={score}
         goals={m.goals}
         cards={m.cards}
+        events={m.events}
         rennesIsHome={m.rennesIsHome}
       />
     ) : null;

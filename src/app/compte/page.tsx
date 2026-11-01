@@ -4,7 +4,7 @@ import { AvatarEditor } from "@/components/AvatarEditor";
 import { ChangeEmailForm, ChangePasswordForm } from "@/components/forms";
 import { replayTutorialAction } from "@/app/actions/auth";
 import { PushToggle } from "@/components/PushToggle";
-import { EmailRemindersForm } from "@/components/AccountForms";
+import { EmailRemindersForm, PushPrefsForm } from "@/components/AccountForms";
 import { requireUser } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
 import { Avatar } from "@/components/Avatar";
@@ -63,6 +63,10 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">Sur cet appareil</p>
             <PushToggle publicKey={process.env.VAPID_PUBLIC_KEY?.trim() || null} />
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">Je veux être prévenu</p>
+            <PushPrefsForm live={user.pushLive} prematch={user.pushPrematch} />
           </div>
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">Par e-mail</p>

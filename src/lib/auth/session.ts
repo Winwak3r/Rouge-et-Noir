@@ -39,6 +39,8 @@ export const getCurrentUser = cache(async () => {
       emailReminders: true,
       activeLeagueId: true,
       tutorialDoneAt: true,
+      pushLive: true,
+      pushPrematch: true,
     },
   });
   if (!user || !user.isActive || user.sessionVersion !== session.v) return null;

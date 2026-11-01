@@ -301,3 +301,14 @@ export async function replayTutorialAction(): Promise<void> {
   await prisma.user.update({ where: { id: user.id }, data: { tutorialDoneAt: null } });
   redirect("/");
 }
+
+
+/** Notifications du téléphone / de l'ordinateur : pendant les matchs, avant les matchs. */
+export async function setPushPrefsAction(_: FormState, form: FormData): Promise<FormState> {
+  const user = await requireUser();
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { pushLive: form.get("pushLive") === "on", pushPrematch: form.get("pushPrematch") === "on" },
+  });
+  return { success: "Préférences enregistrées." };
+}

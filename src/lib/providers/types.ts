@@ -58,6 +58,32 @@ export interface ProviderLineupPlayer {
   shirtNumber: number | null;
 }
 
+export interface ProviderYellowCard {
+  key: string;
+  teamExternalId: number | null;
+  playerName: string;
+  minute: number | null;
+  extraMinute: number | null;
+}
+
+export interface ProviderSubstitution {
+  key: string;
+  teamExternalId: number | null;
+  inName: string;
+  inExternalId: number | null;
+  outName: string;
+  outExternalId: number | null;
+  minute: number | null;
+  extraMinute: number | null;
+}
+
+/** Repères du déroulé du match (événements « Coup d'envoi », « Mi-temps », « Reprise »). */
+export interface ProviderPhases {
+  kickoff: boolean;
+  halftime: boolean;
+  secondHalf: boolean;
+}
+
 export interface ProviderMatchDetail {
   status: MatchStatus;
   minute: number | null;
@@ -68,6 +94,9 @@ export interface ProviderMatchDetail {
   penalties: { home: number; away: number } | null;
   goals: ProviderGoal[];
   redCards: ProviderCard[];
+  yellowCards: ProviderYellowCard[];
+  substitutions: ProviderSubstitution[];
+  phases: ProviderPhases;
   scorerOdds: ProviderOdds[]; // cotes « buteur à tout moment » avant-match
   /** Feuilles de match par équipe (identifiant fournisseur) ; vide tant qu'elles ne sont pas publiées. */
   lineups: Record<number, ProviderLineupPlayer[]>;

@@ -9,7 +9,10 @@ import type {
   ProviderMatchDetail,
   ProviderOdds,
   ProviderPlayer,
+  ProviderPhases,
+  ProviderSubstitution,
   ProviderTeam,
+  ProviderYellowCard,
 } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -172,6 +175,59 @@ export function parseRedCards(summary: Json): ProviderCard[] {
   return cards;
 }
 
+/** Cartons jaunes simples (le deuxième jaune est compté comme carton rouge). */
+export function parseYellowCards(summary: Json): ProviderYellowCard[] {
+  const out: ProviderYellowCard[] = [];
+  for (const k of summary?.keyEvents ?? []) {
+    const typeText = `${k?.type?.type ?? ""} ${k?.type?.text ?? ""}`.toLowerCase();
+    if (!/yellow/.test(typeText) || /red|second|2nd/.test(typeText)) continue;
+    const player = k?.participants?.[0]?.athlete;
+    const clock = parseClock(k?.clock?.displayValue);
+    out.push({
+      key: String(k?.id ?? `y-${clock.minute}-${player?.id ?? "?"}`),
+      teamExternalId: int(k?.team?.id),
+      playerName: String(player?.displayName ?? "?"),
+      minute: clock.minute,
+      extraMinute: clock.extra,
+    });
+  }
+  return out;
+}
+
+/** Remplacements : « Substitution, Équipe. Entrant replaces Sortant. » (participants : entrant puis sortant). */
+export function parseSubstitutions(summary: Json): ProviderSubstitution[] {
+  const out: ProviderSubstitution[] = [];
+  for (const k of summary?.keyEvents ?? []) {
+    const typeText = `${k?.type?.type ?? ""} ${k?.type?.text ?? ""}`.toLowerCase();
+    if (!/substitution/.test(typeText)) continue;
+    const [pin, pout] = (k?.participants ?? []).map((p: Json) => p?.athlete);
+    const m = /([^.,]+?)\s+replaces\s+([^.]+?)\s*\.?\s*$/i.exec(String(k?.text ?? ""));
+    const clock = parseClock(k?.clock?.displayValue);
+    const inName = String(pin?.displayName ?? m?.[1]?.trim() ?? "?");
+    const outName = String(pout?.displayName ?? m?.[2]?.trim() ?? "?");
+    out.push({
+      key: String(k?.id ?? `s-${clock.minute}-${inName}`),
+      teamExternalId: int(k?.team?.id),
+      inName,
+      inExternalId: int(pin?.id),
+      outName,
+      outExternalId: int(pout?.id),
+      minute: clock.minute,
+      extraMinute: clock.extra,
+    });
+  }
+  return out;
+}
+
+export function parsePhases(summary: Json): ProviderPhases {
+  const types = new Set<string>((summary?.keyEvents ?? []).map((k: Json) => String(k?.type?.type ?? "").toLowerCase()));
+  return {
+    kickoff: types.has("kickoff"),
+    halftime: types.has("halftime"),
+    secondHalf: types.has("start-2nd-half"),
+  };
+}
+
 export function parseScorerOdds(summary: Json): ProviderOdds[] {
   for (const o of summary?.odds ?? []) {
     const list = o?.bettingOdds?.playerOdds?.preMatchAnyTimeGoalScorer;
@@ -260,6 +316,9 @@ export function parseSummary(summary: Json): ProviderMatchDetail {
     penalties: hs !== null && as !== null ? { home: hs, away: as } : null,
     goals,
     redCards: parseRedCards(summary),
+    yellowCards: parseYellowCards(summary),
+    substitutions: parseSubstitutions(summary),
+    phases: parsePhases(summary),
     scorerOdds: parseScorerOdds(summary),
     lineups: parseLineups(summary),
   };

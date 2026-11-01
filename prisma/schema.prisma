@@ -67,6 +67,9 @@ model User {
   avatarUpdatedAt DateTime?
   // E-mail de rappel 2 h avant chaque match si le pronostic n'est pas saisi (désactivable dans « Mon compte »).
   emailReminders  Boolean   @default(true)
+  // Notifications : pendant les matchs (buts, cartons…) et avant (veille, cotes, composition)
+  pushLive        Boolean   @default(true)
+  pushPrematch    Boolean   @default(true)
   // Ligue affichée (classement, pronostics des autres) quand le joueur est dans plusieurs ligues.
   activeLeagueId  String?
   // Didacticiel de découverte terminé (affiché une seule fois, après la première ligue)
@@ -167,12 +170,39 @@ model PushSubscription {
   pendingBody  String?
   pendingUrl   String?
   pendingAt    DateTime?
+  messages     PushMessage[]
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 // Rappel déjà envoyé (un seul par joueur et par match).
+// File d'attente des notifications : chaque « réveil » de l'appareil affiche le message suivant.
+// (Plusieurs notifications rapprochées — but puis mi-temps — ne s'écrasent plus.)
+model PushMessage {
+  id             String           @id @default(cuid())
+  subscriptionId String
+  title          String
+  body           String
+  url            String
+  tag            String
+  createdAt      DateTime         @default(now())
+  deliveredAt    DateTime?
+  subscription   PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, deliveredAt])
+}
+
+// Notification de match déjà envoyée à un joueur (but, mi-temps, veille, cotes…) : jamais deux fois.
+model PushEvent {
+  userId  String
+  matchId String
+  kind    String // « goal:<id> », « halftime », « eve », « odds »…
+  sentAt  DateTime @default(now())
+
+  @@id([userId, matchId, kind])
+}
+
 model PushSent {
   userId  String
   matchId String
@@ -263,6 +293,7 @@ model Match {
   deadlineAt   DateTime?
   // Feuille de match publiée (titulaires + remplaçants), en général 1 h avant le coup d'envoi.
   lineupAt     DateTime?
+  events       MatchEvent[]
   // Simulation en cours (mode test) : état d'origine à restaurer ; la synchro ne touche pas au match.
   simulation   Json?
   status       MatchStatus @default(SCHEDULED)
@@ -509,4 +540,20 @@ model PlayerImage {
   type      String
   updatedAt DateTime @updatedAt
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+// Cartons jaunes et remplacements (affichés dans le résultat, en direct et après le match).
+model MatchEvent {
+  id               String  @id @default(cuid())
+  matchId          String
+  externalEventKey String
+  kind             String // YELLOW ou SUB
+  forRennes        Boolean
+  minute           Int?
+  extraMinute      Int?
+  playerName       String // carton : le joueur ; remplacement : l'entrant
+  playerOutName    String? // remplacement : le sortant
+  match            Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, externalEventKey])
 }

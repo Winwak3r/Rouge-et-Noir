@@ -1,4 +1,4 @@
-import type { MatchCard, MatchGoal } from "@prisma/client";
+import type { MatchCard, MatchEvent, MatchGoal } from "@prisma/client";
 import { TeamLabel } from "./TeamLabel";
 
 /** « Résultat officiel » (ou score en direct) avec les buteurs. */
@@ -9,8 +9,40 @@ export function MatchResult(props: {
   score: { home: number; away: number; pens: string | null };
   goals: MatchGoal[];
   cards: MatchCard[];
+  /** Cartons jaunes et remplacements */
+  events?: MatchEvent[];
   rennesIsHome: boolean;
 }) {
+  const byTime = <T extends { minute: number | null; extraMinute: number | null }>(a: T, b: T) =>
+    (a.minute ?? 0) - (b.minute ?? 0) || (a.extraMinute ?? 0) - (b.extraMinute ?? 0);
+  const events = [...(props.events ?? [])].sort(byTime);
+  const side = (home: boolean) => events.filter((e) => e.forRennes === (home ? props.rennesIsHome : !props.rennesIsHome));
+  const mn = (e: { minute: number | null; extraMinute: number | null }) => `${e.minute ?? "?"}’${e.extraMinute ? `+${e.extraMinute}` : ""}`;
+  const YellowCard = () => <span aria-label="carton jaune" className="mr-1 inline-block h-3 w-2 rounded-[1px] bg-[#FBC02D] align-[-1px]" />;
+  // Jaunes puis remplacements, chacun dans l'ordre du match
+  const extras = (home: boolean) => (
+    <>
+      {side(home)
+        .filter((e) => e.kind === "YELLOW")
+        .map((e) => (
+          <li key={e.id}>
+            <YellowCard />
+            {e.playerName} {mn(e)}
+          </li>
+        ))}
+      {side(home)
+        .filter((e) => e.kind === "SUB")
+        .map((e) => (
+          <li key={e.id} title={`${e.playerName} remplace ${e.playerOutName ?? "?"}`}>
+            <span aria-label="remplacement">🔁 </span>
+            <span className="text-green-700">{e.playerName}</span>
+            <span aria-hidden> ↔ </span>
+            <span className="sr-only"> remplace </span>
+            <span className="text-red-700">{e.playerOutName}</span> {mn(e)}
+          </li>
+        ))}
+    </>
+  );
   const goals = [...props.goals].sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0) || (a.extraMinute ?? 0) - (b.extraMinute ?? 0));
   // Un but est affiché du côté de l'équipe qui en profite (csc compris).
   const homeGoals = goals.filter((g) => g.forRennes === props.rennesIsHome);
@@ -43,6 +75,7 @@ export function MatchResult(props: {
                 {cardLine(c)}
               </li>
             ))}
+            {extras(true)}
           </ul>
         </div>
         <div className="text-center">
@@ -65,6 +98,7 @@ export function MatchResult(props: {
                 {cardLine(c)}
               </li>
             ))}
+            {extras(false)}
           </ul>
         </div>
       </div>

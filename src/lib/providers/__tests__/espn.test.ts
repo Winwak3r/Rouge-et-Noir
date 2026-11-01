@@ -180,3 +180,17 @@ describe("Rapprochement des noms (cotes ↔ effectif)", () => {
     expect(matchPlayerName("Nick Woltemade", squad)).toBeNull();
   });
 });
+
+
+describe("ESPN : cartons jaunes, remplacements, déroulé (vrai match Juventus – Rennes)", () => {
+  it("lit les jaunes, les remplacements (entrant / sortant) et les repères du match", async () => {
+    const { parseSummary } = await import("../espn-parse");
+    const { readFileSync } = await import("node:fs");
+    const raw = JSON.parse(readFileSync(new URL("./fixtures/espn-summary-juventus-rennes.json", import.meta.url), "utf8"));
+    const d = parseSummary(raw);
+    expect(d.yellowCards.some((y) => y.playerName === "Federico Gatti" && y.minute === 19)).toBe(true);
+    const sub = d.substitutions.find((x) => x.outName === "Zeki Çelik");
+    expect(sub).toMatchObject({ inName: "Pierre Kalulu", teamExternalId: 111, minute: 45 });
+    expect(d.phases).toEqual({ kickoff: true, halftime: true, secondHalf: true });
+  });
+});

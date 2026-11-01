@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { resendVerificationAction, setMyEmailRemindersAction, type FormState } from "@/app/actions/auth";
+import { resendVerificationAction, setMyEmailRemindersAction, setPushPrefsAction, type FormState } from "@/app/actions/auth";
 
 /** Bandeau « confirme ton adresse e-mail » avec renvoi du lien. */
 export function VerifyEmailBanner({ email }: { email: string }) {
@@ -36,6 +36,28 @@ export function EmailRemindersForm({ enabled, verified }: { enabled: boolean; ve
         <span>Recevoir un e-mail de rappel 2 h avant chaque match si mon pronostic n’est pas saisi</span>
       </label>
       {!verified && <p className="text-xs text-amber-700">Les e-mails ne partent qu’une fois ton adresse confirmée.</p>}
+      {pending && <p className="text-xs text-neutral-500">Enregistrement…</p>}
+      {state.success && <p className="text-xs text-green-700">{state.success}</p>}
+    </form>
+  );
+}
+
+/** Types de notifications reçues sur les appareils activés. */
+export function PushPrefsForm({ live, prematch }: { live: boolean; prematch: boolean }) {
+  const [state, action, pending] = useActionState<FormState, FormData>(setPushPrefsAction, {});
+  const box = (name: string, checked: boolean, label: string, hint: string) => (
+    <label className="flex items-start gap-2">
+      <input type="checkbox" name={name} defaultChecked={checked} onChange={(e) => e.currentTarget.form?.requestSubmit()} className="mt-0.5" />
+      <span>
+        {label}
+        <span className="block text-xs text-neutral-500">{hint}</span>
+      </span>
+    </label>
+  );
+  return (
+    <form action={action} className="space-y-2 text-sm">
+      {box("pushLive", live, "Pendant les matchs", "Coup d’envoi, buts, cartons rouges, mi-temps, fin du match, ton buteur remplacé ou entré en jeu")}
+      {box("pushPrematch", prematch, "Avant les matchs", "La veille du match, cotes des buteurs disponibles, composition publiée")}
       {pending && <p className="text-xs text-neutral-500">Enregistrement…</p>}
       {state.success && <p className="text-xs text-green-700">{state.success}</p>}
     </form>

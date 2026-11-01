@@ -19,9 +19,9 @@ async function deliver(subs: Array<{ id: string; endpoint: string }>, text: Push
   let failed = 0;
   let removed = 0;
   for (const sub of subs) {
-    await prisma.pushSubscription.update({
-      where: { id: sub.id },
-      data: { pendingTitle: text.title, pendingBody: text.body, pendingUrl: text.url, pendingAt: new Date() },
+    // Le message rejoint la file de l'appareil : chaque « réveil » affiche le suivant
+    await prisma.pushMessage.create({
+      data: { subscriptionId: sub.id, title: text.title, body: text.body, url: text.url ?? "/", tag: text.tag ?? "rn" },
     });
     try {
       const r = await sendPush(sub.endpoint, vapid);
@@ -87,19 +87,51 @@ export async function sendReminders(now = new Date()): Promise<PushReport> {
 /** Notification de test vers un appareil du joueur. */
 export async function sendTest(subId: string, endpoint: string): Promise<PushReport> {
   await prisma.pushSubscription.update({ where: { id: subId }, data: { testAt: new Date() } });
-  return deliver([{ id: subId, endpoint }], TEST_MESSAGE);
+  return deliver([{ id: subId, endpoint }], { ...TEST_MESSAGE, tag: `test-${Date.now()}` });
 }
 
-/** Texte demandé par le service worker après un « réveil » (puis effacé). */
+/** Message suivant de la file de l'appareil, demandé par le service worker après un « réveil ». */
 export async function messageForEndpoint(endpoint: string, now = new Date()): Promise<PushText> {
   const sub = await prisma.pushSubscription.findUnique({ where: { endpoint } });
   if (!sub) return GENERIC_MESSAGE;
-  if (sub.pendingAt && now.getTime() - sub.pendingAt.getTime() < 30 * 60_000 && sub.pendingTitle && sub.pendingBody) {
-    await prisma.pushSubscription.update({
-      where: { id: sub.id },
-      data: { pendingTitle: null, pendingBody: null, pendingUrl: null, pendingAt: null, testAt: null },
-    });
-    return { title: sub.pendingTitle, body: sub.pendingBody, url: sub.pendingUrl ?? "/", tag: "message" };
-  }
-  return GENERIC_MESSAGE;
+  const next = await prisma.pushMessage.findFirst({
+    where: { subscriptionId: sub.id, deliveredAt: null, createdAt: { gte: new Date(now.getTime() - 30 * 60_000) } },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!next) return GENERIC_MESSAGE;
+  await prisma.pushMessage.update({ where: { id: next.id }, data: { deliveredAt: now } });
+  // ménage : messages remis depuis plus d'un jour
+  await prisma.pushMessage.deleteMany({ where: { subscriptionId: sub.id, deliveredAt: { lt: new Date(now.getTime() - 24 * 3600_000) } } });
+  return { title: next.title, body: next.body, url: next.url, tag: next.tag };
+}
+
+/**
+ * Notification de match envoyée UNE fois par joueur (but, mi-temps, veille, cotes…).
+ * `pref` : réglage du joueur à respecter ; `userIds` : destinataires précis (sinon tous les joueurs actifs).
+ */
+export async function notifyOnce(opts: {
+  matchId: string;
+  kind: string;
+  text: PushText;
+  pref: "live" | "prematch";
+  userIds?: string[];
+}): Promise<number> {
+  if (!vapidFromEnv()) return 0;
+  const subs = await prisma.pushSubscription.findMany({
+    where: {
+      user: { isActive: true, ...(opts.pref === "live" ? { pushLive: true } : { pushPrematch: true }) },
+      ...(opts.userIds ? { userId: { in: opts.userIds } } : {}),
+    },
+    select: { id: true, userId: true, endpoint: true },
+  });
+  if (subs.length === 0) return 0;
+  const already = new Set(
+    (await prisma.pushEvent.findMany({ where: { matchId: opts.matchId, kind: opts.kind }, select: { userId: true } })).map((x) => x.userId),
+  );
+  const users = [...new Set(subs.map((x) => x.userId))].filter((u) => !already.has(u));
+  if (users.length === 0) return 0;
+  // réservé d'abord : jamais de doublon, même si deux synchros se croisent
+  await prisma.pushEvent.createMany({ data: users.map((userId) => ({ userId, matchId: opts.matchId, kind: opts.kind })), skipDuplicates: true });
+  const r = await deliver(subs.filter((x) => users.includes(x.userId)), opts.text);
+  return r.sent;
 }

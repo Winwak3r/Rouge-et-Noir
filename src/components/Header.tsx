@@ -156,7 +156,7 @@ export async function Header() {
             <ThemeSwitch className="inline-flex sm:hidden" />
           </div>
           {/* Sous le pseudo : classement / points de la ligue, choix de la ligue, (mobile) thème */}
-          <div className="col-span-2 col-start-1 row-start-2 mt-1.5 flex min-w-0 items-center gap-2">
+          <div className="col-span-2 col-start-1 row-start-2 mt-1.5 flex min-w-0 items-stretch gap-2">
             {user && myActiveLeagues.length > 0 && (
               <LeagueSwitcher
                 leagues={[
@@ -167,7 +167,7 @@ export async function Header() {
               />
             )}
           {user && (
-            <div className="flex min-w-0 shrink gap-2.5">
+            <div className="flex min-w-0 flex-1 basis-0 gap-2.5 sm:flex-none sm:basis-auto">
               <Link
                 href="/classement"
                 data-tour="rank"

@@ -63,19 +63,19 @@ export function LeagueSwitcher({ leagues, activeId }: { leagues: L[]; activeId: 
 
   return (
     // @container : la largeur réellement disponible décide de l'affichage du texte
-    <div ref={ref} data-tour="league" className="@container relative min-w-[3.25rem] max-w-[11rem] flex-1 sm:max-w-[15rem]">
+    <div ref={ref} data-tour="league" className="@container relative min-w-0 flex-1 basis-0 sm:max-w-[15rem] sm:basis-auto">
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         title={sel.name}
-        className={`flex w-full min-w-0 items-center justify-between gap-1 overflow-hidden rounded-[10px] border bg-neutral-50 px-1.5 py-1.5 @[8.5rem]:gap-2 @[8.5rem]:px-2.5 text-left transition-colors hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-noir ${
+        className={`flex h-full w-full min-w-0 items-center justify-center gap-1 overflow-hidden rounded-[10px] border bg-neutral-50 px-1.5 py-1 @[8.5rem]:justify-between @[8.5rem]:gap-2 @[8.5rem]:px-2.5 @[8.5rem]:py-1.5 text-left transition-colors hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-noir ${
           open ? "border-neutral-500" : "border-neutral-200"
         }`}
       >
         {/* Image réduite quand la place manque : le chevron reste dans le bloc */}
-        <span className="shrink-0 [&>*]:!h-6 [&>*]:!w-6 @[8.5rem]:[&>*]:!h-7 @[8.5rem]:[&>*]:!w-7">
+        <span className="shrink-0 [&>*]:!h-10 [&>*]:!w-10 @[8.5rem]:[&>*]:!h-7 @[8.5rem]:[&>*]:!w-7">
           <Logo l={sel} size={28} />
         </span>
         {/* Pas la place pour « Ligue » : seul le logo s'affiche (le nom reste lu par les lecteurs d'écran) */}

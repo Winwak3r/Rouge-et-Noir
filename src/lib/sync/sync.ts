@@ -8,6 +8,7 @@ import type { FootballProvider, ProviderTeam } from "@/lib/providers/types";
 import { emailRemindersEnabled, sendEmailReminders } from "@/lib/email-reminders";
 import { sendReminders } from "@/lib/push/send";
 import { syncSquadPhotos } from "./squad-photos-sync";
+import { notifyEves, notifyMatchProgress, notifyPrematch } from "@/lib/push/match-notify";
 import { getActiveRules, getRulesByVersion } from "@/lib/scoring/active-rules";
 import { lockTime, scoreParticipantForMatch } from "@/lib/scoring/engine";
 import type { ScoreLine } from "@/lib/scoring/rules";
@@ -151,6 +152,15 @@ export async function syncSquad(provider: FootballProvider): Promise<number> {
 const toRennes = (m: Pick<Match, "rennesIsHome">, home: number, away: number): ScoreLine =>
   m.rennesIsHome ? { rennes: home, opponent: away } : { rennes: away, opponent: home };
 
+/** Nom des deux équipes, pour les notifications. */
+async function matchLabel(match: Match) {
+  const [home, away] = await Promise.all([
+    prisma.team.findUnique({ where: { id: match.homeTeamId } }),
+    prisma.team.findUnique({ where: { id: match.awayTeamId } }),
+  ]);
+  return { id: match.id, home: home?.name ?? "?", away: away?.name ?? "?" };
+}
+
 export async function syncMatchDetail(provider: FootballProvider, match: Match): Promise<string[]> {
   const notes: string[] = [];
   const d = await provider.getMatchDetail({ externalId: match.externalId, competition: match.competition });
@@ -215,6 +225,35 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
     }),
   ]);
 
+  // 1 ter. Cartons jaunes et remplacements (remplacés à chaque fois : idempotent)
+  await prisma.$transaction([
+    prisma.matchEvent.deleteMany({ where: { matchId: match.id } }),
+    prisma.matchEvent.createMany({
+      data: [
+        ...d.yellowCards.map((y) => ({
+          matchId: match.id,
+          externalEventKey: `y-${y.key}`,
+          kind: "YELLOW",
+          forRennes: y.teamExternalId === rennesId,
+          minute: y.minute,
+          extraMinute: y.extraMinute,
+          playerName: y.playerName,
+        })),
+        ...d.substitutions.map((x) => ({
+          matchId: match.id,
+          externalEventKey: `s-${x.key}`,
+          kind: "SUB",
+          forRennes: x.teamExternalId === rennesId,
+          minute: x.minute,
+          extraMinute: x.extraMinute,
+          playerName: x.inName,
+          playerOutName: x.outName,
+        })),
+      ],
+      skipDuplicates: true,
+    }),
+  ]);
+
   // 2. Feuille de match rennaise (titulaires + remplaçants), dès sa publication
   const lineup = d.lineups[rennesId] ?? [];
   if (lineup.length > 0) {
@@ -232,11 +271,15 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
       prisma.matchLineup.createMany({ data: rows }),
       ...(match.lineupAt ? [] : [prisma.match.update({ where: { id: match.id }, data: { lineupAt: now } })]),
     ]);
-    if (!match.lineupAt) notes.push(`feuille de match : ${lineup.filter((l) => l.starter).length} titulaires, ${lineup.filter((l) => !l.starter).length} remplaçants`);
+    if (!match.lineupAt) {
+      notes.push(`feuille de match : ${lineup.filter((l) => l.starter).length} titulaires, ${lineup.filter((l) => !l.starter).length} remplaçants`);
+      await notifyPrematch("lineup", match, await matchLabel(match)).catch(() => 0);
+    }
   }
 
   // 3. Cotes buteur : uniquement avant le verrouillage
   if (now < lockTime(match) && d.scorerOdds.length > 0) {
+    const hadOdds = (await prisma.playerOdds.count({ where: { matchId: match.id } })) > 0;
     const players = await prisma.player.findMany({ where: { seasonId: season.id }, select: { id: true, name: true } });
     let matched = 0;
     const unmatched: string[] = [];
@@ -258,6 +301,7 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
       });
     }
     notes.push(`cotes : ${matched} joueurs rennais`);
+    if (!hadOdds && matched > 0) await notifyPrematch("odds", match, await matchLabel(match)).catch(() => 0);
     // Les noms non trouvés sont surtout les adversaires : on ne les signale pas tous.
     void unmatched;
   }
@@ -294,6 +338,10 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
     }
   }
   const updated = await prisma.match.update({ where: { id: match.id }, data });
+
+  // Notifications du direct (buts, cartons, buteur remplacé, déroulé) : une seule fois chacune
+  const pushed = await notifyMatchProgress({ match, label: await matchLabel(match), detail: d, rennesId }).catch(() => 0);
+  if (pushed) notes.push(`${pushed} notification(s) envoyée(s)`);
 
   // 5. Verrouillage (cote figée) dès le coup d'envoi, puis points si le résultat est confirmé
   if (now >= lockTime(updated)) await lockPredictions(updated.id);
@@ -531,6 +579,14 @@ export async function runSmartSync(opts: { force?: boolean; reason: string; budg
     }
 
     if (postponed) report.steps.push(`${postponed} match(s) reporté(s) à la synchro suivante (temps limité)`);
+
+    // Notification de la veille du match (24 h avant, à tous)
+    try {
+      const n = await notifyEves(now);
+      if (n) report.steps.push(`veille du match : ${n} notification(s)`);
+    } catch (e) {
+      report.errors.push(`veille du match : ${e instanceof Error ? e.message : String(e)}`);
+    }
 
     // Rappels par e-mail 2 h avant le verrouillage (si activés par l'admin)
     try {
