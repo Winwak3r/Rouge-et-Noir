@@ -39,6 +39,7 @@ export const getCurrentUser = cache(async () => {
       emailReminders: true,
       activeLeagueId: true,
       tutorialDoneAt: true,
+      notifPromptAt: true,
       pushLive: true,
       pushPrematch: true,
     },

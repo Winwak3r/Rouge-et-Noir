@@ -312,3 +312,14 @@ export async function setPushPrefsAction(_: FormState, form: FormData): Promise<
   });
   return { success: "Préférences enregistrées." };
 }
+
+
+/** Réponse à la proposition d'activer les notifications (après la première ligue). */
+export async function answerNotifPromptAction(prefs: { live: boolean; prematch: boolean } | null): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) return;
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { notifPromptAt: new Date(), ...(prefs ? { pushLive: prefs.live, pushPrematch: prefs.prematch } : {}) },
+  });
+}

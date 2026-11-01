@@ -74,6 +74,8 @@ model User {
   activeLeagueId  String?
   // Didacticiel de découverte terminé (affiché une seule fois, après la première ligue)
   tutorialDoneAt  DateTime?
+  // Proposition d'activer les notifications faite (après la première ligue)
+  notifPromptAt   DateTime?
   // Date d'inscription : aucun -1 pour les matchs commencés avant cette date.
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

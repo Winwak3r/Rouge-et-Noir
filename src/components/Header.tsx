@@ -10,6 +10,7 @@ import { ThemeSwitch } from "./ThemeSwitch";
 import { LeagueSwitcher } from "./LeagueSwitcher";
 import { LeagueWelcome } from "./LeagueWelcome";
 import { Tutorial } from "./Tutorial";
+import { NotifPrompt } from "./NotifPrompt";
 import { getActiveRules } from "@/lib/scoring/active-rules";
 import { cookies } from "next/headers";
 import { WELCOME_COOKIE } from "@/lib/league-rules";
@@ -77,7 +78,16 @@ export async function Header() {
       {/* Première connexion (ou aucune ligue) : rejoindre ou créer une ligue */}
       {user && membershipCount === 0 && <LeagueOnboarding canCreate logos={logos} />}
       {/* Didacticiel : une fois, quand le joueur a sa première ligue (après la fenêtre de bienvenue s'il y en a une) */}
-      {user && !user.tutorialDoneAt && membershipCount > 0 && <Tutorial waitForEvent={welcomeLeague ? "league-welcome-closed" : undefined} points={(await getActiveRules()).points} />}
+      {/* Après la première ligue : 1) bienvenue dans la ligue, 2) proposition des notifications, 3) didacticiel */}
+      {user && !user.notifPromptAt && membershipCount > 0 && (
+        <NotifPrompt publicKey={process.env.VAPID_PUBLIC_KEY?.trim() || null} waitForEvent={welcomeLeague ? "league-welcome-closed" : undefined} />
+      )}
+      {user && !user.tutorialDoneAt && membershipCount > 0 && (
+        <Tutorial
+          waitForEvent={!user.notifPromptAt ? "notif-prompt-closed" : welcomeLeague ? "league-welcome-closed" : undefined}
+          points={(await getActiveRules()).points}
+        />
+      )}
       {welcomeLeague && (
         <LeagueWelcome
           logos={logos}
