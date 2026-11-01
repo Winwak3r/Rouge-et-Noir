@@ -446,3 +446,29 @@ export async function verifyUserEmailAction(_: AdminState, form: FormData): Prom
   refresh("/admin/participants");
   return { message: `Compte de ${u.pseudo} validé : il peut se connecter.` };
 }
+
+/** Envoie à l'admin lui-même l'exemple d'une notification (sur tous ses appareils abonnés). */
+export async function testNotificationAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const { TEST_KINDS, sampleNotification } = await import("@/lib/push/test-samples");
+  const { sendToUser } = await import("@/lib/push/send");
+  const kind = str(form, "mode") as (typeof TEST_KINDS)[number][0];
+  if (!TEST_KINDS.some(([k]) => k === kind)) return { error: "Type de notification inconnu." };
+  // Basé sur le prochain match (sinon le dernier) pour que le clic ouvre un vrai match
+  const now = new Date();
+  const match =
+    (await prisma.match.findFirst({ where: { kickoffAt: { gte: now } }, orderBy: { kickoffAt: "asc" }, include: { homeTeam: true, awayTeam: true } })) ??
+    (await prisma.match.findFirst({ orderBy: { kickoffAt: "desc" }, include: { homeTeam: true, awayTeam: true } }));
+  if (!match) return { error: "Aucun match en base : lance d’abord une synchronisation." };
+  const fav = await prisma.playerOdds.findFirst({ where: { matchId: match.id }, orderBy: { odds: "asc" }, include: { player: true } });
+  const text = sampleNotification(
+    kind,
+    { id: match.id, home: match.homeTeam.name, away: match.awayTeam.name, rennesIsHome: match.rennesIsHome, competition: match.competition, kickoffAt: match.kickoffAt },
+    fav?.player.name ?? "Arnaud Nordin",
+    now,
+  );
+  const r = await sendToUser(admin.id, text);
+  if (r.skipped) return { error: `Rien n’a été envoyé : ${r.skipped}. Active d’abord les notifications dans Mon compte, sur cet appareil.` };
+  if (r.sent === 0) return { error: `Échec de l’envoi (${r.failed} appareil(s) en erreur${r.removed ? `, ${r.removed} abonnement(s) expiré(s) supprimé(s)` : ""}).` };
+  return { message: `« ${text.body} » envoyé à ${r.sent} de tes appareils.` };
+}

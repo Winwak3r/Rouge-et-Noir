@@ -1,4 +1,5 @@
-import { broadcastPushAction, saveAnnouncementAction, sendEmailRemindersNowAction, setEmailRemindersAction } from "@/app/actions/admin";
+import { broadcastPushAction, saveAnnouncementAction, sendEmailRemindersNowAction, setEmailRemindersAction, testNotificationAction } from "@/app/actions/admin";
+import { TEST_KINDS } from "@/lib/push/test-samples";
 import { emailRemindersEnabled } from "@/lib/email-reminders";
 import { emailConfigured } from "@/lib/email";
 import { canEditPrediction } from "@/lib/scoring/engine";
@@ -59,6 +60,22 @@ export default async function MessagesAdminPage() {
             <textarea name="body" required maxLength={240} rows={3} className="input" />
           </label>
         </ActionForm>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Tester les notifications</h2>
+        <p className="text-sm text-neutral-600">
+          Envoie-toi un exemple de chaque notification automatique, sur <strong>tes</strong> appareils uniquement (les joueurs ne
+          reçoivent rien). L’exemple porte sur le prochain match : touche la notification pour vérifier qu’elle ouvre bien ce match.
+          Les notifications de test sont marquées « [Test] ».
+        </p>
+        <div className="card">
+          <ActionForm
+            action={testNotificationAction}
+            className="flex flex-wrap items-center gap-2 [&_.btn-secondary]:px-3 [&_.btn-secondary]:py-1.5 [&_.btn-secondary]:text-xs"
+            submits={TEST_KINDS.map(([value, label]) => ({ label, value, primary: false }))}
+          />
+        </div>
       </section>
 
       <section className="space-y-3">

@@ -135,3 +135,11 @@ export async function notifyOnce(opts: {
   const r = await deliver(subs.filter((x) => users.includes(x.userId)), opts.text);
   return r.sent;
 }
+
+
+/** Notification de test vers TOUS les appareils d'un joueur, sans aucune règle d'envoi (administration). */
+export async function sendToUser(userId: string, text: PushText): Promise<PushReport> {
+  const subs = await prisma.pushSubscription.findMany({ where: { userId }, select: { id: true, endpoint: true } });
+  if (subs.length === 0) return { sent: 0, failed: 0, removed: 0, skipped: "aucun appareil abonné" };
+  return deliver(subs, text);
+}
