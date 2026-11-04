@@ -472,3 +472,26 @@ export async function testNotificationAction(_: AdminState, form: FormData): Pro
   if (r.sent === 0) return { error: `Échec de l’envoi (${r.failed} appareil(s) en erreur${r.removed ? `, ${r.removed} abonnement(s) expiré(s) supprimé(s)` : ""}).` };
   return { message: `« ${text.body} » envoyé à ${r.sent} de tes appareils.` };
 }
+
+/** Cotes du match (1-N-2) saisies par l'admin : indices de victoire affichés dans l'avant-match. */
+export async function setMatchOddsAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const matchId = str(form, "matchId");
+  const match = await prisma.match.findUnique({ where: { id: matchId } });
+  if (!match) return { error: "Match introuvable." };
+  if (str(form, "mode") === "clear") {
+    await prisma.match.update({ where: { id: matchId }, data: { oddsHome: null, oddsDraw: null, oddsAway: null } });
+    await audit(admin.id, "CLEAR_MATCH_ODDS", "Match", matchId);
+    refresh("/admin/cotes");
+    return { message: "Cotes du match effacées : les indices ne s’affichent plus." };
+  }
+  const num = (k: string) => Number(str(form, k).replace(",", "."));
+  const odds = { home: num("home"), draw: num("draw"), away: num("away") };
+  if (Object.values(odds).some((v) => !Number.isFinite(v) || v < 1.01 || v > 100)) {
+    return { error: "Chaque cote doit être un nombre entre 1,01 et 100 (ex. 2,10)." };
+  }
+  await prisma.match.update({ where: { id: matchId }, data: { oddsHome: odds.home, oddsDraw: odds.draw, oddsAway: odds.away } });
+  await audit(admin.id, "SET_MATCH_ODDS", "Match", matchId, { home: match.oddsHome, draw: match.oddsDraw, away: match.oddsAway }, odds);
+  refresh("/admin/cotes");
+  return { message: "Cotes enregistrées : les indices s’affichent dans l’avant-match." };
+}

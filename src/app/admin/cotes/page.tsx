@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { setOddsAction } from "@/app/actions/admin";
 import { ActionForm } from "@/components/ActionForm";
+import { MatchOddsSimulator } from "@/components/MatchOddsSimulator";
 import { prisma } from "@/lib/db";
 import { formatDateTime, formatStamp } from "@/lib/dates";
 import { getActiveRules } from "@/lib/scoring/active-rules";
@@ -54,6 +55,24 @@ export default async function OddsAdminPage({ searchParams }: { searchParams: Pr
           <p className="text-sm text-neutral-600">
             {match!.homeTeam.name} – {match!.awayTeam.name} · {formatDateTime(match!.kickoffAt)}
           </p>
+
+          <section className="card space-y-3">
+            <h2 className="font-display text-xl font-bold uppercase tracking-wide">Cotes du match et indices de victoire</h2>
+            <p className="text-sm text-neutral-600">
+              Saisis des cotes (victoire / nul / victoire) pour voir aussitôt les indices de 1 à 5. « Enregistrer » les affiche
+              dans l’avant-match du site. Les vraies cotes récupérées par la synchro, environ 48 h avant le match, remplacent ces
+              valeurs.
+            </p>
+            <MatchOddsSimulator
+              key={match!.id}
+              matchId={match!.id}
+              home={{ name: match!.homeTeam.name, rennes: match!.rennesIsHome }}
+              away={{ name: match!.awayTeam.name, rennes: !match!.rennesIsHome }}
+              current={{ home: match!.oddsHome, draw: match!.oddsDraw, away: match!.oddsAway }}
+            />
+          </section>
+
+          <h2 className="font-display text-xl font-bold uppercase tracking-wide">Cotes des buteurs</h2>
           <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-sm">
             {players.map((p) => {
               const o = odds.find((x) => x.playerId === p.id);
