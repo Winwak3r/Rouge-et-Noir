@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  viewportFit: "cover", // barre du bas au-dessus de la zone du geste d'accueil (iPhone)
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
@@ -31,7 +32,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable}`}>
       <body className="min-h-screen bg-page font-sans text-neutral-900 antialiased">
         <Header />
-        <main className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6">{children}</main>
+        <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-16">{children}</main>
       </body>
     </html>
   );

@@ -21,7 +21,7 @@ const STEPS: Step[] = [
   {
     target: "user-menu",
     title: "Ton menu",
-    text: "Clique sur ton pseudo pour gérer ton compte (photo, notifications, mot de passe) et tes ligues : en rejoindre une avec un code, ou en créer une.",
+    text: "Ton compte : photo, notifications, mot de passe. Tes ligues se gèrent depuis le menu Ligues : en rejoindre une avec un code, ou en créer une.",
   },
   {
     target: "league",
@@ -45,6 +45,10 @@ const STEPS: Step[] = [
     text: "Les classements officiels des compétitions du Stade Rennais, et les meilleurs buteurs.",
   },
 ];
+
+/** Premier élément visible portant ce repère (certains existent en double : en-tête et barre du bas). */
+const findTarget = (t: string) =>
+  [...document.querySelectorAll<HTMLElement>(`[data-tour="${t}"]`)].find((el) => el.getClientRects().length > 0) ?? null;
 
 const PAD = 6; // marge autour de l'élément éclairé
 const GAP = 14; // distance entre l'élément et la bulle
@@ -86,7 +90,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
   // Étapes dont l'élément existe réellement à l'écran
   useEffect(() => {
     if (!ready || pathname !== "/") return;
-    const t = setTimeout(() => setSteps(STEPS.filter((s) => document.querySelector(`[data-tour="${s.target}"]`))), 400);
+    const t = setTimeout(() => setSteps(STEPS.filter((s) => findTarget(s.target))), 400);
     return () => clearTimeout(t);
   }, [ready, pathname]);
 
@@ -94,7 +98,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
 
   const measure = useCallback(() => {
     if (!step) return;
-    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+    const el = findTarget(step.target);
     if (!el) return;
     const r = el.getBoundingClientRect();
     // un élément très haut (calendrier) : on n'éclaire que le haut, visible à l'écran
@@ -105,8 +109,9 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
   // Amener l'élément à l'écran, puis le mesurer (et suivre défilement / redimensionnement)
   useEffect(() => {
     if (!step) return;
-    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
-    el?.scrollIntoView({ block: "center", behavior: "smooth" });
+    const el = findTarget(step.target);
+    // éléments de la barre du bas ou de l'en-tête : toujours visibles, inutile de faire défiler
+    if (el && !el.closest("nav, header")) el.scrollIntoView({ block: "center", behavior: "smooth" });
     const t = setTimeout(measure, 350);
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, { passive: true });

@@ -20,7 +20,18 @@ function Logo({ l, size }: { l: L; size: number }) {
 }
 
 /** Liste des ligues de l'en-tête : la ligue choisie s'affiche aussitôt, la page se met à jour en arrière-plan. */
-export function LeagueSwitcher({ leagues, activeId }: { leagues: L[]; activeId: string | null }) {
+export function LeagueSwitcher({
+  leagues,
+  activeId,
+  variant = "header",
+  className = "",
+}: {
+  leagues: L[];
+  activeId: string | null;
+  /** « bottom » : bouton de la barre du bas (mobile), la liste s'ouvre vers le haut */
+  variant?: "header" | "bottom";
+  className?: string;
+}) {
   const [current, setCurrent] = useState(activeId ?? leagues[0]?.id);
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -83,8 +94,51 @@ export function LeagueSwitcher({ leagues, activeId }: { leagues: L[]; activeId: 
     start(() => viewLeagueAction(id));
   };
 
+  if (variant === "bottom") {
+    return (
+      <div ref={ref} data-tour="league" className={`relative flex justify-center ${className}`}>
+        <button
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          className={`flex w-full flex-col items-center gap-0.5 pt-1.5 text-[10px] font-semibold ${open ? "text-rouge" : "text-neutral-600"}`}
+        >
+          <span className={`rounded-lg ${open ? "ring-2 ring-rouge" : ""} ${pending ? "opacity-60" : ""}`}>
+            <Logo l={sel} size={26} />
+          </span>
+          <span className="max-w-[4.75rem] truncate">{sel.name}</span>
+        </button>
+        {open && (
+          <ul role="listbox" aria-label="Choisir la ligue affichée" className="absolute bottom-full left-1 z-50 mb-3 w-max min-w-[13rem] max-w-[18rem] overflow-hidden rounded-xl border border-neutral-200 bg-surface p-1 shadow-xl">
+            {leagues.map((l) => {
+              const on = l.id === current;
+              return (
+                <li key={l.id} role="option" aria-selected={on} className={l.id === "general" ? "mt-1 border-t border-neutral-200 pt-1" : undefined}>
+                  <button
+                    type="button"
+                    onClick={() => choose(l.id)}
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2.5 text-left text-sm hover:bg-neutral-100 ${on ? "font-bold" : ""}`}
+                  >
+                    <Logo l={l} size={28} />
+                    <span className="min-w-0 flex-1 truncate">{l.name}</span>
+                    {on && (
+                      <svg aria-hidden className="shrink-0 text-rouge" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 12.5l5 5L20 6.5" />
+                      </svg>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div ref={ref} data-tour="league" className="relative flex min-w-0 shrink">
+    <div ref={ref} data-tour="league" className={`relative flex min-w-0 shrink ${className}`}>
       <button
         type="button"
         aria-haspopup="listbox"

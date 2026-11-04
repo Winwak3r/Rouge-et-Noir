@@ -8,6 +8,7 @@ import { buildStandings } from "@/lib/scoring/ranking";
 import { Logo } from "./Logo";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { LeagueSwitcher } from "./LeagueSwitcher";
+import { BottomNav } from "./BottomNav";
 import { LeagueWelcome } from "./LeagueWelcome";
 import { Tutorial } from "./Tutorial";
 import { NotifPrompt } from "./NotifPrompt";
@@ -106,6 +107,7 @@ export async function Header() {
         <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:gap-x-4">
           <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
             {user ? (
+              <div className="hidden sm:block">
               <UserMenu
                 userId={user.id}
                 avatarAt={user.avatarUpdatedAt?.getTime() ?? null}
@@ -115,6 +117,7 @@ export async function Header() {
                 isLeagueAdmin={adminCount > 0}
                 logoutAction={logoutAction}
               />
+              </div>
             ) : (
               <>
                 <Link href="/connexion" className="hbtn">
@@ -143,7 +146,7 @@ export async function Header() {
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
             </Link>
-            <Link href="/classements-srfc" aria-label="Classements" data-tour="standings" className="hbtn">
+            <Link href="/classements-srfc" aria-label="Classements" data-tour="standings" className={`hbtn ${user ? "max-sm:hidden" : ""}`}>
               {rennes?.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={rennes.logoUrl} alt="" width={18} height={18} className="h-[18px] w-[18px] object-contain" />
@@ -165,10 +168,11 @@ export async function Header() {
             {/* Mobile : interrupteur du thème sous la dernière synchro, tout à droite */}
             <ThemeSwitch className="inline-flex sm:hidden" />
           </div>
-          {/* Sous le pseudo : classement / points de la ligue, choix de la ligue, (mobile) thème */}
+          {/* Sous le pseudo : choix de la ligue (ordinateur) et classement de la ligue (toute la largeur sur mobile) */}
           <div className="col-span-2 col-start-1 row-start-2 mt-1.5 flex min-w-0 items-stretch gap-2">
             {user && myActiveLeagues.length > 0 && (
               <LeagueSwitcher
+                className="max-sm:hidden"
                 leagues={[
                   ...myActiveLeagues.map((m) => ({ id: m.league.id, name: m.league.name, imageAt: m.league.imageUpdatedAt?.getTime() ?? null })),
                   { id: "general", name: "Général R&N", imageAt: null },
@@ -177,14 +181,14 @@ export async function Header() {
               />
             )}
           {user && (
-            <div className="flex shrink-0 gap-2.5">
+            <div className="flex min-w-0 flex-1 gap-2.5 sm:flex-none sm:shrink-0">
               <Link
                 href="/classement"
                 data-tour="rank"
                 title="Voir le classement général des pronostics"
-                className="flex flex-col gap-px rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors hover:border-neutral-400"
+                className="flex min-w-0 flex-1 flex-col gap-px rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors hover:border-neutral-400 sm:flex-none"
               >
-                <span className="max-w-[9rem] truncate text-[10px] font-bold uppercase tracking-[0.08em] text-neutral-500">
+                <span className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-neutral-500 sm:max-w-[9rem]">
                   {scope ? scope.name : "Général"} ›
                 </span>
                 <span className="whitespace-nowrap text-lg font-extrabold leading-tight">
@@ -200,6 +204,20 @@ export async function Header() {
           </div>
         </div>
       </div>
+      {user && (
+        <BottomNav
+          user={{ id: user.id, pseudo: user.pseudo, avatarAt: user.avatarUpdatedAt?.getTime() ?? null }}
+          activeLeagueId={scope?.leagueId ?? null}
+          leagues={
+            myActiveLeagues.length
+              ? [
+                  ...myActiveLeagues.map((m) => ({ id: m.league.id, name: m.league.name, imageAt: m.league.imageUpdatedAt?.getTime() ?? null })),
+                  { id: "general", name: "Général R&N", imageAt: null },
+                ]
+              : []
+          }
+        />
+      )}
     </header>
   );
 }

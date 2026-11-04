@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { logoutAction } from "@/app/actions/auth";
 import { AvatarEditor } from "@/components/AvatarEditor";
@@ -36,6 +37,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           </p>
           </div>
         </div>
+        {user.role === "ADMIN" && (
+          <Link href="/admin" className="btn-secondary">
+            Administration
+          </Link>
+        )}
         <form action={replayTutorialAction}>
           <button type="submit" className="btn-secondary">
             Revoir le didacticiel
