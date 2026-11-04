@@ -147,14 +147,10 @@ export function MatchAccordion({ h, children }: { h: MatchHeader; children: Reac
           </span>
         )}
       </button>
-      {/* Ouverture : hauteur, puis contenu qui glisse de gauche à droite en apparaissant */}
+      {/* Ouverture : la hauteur se déploie, puis les rubriques apparaissent l'une après l'autre (dévoilement progressif) */}
       <div className={`grid transition-all duration-300 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`} inert={!open}>
         <div className="overflow-hidden">
-          <div
-            className={`space-y-6 border-t border-neutral-200 p-4 transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
-              open ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0"
-            }`}
-          >
+          <div className={`space-y-6 border-t border-neutral-200 p-4 ${open ? "disclose" : "opacity-0"}`}>
             {children}
           </div>
         </div>

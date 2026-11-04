@@ -110,7 +110,7 @@ export function LeagueSwitcher({
           <span className="max-w-[4.75rem] truncate">{sel.name}</span>
         </button>
         {open && (
-          <ul role="listbox" aria-label="Choisir la ligue affichée" className="absolute bottom-full left-1 z-50 mb-3 w-max min-w-[13rem] max-w-[18rem] overflow-hidden rounded-xl border border-neutral-200 bg-surface p-1 shadow-xl">
+          <ul role="listbox" aria-label="Choisir la ligue affichée" className="menu-pop absolute bottom-full left-1 z-50 mb-3 w-max min-w-[13rem] max-w-[18rem] overflow-hidden rounded-xl border border-neutral-200 bg-surface p-1 shadow-xl">
             {leagues.map((l) => {
               const on = l.id === current;
               return (

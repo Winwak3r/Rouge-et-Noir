@@ -55,7 +55,7 @@ export function Comparison({ rows, live = false }: { rows: CompRow[]; live?: boo
     });
 
   return (
-    <ul className="divide-y divide-neutral-200 overflow-hidden rounded-lg border border-neutral-200 bg-surface">
+    <ul data-stagger className="divide-y divide-neutral-200 overflow-hidden rounded-lg border border-neutral-200 bg-surface">
       <li className="flex items-stretch bg-neutral-50">
         <span className="flex-1" />
         <button
