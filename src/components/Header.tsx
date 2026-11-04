@@ -9,6 +9,7 @@ import { Logo } from "./Logo";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { LeagueSwitcher } from "./LeagueSwitcher";
 import { BottomNav } from "./BottomNav";
+import { Avatar } from "./Avatar";
 import { CompetitionBadge } from "./CompetitionBadge";
 import { LeagueWelcome } from "./LeagueWelcome";
 import { Tutorial } from "./Tutorial";
@@ -18,7 +19,6 @@ import { cookies } from "next/headers";
 import { WELCOME_COOKIE } from "@/lib/league-rules";
 import { getLeagueLogos } from "@/lib/league-logos";
 import { VerifyEmailBanner } from "./AccountForms";
-import { UserMenu } from "./UserMenu";
 import { LeagueOnboarding } from "./LeagueForms";
 import { activeLeagueScope, generalPlayers, scopeResultFilter } from "@/lib/leagues";
 
@@ -111,24 +111,37 @@ export async function Header() {
           <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
             {user && (
               <Link href="/regles" aria-label="Règles" data-tour="rules" className="hbtn sm:hidden">
-                <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-              </svg>
+                <span className="hicon">
+                <svg aria-hidden viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+              </span>
                 Règles
               </Link>
             )}
             {user ? (
-              <div className="hidden sm:block">
-              <UserMenu
-                userId={user.id}
-                avatarAt={user.avatarUpdatedAt?.getTime() ?? null}
-                pseudo={user.pseudo}
-                isAdmin={user.role === "ADMIN"}
-                canCreateLeague={createdCount < 3}
-                isLeagueAdmin={adminCount > 0}
-                logoutAction={logoutAction}
-              />
+              // Ordinateur : « Mon compte » (rouge, avec la photo) puis « Ligues »
+              <div className="hidden items-center gap-2 sm:flex">
+                <Link href="/compte" data-tour="user-menu" className="hbtn-pseudo">
+                  <Avatar userId={user.id} pseudo={user.pseudo} at={user.avatarUpdatedAt?.getTime() ?? null} size={22} className="ring-white/60" />
+                  Mon compte
+                </Link>
+                <Link href="/ligues" data-tour="leagues" className="hbtn">
+                  <span className="hicon">
+                  <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  </span>
+                  Ligues
+                </Link>
+                {user.role === "ADMIN" && (
+                  <Link href="/admin" className="hbtn">
+                    Admin
+                  </Link>
+                )}
               </div>
             ) : (
               <>
@@ -152,19 +165,23 @@ export async function Header() {
           <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end">
             <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
             <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : ""}`}>
-              <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-              </svg>
+              <span className="hicon">
+                <svg aria-hidden viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+              </span>
               <span className="max-[359px]:hidden">Règles</span>
             </Link>
             <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className="hbtn">
-              {rennes?.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={rennes.logoUrl} alt="" width={18} height={18} className="h-[18px] w-[18px] object-contain" />
-              ) : (
-                <Logo className="h-[18px] w-[18px]" />
-              )}
+              <span className="hicon bg-white">
+                {rennes?.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={rennes.logoUrl} alt="" width={16} height={16} className="h-[72%] w-[72%] object-contain" />
+                ) : (
+                  <Logo className="h-[72%] w-[72%]" />
+                )}
+              </span>
               {/* Sur mobile : blason + podium, pour ne pas déborder */}
               <svg aria-hidden className="sm:hidden" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                 <rect x="9" y="6" width="6" height="15" rx="1" />

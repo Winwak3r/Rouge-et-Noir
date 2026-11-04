@@ -23,10 +23,9 @@ const STEPS: Step[] = [
       "Le bouton central te ramène toujours au calendrier : tous les matchs du Stade Rennais. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
   },
   {
-    target: "user-menu",
-    mobileTarget: "leagues",
+    target: "leagues",
     title: "Les ligues",
-    text: "Dans le menu de ton pseudo, « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
+    text: "Le bouton « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
     mobileText: "Le bouton « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
   },
   {
@@ -46,7 +45,7 @@ const STEPS: Step[] = [
   {
     target: "user-menu",
     title: "Ton compte",
-    text: "Clique sur ton pseudo pour ton compte : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
+    text: "Le bouton « Mon compte » : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
     mobileText: "Ton compte : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
   },
   {
