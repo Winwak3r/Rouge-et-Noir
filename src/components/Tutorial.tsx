@@ -31,7 +31,7 @@ const STEPS: Step[] = [
   {
     target: "rank",
     title: "Ton classement",
-    text: "Ta position et tes points dans la ligue affichée. Touche ce bloc pour voir le classement complet des participants.",
+    text: "Ta position et tes points dans la ligue affichée, avec ses compétitions. Le classement complet des participants est dans « Classement ».",
   },
   {
     target: "rules",
