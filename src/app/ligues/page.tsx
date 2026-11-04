@@ -22,8 +22,21 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-6">
       <h1 className="page-title">Ligues</h1>
-      <h2 className="font-display text-xl font-bold uppercase tracking-wide">Mes ligues</h2>
-      <p className="text-sm text-neutral-600">La ligue « Par défaut » est celle affichée à chaque connexion. Tu peux en consulter une autre à tout moment avec la liste de l’en-tête.</p>
+      <div className="flex flex-wrap items-baseline gap-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Mes ligues</h2>
+        <span
+          className={`rounded-full px-2.5 py-0.5 text-sm font-bold tabular-nums ${leagues.length >= MAX_LEAGUES ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-700"}`}
+          title={`${MAX_LEAGUES} ligues au maximum`}
+        >
+          {leagues.length}/{MAX_LEAGUES}
+        </span>
+      </div>
+      <p className="text-sm text-neutral-600">
+        Tu peux participer à {MAX_LEAGUES} ligues au maximum, créées ou rejointes. La ligue « Par défaut » est celle affichée à chaque
+        connexion ; tu peux en consulter une autre à tout moment avec{" "}
+        <span className="sm:hidden">le bouton en bas à gauche de l’écran.</span>
+        <span className="hidden sm:inline">la liste « Ligue » en haut à gauche, sous ton pseudo.</span>
+      </p>
       {q.rejoint && <p className="rounded-lg bg-green-100 px-3 py-2 text-sm text-green-800">Bienvenue dans la ligue « {q.rejoint} » !</p>}
       {q.invitation === "invalide" && <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">Ce lien d’invitation n’est plus valable. Demande un nouveau lien à l’administrateur de la ligue.</p>}
       {q.invitation === "suspendu" && <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">Ton accès à cette ligue a été suspendu par son administrateur.</p>}

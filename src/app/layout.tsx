@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   return (
     <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable}`}>
-      <body className="min-h-screen bg-page font-sans text-neutral-900 antialiased">
+      <body className="min-h-screen overflow-x-clip bg-page font-sans text-neutral-900 antialiased">
         <Header />
         <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-16">{children}</main>
       </body>

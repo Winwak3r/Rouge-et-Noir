@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { activeLeagueScope, generalPlayers } from "@/lib/leagues";
 import { getLeagueLogos } from "@/lib/league-logos";
 
-export const metadata: Metadata = { title: "Classement des pronostics" };
+export const metadata: Metadata = { title: "Classement" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -77,7 +77,7 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Classements</h1>
+        <h1 className="page-title">Classement</h1>
         {!scope && me && (
           <p className="mt-2 text-sm text-neutral-600">
             Tu n’es dans aucune ligue : voici le classement Général R&N.{" "}
@@ -86,7 +86,6 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
             </Link>
           </p>
         )}
-        <p className="mt-1 text-sm text-neutral-600">Départage : scores exacts, puis buteurs trouvés, puis bons écarts. Égalité persistante = ex æquo.</p>
       </div>
       <StandingsBoard views={views} initial={initial} me={me?.id ?? null} logos={logos} />
     </div>

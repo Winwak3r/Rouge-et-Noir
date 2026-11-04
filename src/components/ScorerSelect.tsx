@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { PlayerPhoto } from "./PlayerPhoto";
+import { PlayerName } from "./PlayerName";
 
 export interface ScorerOption {
   id: string;
@@ -128,7 +129,7 @@ export function ScorerSelect(props: {
     <span className="flex w-full min-w-0 items-center gap-2">
       {it.isPlayer && <PlayerPhoto name={it.label} url={it.photo ?? null} size={26} />}
       <span className="min-w-0 flex-1 truncate">
-        {it.label}
+        {it.isPlayer ? <PlayerName name={it.label} /> : it.label}
         {it.pos && <span className="ml-1 text-xs text-neutral-500">({it.pos})</span>}
         {it.role === "sub" && <span className="ml-1.5 rounded bg-neutral-100 px-1 text-[10px] font-medium text-neutral-600">remplaçant</span>}
       </span>

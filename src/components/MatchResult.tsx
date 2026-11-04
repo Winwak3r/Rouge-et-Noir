@@ -1,5 +1,6 @@
 import type { MatchCard, MatchEvent, MatchGoal } from "@prisma/client";
 import { TeamLabel } from "./TeamLabel";
+import { PlayerName } from "./PlayerName";
 
 /** « Résultat officiel » (ou score en direct) avec les buteurs. */
 export function MatchResult(props: {
@@ -27,7 +28,7 @@ export function MatchResult(props: {
         .map((e) => (
           <li key={e.id}>
             <YellowCard />
-            {e.playerName} {mn(e)}
+            <PlayerName name={e.playerName} /> {mn(e)}
           </li>
         ))}
       {side(home)
@@ -35,10 +36,10 @@ export function MatchResult(props: {
         .map((e) => (
           <li key={e.id} title={`${e.playerName} remplace ${e.playerOutName ?? "?"}`}>
             <span aria-label="remplacement">🔁 </span>
-            <span className="text-green-700">{e.playerName}</span>
+            <PlayerName name={e.playerName} className="text-green-700" />
             <span aria-hidden> ↔ </span>
             <span className="sr-only"> remplace </span>
-            <span className="text-red-700">{e.playerOutName}</span> {mn(e)}
+            {e.playerOutName && <PlayerName name={e.playerOutName} className="text-red-700" />} {mn(e)}
           </li>
         ))}
     </>
@@ -51,11 +52,20 @@ export function MatchResult(props: {
   const cards = [...props.cards].sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0) || (a.extraMinute ?? 0) - (b.extraMinute ?? 0));
   const homeCards = cards.filter((c) => c.forRennes === props.rennesIsHome);
   const awayCards = cards.filter((c) => c.forRennes !== props.rennesIsHome);
-  const cardLine = (c: MatchCard) =>
-    `${c.playerName} ${c.minute ?? "?"}’${c.extraMinute ? `+${c.extraMinute}` : ""}${c.secondYellow ? " (2e jaune)" : ""}`;
+  const cardLine = (c: MatchCard) => (
+    <>
+      <PlayerName name={c.playerName} /> {c.minute ?? "?"}’{c.extraMinute ? `+${c.extraMinute}` : ""}
+      {c.secondYellow ? " (2e jaune)" : ""}
+    </>
+  );
   const RedCard = () => <span aria-label="carton rouge" className="mr-1 inline-block h-3 w-2 rounded-[1px] bg-[#E53935] align-[-1px]" />;
-  const line = (g: MatchGoal) =>
-    `${g.scorerName} ${g.minute ?? "?"}’${g.extraMinute ? `+${g.extraMinute}` : ""}${g.isPenalty ? " (pen.)" : ""}${g.isOwnGoal ? " (c.s.c.)" : ""}`;
+  const line = (g: MatchGoal) => (
+    <>
+      <PlayerName name={g.scorerName} /> {g.minute ?? "?"}’{g.extraMinute ? `+${g.extraMinute}` : ""}
+      {g.isPenalty ? " (pen.)" : ""}
+      {g.isOwnGoal ? " (c.s.c.)" : ""}
+    </>
+  );
 
   return (
     <div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Avatar } from "./Avatar";
 import { LeagueSwitcher } from "./LeagueSwitcher";
+import { setNavDirection } from "@/lib/nav-direction";
 
 interface L {
   id: string;
@@ -28,6 +29,7 @@ export function BottomNav(props: { leagues: L[]; activeLeagueId: string | null; 
   const item = (href: string, label: string, glyph: ReactNode, tour?: string) => (
     <Link
       href={href}
+      onClick={() => setNavDirection(path, href)}
       data-tour={tour}
       aria-current={on(href) ? "page" : undefined}
       className={`flex flex-col items-center gap-0.5 pt-1.5 text-[10px] font-semibold transition-colors ${on(href) ? "text-rouge" : "text-neutral-600"}`}
@@ -70,11 +72,13 @@ export function BottomNav(props: { leagues: L[]; activeLeagueId: string | null; 
               <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
             </>,
           ),
+          "leagues",
         )}
 
         {/* 3. Calendrier : bouton central, qui dépasse de la barre */}
         <Link
           href="/"
+          onClick={() => setNavDirection(path, "/")}
           data-tour="calendar"
           aria-current={on("/") ? "page" : undefined}
           aria-label="Calendrier"
@@ -104,6 +108,7 @@ export function BottomNav(props: { leagues: L[]; activeLeagueId: string | null; 
               <path d="M17 6h3v1a4 4 0 0 1-3 3.87M7 6H4v1a4 4 0 0 0 3 3.87" />
             </>,
           ),
+          "rank-mobile",
         )}
 
         {/* 5. Mon compte */}

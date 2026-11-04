@@ -5,9 +5,11 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { completeTutorialAction } from "@/app/actions/auth";
 
 interface Step {
-  target: string; // valeur de l'attribut data-tour de l'élément à montrer
+  target: string; // repère (attribut data-tour) de l'élément à montrer sur ordinateur
+  mobileTarget?: string; // … et sur mobile, s'il est différent
   title: string;
   text: string;
+  mobileText?: string;
   /** Barème affiché sous le texte (étape « Les règles ») */
   scale?: boolean;
 }
@@ -17,34 +19,52 @@ const STEPS: Step[] = [
     target: "calendar",
     title: "Le calendrier",
     text: "Tous les matchs du Stade Rennais : Ligue 1, coupe d’Europe et Coupe de France. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
+    mobileText:
+      "Le bouton central te ramène toujours au calendrier : tous les matchs du Stade Rennais. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
   },
   {
     target: "user-menu",
-    title: "Ton menu",
-    text: "Ton compte : photo, notifications, mot de passe. Tes ligues se gèrent depuis le menu Ligues : en rejoindre une avec un code, ou en créer une.",
+    mobileTarget: "leagues",
+    title: "Les ligues",
+    text: "Dans le menu de ton pseudo, « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
+    mobileText: "Le bouton « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
   },
   {
     target: "league",
-    title: "Tes ligues",
-    text: "Tu joues dans plusieurs ligues ? Passe de l’une à l’autre ici : ton classement et les pronostics des autres joueurs suivent la ligue choisie.",
+    title: "Passer d’une ligue à l’autre",
+    text: "Tu joues dans plusieurs ligues ? Choisis ici celle à afficher : ton classement et les pronostics des autres joueurs suivent la ligue choisie.",
+    mobileText:
+      "Tu joues dans plusieurs ligues ? Touche ce bouton pour choisir celle à afficher : ton classement et les pronostics des autres joueurs suivent la ligue choisie.",
   },
   {
     target: "rank",
+    mobileTarget: "rank-mobile",
     title: "Ton classement",
-    text: "Ta position et tes points dans la ligue affichée, avec ses compétitions. Le classement complet des participants est dans « Classement ».",
+    text: "Ta position et tes points dans la ligue sélectionnée. Clique sur ce bloc pour afficher le classement complet de la ligue.",
+    mobileText: "Le bouton « Classement » affiche le classement complet de la ligue sélectionnée. Ta position et tes points restent visibles en haut de l’écran.",
   },
   {
-    target: "rules",
-    title: "Les règles",
-    text: "Tout le fonctionnement du jeu est expliqué ici. Pour le score, voici ce que rapporte chaque pronostic :",
-    scale: true,
+    target: "user-menu",
+    title: "Ton compte",
+    text: "Clique sur ton pseudo pour ton compte : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
+    mobileText: "Ton compte : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
   },
   {
     target: "standings",
-    title: "Classements officiels",
-    text: "Les classements officiels des compétitions du Stade Rennais, et les meilleurs buteurs.",
+    title: "Les classements officiels",
+    text: "Les classements officiels des compétitions du Stade Rennais FC, et les meilleurs buteurs.",
+  },
+  {
+    target: "rules",
+    title: "Les règles du jeu",
+    text: "Évidemment ! Tout le fonctionnement du jeu y est expliqué. Pour le score, voici ce que rapporte chaque pronostic :",
+    scale: true,
   },
 ];
+
+const isMobile = () => typeof window !== "undefined" && !window.matchMedia("(min-width: 640px)").matches;
+const targetOf = (s: Step) => (isMobile() && s.mobileTarget ? s.mobileTarget : s.target);
+const textOf = (s: Step) => (isMobile() && s.mobileText ? s.mobileText : s.text);
 
 /** Premier élément visible portant ce repère (certains existent en double : en-tête et barre du bas). */
 const findTarget = (t: string) =>
@@ -90,7 +110,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
   // Étapes dont l'élément existe réellement à l'écran
   useEffect(() => {
     if (!ready || pathname !== "/") return;
-    const t = setTimeout(() => setSteps(STEPS.filter((s) => findTarget(s.target))), 400);
+    const t = setTimeout(() => setSteps(STEPS.filter((s) => findTarget(targetOf(s)))), 400);
     return () => clearTimeout(t);
   }, [ready, pathname]);
 
@@ -98,7 +118,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
 
   const measure = useCallback(() => {
     if (!step) return;
-    const el = findTarget(step.target);
+    const el = findTarget(targetOf(step));
     if (!el) return;
     const r = el.getBoundingClientRect();
     // un élément très haut (calendrier) : on n'éclaire que le haut, visible à l'écran
@@ -109,7 +129,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
   // Amener l'élément à l'écran, puis le mesurer (et suivre défilement / redimensionnement)
   useEffect(() => {
     if (!step) return;
-    const el = findTarget(step.target);
+    const el = findTarget(targetOf(step));
     // éléments de la barre du bas ou de l'en-tête : toujours visibles, inutile de faire défiler
     if (el && !el.closest("nav, header")) el.scrollIntoView({ block: "center", behavior: "smooth" });
     const t = setTimeout(measure, 350);
@@ -169,7 +189,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
           Étape {index + 1} sur {steps.length}
         </p>
         <h2 className="mt-0.5 font-display text-xl font-bold uppercase tracking-wide">{step.title}</h2>
-        <p className="mt-1.5 text-sm text-neutral-700">{step.text}</p>
+        <p className="mt-1.5 text-sm text-neutral-700">{textOf(step)}</p>
         {step.scale && (
           <table className="mt-2 w-full text-sm">
             <tbody className="divide-y divide-neutral-100">
@@ -198,7 +218,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
           {/* Points de progression */}
           <span className="flex gap-1.5" aria-hidden>
             {steps.map((s, i) => (
-              <span key={s.target} className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-rouge" : "bg-neutral-300"}`} />
+              <span key={s.title} className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-rouge" : "bg-neutral-300"}`} />
             ))}
           </span>
           <span className="flex items-center gap-3">

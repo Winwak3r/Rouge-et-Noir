@@ -151,9 +151,9 @@
 [data-theme="dark"] .logo-clair { display: none; }
 [data-theme="dark"] .logo-sombre { display: block; }
 
-/* Points du joueur dans l'en-tête : bleu (plus clair en thème sombre) */
-.pts-blue { color: #1565c0; }
-[data-theme="dark"] .pts-blue { color: #64b5f6; }
+/* Points du joueur dans l'en-tête : vert (plus clair en thème sombre) */
+.pts-points { color: #15803d; }
+[data-theme="dark"] .pts-points { color: #4ade80; }
 
 /* Transition entre les pages (barre du bas, liens) : léger fondu et glissement vers le haut */
 @keyframes page-enter {

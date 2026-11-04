@@ -106,14 +106,16 @@ export function StandingsBoard({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-neutral-500">Change de classement avec la liste « Ligue » de l’en-tête.</p>
+      <p className="text-xs text-neutral-500">
+        <span className="sm:hidden">Change de ligue avec le bouton en bas à gauche de l’écran.</span>
+        <span className="hidden sm:inline">Change de ligue avec la liste « Ligue » en haut à gauche, sous ton pseudo.</span>
+      </p>
       <div className="overflow-hidden">
         <div key={`${view.key}-${changes.current}`} className={`space-y-3 ${direction === "right" ? "slide-from-right" : direction === "left" ? "slide-from-left" : ""}`}>
           <h2 className="flex items-center gap-3 font-display text-2xl font-bold uppercase tracking-wide">
             {icon(view, 36)}
             {view.name}
           </h2>
-          <p className="text-xs text-neutral-500">{view.note}</p>
           {/* Compétitions jouées : cocher / décocher pour recalculer le classement */}
           {/* Mobile : les cases sous l'intitulé ; ordinateur : sur la même ligne */}
           <fieldset className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
@@ -185,6 +187,7 @@ export function StandingsBoard({
               </table>
             </div>
           )}
+          <p className="text-xs text-neutral-500">{view.note}</p>
         </div>
       </div>
     </div>

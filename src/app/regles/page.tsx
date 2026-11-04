@@ -79,6 +79,31 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Ligues</h2>
+        <ul className="list-disc space-y-1.5 pl-5 text-sm text-neutral-700">
+          <li>
+            Les pronostics se jouent entre amis, dans des <strong>ligues</strong>. Tu peux participer à <strong>3 ligues au maximum</strong>,
+            que tu les aies créées ou rejointes.
+          </li>
+          <li>À 3 ligues, il faut d’abord en quitter une (« Ligues » › « Quitter ») pour pouvoir en rejoindre ou en créer une autre.</li>
+          <li>
+            On rejoint une ligue avec son <strong>code</strong>, son <strong>lien d’invitation</strong> ou son <strong>QR code</strong>, fournis par
+            un administrateur de la ligue.
+          </li>
+          <li>
+            Le créateur d’une ligue en est l’administrateur : il choisit son nom, sa photo, sa description et les{" "}
+            <strong>compétitions jouées</strong>, invite les joueurs, peut nommer d’autres administrateurs, désactiver ou retirer un joueur.
+          </li>
+          <li>
+            Dans une ligue, <strong>tout le monde part de 0 point</strong> à sa création : seuls les matchs joués ensuite, dans ses
+            compétitions, comptent dans son classement. Tes pronostics, eux, valent pour toutes tes ligues.
+          </li>
+          <li>La ligue « Par défaut » (choisie dans « Ligues ») est celle affichée à chaque connexion.</li>
+          <li>Le classement « Général R&amp;N » réunit tous les joueurs inscrits dans une ligue et ayant pronostiqué, sur toute la saison.</li>
+        </ul>
+      </section>
+
+      <section className="card space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Classement</h2>
         <p className="text-sm text-neutral-700">
           Classement par points. En cas d’égalité : 1) le plus de scores exacts, 2) le plus de buteurs trouvés,

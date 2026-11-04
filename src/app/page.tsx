@@ -25,6 +25,7 @@ import { maxPredictedGoals } from "@/lib/settings";
 import { runSmartSync } from "@/lib/sync/sync";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { PlayerPhoto } from "@/components/PlayerPhoto";
+import { PlayerName } from "@/components/PlayerName";
 import { activeLeagueScope } from "@/lib/leagues";
 
 export const dynamic = "force-dynamic";
@@ -278,7 +279,7 @@ export default async function HomePage() {
             <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Buteur</p>
             {myScorer ? (
               <>
-                <p className="truncate font-semibold">{myScorer}</p>
+                <p className="truncate font-semibold">{my?.scorer ? <PlayerName name={my.scorer.name} /> : myScorer}</p>
                 {myBonus != null && (
                   <p className="text-sm font-bold text-green-700">
                     +{myBonus} point{myBonus > 1 ? "s" : ""} à gagner

@@ -6,6 +6,7 @@ import { fetchCompetitionResults, fetchMatchGoals } from "@/lib/stats/espn-resul
 import { computeTable, formPoints, recentScorers, teamForm, type CompResult } from "@/lib/stats/match-stats";
 import { ordinalFr } from "@/lib/match-view";
 import { TeamLabel } from "./TeamLabel";
+import { PlayerName } from "./PlayerName";
 
 const SEASON = Number(process.env.SEASON_START_YEAR ?? 2026);
 
@@ -120,7 +121,7 @@ export async function MatchStats(props: { competition: CompetitionCode; home: Si
                 <span className="block space-y-0.5">
                   {s.scorers.map((p) => (
                     <span key={p.player} className="flex justify-between gap-2">
-                      <span className="truncate">{p.player}</span>
+                      <PlayerName name={p.player} className="truncate" />
                       <span className="shrink-0 font-semibold tabular-nums">{p.goals}</span>
                     </span>
                   ))}

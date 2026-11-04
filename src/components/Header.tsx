@@ -111,6 +111,10 @@ export async function Header() {
           <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
             {user && (
               <Link href="/regles" aria-label="Règles" data-tour="rules" className="hbtn sm:hidden">
+                <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
                 Règles
               </Link>
             )}
@@ -148,11 +152,11 @@ export async function Header() {
           <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end">
             <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
             <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : ""}`}>
-              <span className="max-[359px]:hidden">Règles</span>
-              <svg aria-hidden className="hidden max-[359px]:block" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
+              <span className="max-[359px]:hidden">Règles</span>
             </Link>
             <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className="hbtn">
               {rennes?.logoUrl ? (
@@ -196,24 +200,27 @@ export async function Header() {
                 title="Voir le classement de la ligue"
                 className="flex min-w-0 flex-1 flex-col gap-0.5 rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors max-sm:pointer-events-none sm:flex-none sm:hover:border-neutral-400"
               >
-                {/* Nom de la ligue mis en avant, et ses compétitions */}
+                {/* Nom de la ligue mis en avant */}
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="truncate text-sm font-extrabold leading-tight text-neutral-900 sm:max-w-[11rem]">
                     {scope ? scope.name : "Général"}
                   </span>
-                  <span className="flex shrink-0 items-center gap-1" aria-label={`Compétitions : ${leagueComps.join(", ")}`}>
+                  <span aria-hidden className="hidden text-neutral-400 sm:inline">›</span>
+                </span>
+                {/* Rang et points, compétitions de la ligue calées à droite */}
+                <span className="flex items-center gap-2">
+                  <span className="whitespace-nowrap text-lg font-extrabold leading-tight">
+                    {rankText}
+                    {standings && <span className="ml-1.5 text-xs font-semibold text-neutral-500">sur {standings.length}</span>}
+                    <span className="mx-1.5 text-neutral-400">·</span>
+                    <span className="pts-points">{me?.totalPoints ?? 0}</span>
+                    <span className="ml-1 text-xs font-semibold text-neutral-500">pts</span>
+                  </span>
+                  <span className="ml-auto flex shrink-0 items-center gap-1" aria-label={`Compétitions : ${leagueComps.join(", ")}`}>
                     {leagueComps.map((c) => (
                       <CompetitionBadge key={c} code={c} logo={logos[c]} className="!h-5 !w-5 !text-[8px]" />
                     ))}
                   </span>
-                  <span aria-hidden className="hidden text-neutral-400 sm:inline">›</span>
-                </span>
-                <span className="whitespace-nowrap text-lg font-extrabold leading-tight">
-                  {rankText}
-                  {standings && <span className="ml-1.5 text-xs font-semibold text-neutral-500">sur {standings.length}</span>}
-                  <span className="mx-1.5 text-neutral-400">·</span>
-                  <span className="pts-blue">{me?.totalPoints ?? 0}</span>
-                  <span className="ml-1 text-xs font-semibold text-neutral-500">pts</span>
                 </span>
               </Link>
             </div>
