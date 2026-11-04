@@ -168,3 +168,14 @@
 @media (prefers-reduced-motion: reduce) {
   .page-enter { animation: none; }
 }
+
+/* Blocs « Ligue » et classement de l'en-tête : fond plus grisé sur ordinateur, en thème clair */
+@media (min-width: 640px) {
+  :root:not([data-theme="dark"]) .hbox {
+    background-color: #ececec;
+    border-color: #d6d6d6;
+  }
+  :root:not([data-theme="dark"]) .hbox:hover {
+    background-color: #e4e4e4;
+  }
+}

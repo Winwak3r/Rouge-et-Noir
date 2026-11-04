@@ -145,7 +145,7 @@ export function LeagueSwitcher({
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         title={sel.name}
-        className={`flex h-full min-w-0 items-center gap-2 rounded-[10px] border bg-neutral-50 py-1 text-left transition-colors hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-noir ${
+        className={`hbox flex h-full min-w-0 items-center gap-2 rounded-[10px] border bg-neutral-50 py-1 text-left transition-colors hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-noir ${
           compact ? "px-1.5" : "px-2.5"
         } ${open ? "border-neutral-500" : "border-neutral-200"}`}
       >

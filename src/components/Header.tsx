@@ -209,7 +209,7 @@ export async function Header() {
                 href="/classement"
                 data-tour="rank"
                 title="Voir le classement de la ligue"
-                className="flex min-w-0 flex-1 flex-col gap-0.5 rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors max-sm:pointer-events-none sm:flex-none sm:hover:border-neutral-400"
+                className="hbox flex min-w-0 flex-1 flex-col gap-0.5 rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors max-sm:pointer-events-none sm:flex-none sm:hover:border-neutral-400"
               >
                 {/* Nom de la ligue mis en avant */}
                 <span className="flex min-w-0 items-center gap-2">
