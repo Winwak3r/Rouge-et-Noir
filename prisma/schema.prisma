@@ -296,6 +296,10 @@ model Match {
   // Feuille de match publiée (titulaires + remplaçants), en général 1 h avant le coup d'envoi.
   lineupAt     DateTime?
   events       MatchEvent[]
+  // Cotes du match (victoire domicile / nul / victoire extérieur), pour les indices d'avant-match
+  oddsHome     Float?
+  oddsDraw     Float?
+  oddsAway     Float?
   // Simulation en cours (mode test) : état d'origine à restaurer ; la synchro ne touche pas au match.
   simulation   Json?
   status       MatchStatus @default(SCHEDULED)

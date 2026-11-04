@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { MatchCard, MatchEvent, MatchGoal } from "@prisma/client";
 import { TeamLabel } from "./TeamLabel";
 import { PlayerName } from "./PlayerName";
@@ -19,7 +20,19 @@ export function MatchResult(props: {
   const events = [...(props.events ?? [])].sort(byTime);
   const side = (home: boolean) => events.filter((e) => e.forRennes === (home ? props.rennesIsHome : !props.rennesIsHome));
   const mn = (e: { minute: number | null; extraMinute: number | null }) => `${e.minute ?? "?"}’${e.extraMinute ? `+${e.extraMinute}` : ""}`;
-  const YellowCard = () => <span aria-label="carton jaune" className="mr-1 inline-block h-3 w-2 rounded-[1px] bg-[#FBC02D] align-[-1px]" />;
+  const YellowCard = () => <span aria-label="carton jaune" className="inline-block h-3 w-2 rounded-[1px] bg-[#FBC02D] align-[-1px]" />;
+  /** Domicile (colonne alignée à droite) : texte puis icône ; extérieur : icône puis texte. */
+  const row = (home: boolean, icon: ReactNode, content: ReactNode) =>
+    home ? (
+      <>
+        {content} <span className="ml-1 inline-block">{icon}</span>
+      </>
+    ) : (
+      <>
+        <span className="mr-1 inline-block">{icon}</span>
+        {content}
+      </>
+    );
   // Jaunes puis remplacements, chacun dans l'ordre du match
   const extras = (home: boolean) => (
     <>
@@ -27,19 +40,29 @@ export function MatchResult(props: {
         .filter((e) => e.kind === "YELLOW")
         .map((e) => (
           <li key={e.id}>
-            <YellowCard />
-            <PlayerName name={e.playerName} /> {mn(e)}
+            {row(
+              home,
+              <YellowCard />,
+              <>
+                <PlayerName name={e.playerName} /> {mn(e)}
+              </>,
+            )}
           </li>
         ))}
       {side(home)
         .filter((e) => e.kind === "SUB")
         .map((e) => (
           <li key={e.id} title={`${e.playerName} remplace ${e.playerOutName ?? "?"}`}>
-            <span aria-label="remplacement">🔁 </span>
-            <PlayerName name={e.playerName} className="text-green-700" />
-            <span aria-hidden> ↔ </span>
-            <span className="sr-only"> remplace </span>
-            {e.playerOutName && <PlayerName name={e.playerOutName} className="text-red-700" />} {mn(e)}
+            {row(
+              home,
+              <span aria-label="remplacement">🔁</span>,
+              <>
+                <PlayerName name={e.playerName} className="text-green-700" />
+                <span aria-hidden> ↔ </span>
+                <span className="sr-only"> remplace </span>
+                {e.playerOutName && <PlayerName name={e.playerOutName} className="text-red-700" />} {mn(e)}
+              </>,
+            )}
           </li>
         ))}
     </>
@@ -58,7 +81,7 @@ export function MatchResult(props: {
       {c.secondYellow ? " (2e jaune)" : ""}
     </>
   );
-  const RedCard = () => <span aria-label="carton rouge" className="mr-1 inline-block h-3 w-2 rounded-[1px] bg-[#E53935] align-[-1px]" />;
+  const RedCard = () => <span aria-label="carton rouge" className="inline-block h-3 w-2 rounded-[1px] bg-[#E53935] align-[-1px]" />;
   const line = (g: MatchGoal) => (
     <>
       <PlayerName name={g.scorerName} /> {g.minute ?? "?"}’{g.extraMinute ? `+${g.extraMinute}` : ""}
@@ -77,13 +100,10 @@ export function MatchResult(props: {
           </p>
           <ul className="mt-1 space-y-0.5 text-xs text-neutral-600">
             {homeGoals.map((g) => (
-              <li key={g.id}>⚽ {line(g)}</li>
+              <li key={g.id}>{row(true, <span aria-label="but">⚽</span>, line(g))}</li>
             ))}
             {homeCards.map((c) => (
-              <li key={c.id}>
-                <RedCard />
-                {cardLine(c)}
-              </li>
+              <li key={c.id}>{row(true, <RedCard />, cardLine(c))}</li>
             ))}
             {extras(true)}
           </ul>
@@ -100,13 +120,10 @@ export function MatchResult(props: {
           </p>
           <ul className="mt-1 space-y-0.5 text-xs text-neutral-600">
             {awayGoals.map((g) => (
-              <li key={g.id}>⚽ {line(g)}</li>
+              <li key={g.id}>{row(false, <span aria-label="but">⚽</span>, line(g))}</li>
             ))}
             {awayCards.map((c) => (
-              <li key={c.id}>
-                <RedCard />
-                {cardLine(c)}
-              </li>
+              <li key={c.id}>{row(false, <RedCard />, cardLine(c))}</li>
             ))}
             {extras(false)}
           </ul>

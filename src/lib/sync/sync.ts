@@ -254,6 +254,14 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
     }),
   ]);
 
+  // 1 quater. Cotes du match (1-N-2) avant le coup d'envoi : indices de victoire / nul / victoire
+  if (d.matchOdds && now < match.kickoffAt) {
+    await prisma.match.update({
+      where: { id: match.id },
+      data: { oddsHome: d.matchOdds.home, oddsDraw: d.matchOdds.draw, oddsAway: d.matchOdds.away },
+    });
+  }
+
   // 2. Feuille de match rennaise (titulaires + remplaçants), dès sa publication
   const lineup = d.lineups[rennesId] ?? [];
   if (lineup.length > 0) {

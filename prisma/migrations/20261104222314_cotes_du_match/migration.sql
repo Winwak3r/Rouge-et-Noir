@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Match" ADD COLUMN     "oddsAway" DOUBLE PRECISION,
+ADD COLUMN     "oddsDraw" DOUBLE PRECISION,
+ADD COLUMN     "oddsHome" DOUBLE PRECISION;

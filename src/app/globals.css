@@ -101,7 +101,7 @@
   }
   /* Icône dans un rond, à l'intérieur des boutons de l'en-tête */
   .hicon {
-    @apply grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--color-surface)] text-noir ring-1 ring-neutral-300 sm:h-6 sm:w-6;
+    @apply grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-[#111111] ring-1 ring-neutral-300 sm:h-6 sm:w-6;
   }
   .hbtn-pseudo {
     @apply inline-flex h-7 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded bg-rouge px-1.5 text-xs font-semibold text-white transition-colors hover:bg-rouge-fonce focus-visible:outline-2 focus-visible:outline-noir sm:h-8 sm:px-2.5 sm:text-sm;

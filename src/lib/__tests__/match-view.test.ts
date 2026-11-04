@@ -136,3 +136,20 @@ describe("Pronostics et points : après le match", () => {
     expect(rows.find((r) => r.userId === "tardif")).toBeUndefined();
   });
 });
+
+
+describe("Pronostics et points : ordre", () => {
+  it("du plus grand nombre de points au plus petit ; sans points, ordre conservé", () => {
+    const rows = buildMatchRows({
+      ...base,
+      isPublic: true,
+      results: [
+        { userId: "moi", category: "WRONG", scorePoints: 0, scorerPoints: 0, totalPoints: 0, correctScorer: false },
+        { userId: "ami", category: "EXACT", scorePoints: 4, scorerPoints: 2, totalPoints: 6, correctScorer: false },
+        { userId: "absent", category: "MISSING", scorePoints: -1, scorerPoints: 0, totalPoints: -1, correctScorer: false },
+      ],
+    } as RowInput);
+    expect(rows.map((r) => r.userId)).toEqual(["ami", "moi", "absent"]);
+    expect(buildMatchRows(base).map((r) => r.userId)).toEqual(["moi", "ami", "absent", "tardif"]);
+  });
+});

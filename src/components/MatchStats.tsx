@@ -6,6 +6,7 @@ import { fetchCompetitionResults, fetchMatchGoals } from "@/lib/stats/espn-resul
 import { computeTable, formPoints, recentScorers, teamForm, type CompResult } from "@/lib/stats/match-stats";
 import { ordinalFr } from "@/lib/match-view";
 import { TeamLabel } from "./TeamLabel";
+import { OutcomeIndices } from "./OutcomeIndices";
 import { PlayerName } from "./PlayerName";
 
 const SEASON = Number(process.env.SEASON_START_YEAR ?? 2026);
@@ -16,7 +17,13 @@ interface Side {
 }
 
 /** « STATISTIQUES » du prochain match : forme, buteurs récents, classements (général, domicile / extérieur). */
-export async function MatchStats(props: { competition: CompetitionCode; home: Side; away: Side }) {
+export async function MatchStats(props: {
+  competition: CompetitionCode;
+  home: Side;
+  away: Side;
+  /** Cotes du match (victoire domicile / nul / victoire extérieur) */
+  odds?: { home: number | null; draw: number | null; away: number | null };
+}) {
   const slug = ESPN_LEAGUES[props.competition];
   const withTables = props.competition !== "COUPE_DE_FRANCE";
   // Classement officiel d'abord : il donne aussi la liste des équipes de la compétition.
@@ -58,8 +65,16 @@ export async function MatchStats(props: { competition: CompetitionCode; home: Si
     };
   });
 
+  const RENNES = Number(process.env.ESPN_TEAM_ID ?? 169);
   return (
-    <div>
+    <div className="space-y-3">
+      {props.odds && (
+        <OutcomeIndices
+          odds={props.odds}
+          home={{ name: props.home.name, rennes: props.home.id === RENNES }}
+          away={{ name: props.away.name, rennes: props.away.id === RENNES }}
+        />
+      )}
       <div className="grid grid-cols-2 gap-3 text-sm">
         {sides.map((s) => (
           <div key={s.team.id} className="min-w-0 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">

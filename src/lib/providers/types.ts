@@ -84,6 +84,13 @@ export interface ProviderPhases {
   secondHalf: boolean;
 }
 
+/** Cotes décimales du match : victoire domicile, nul, victoire extérieur. */
+export interface ProviderMatchOdds {
+  home: number;
+  draw: number;
+  away: number;
+}
+
 export interface ProviderMatchDetail {
   status: MatchStatus;
   minute: number | null;
@@ -97,6 +104,7 @@ export interface ProviderMatchDetail {
   yellowCards: ProviderYellowCard[];
   substitutions: ProviderSubstitution[];
   phases: ProviderPhases;
+  matchOdds: ProviderMatchOdds | null;
   scorerOdds: ProviderOdds[]; // cotes « buteur à tout moment » avant-match
   /** Feuilles de match par équipe (identifiant fournisseur) ; vide tant qu'elles ne sont pas publiées. */
   lineups: Record<number, ProviderLineupPlayer[]>;

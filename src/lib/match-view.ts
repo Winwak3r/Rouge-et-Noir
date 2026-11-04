@@ -175,5 +175,9 @@ export function buildMatchRows(input: RowInput): CompRow[] {
       provisional,
     });
   }
-  return rows;
+  // Du plus grand nombre de points au plus petit (sans points encore : l'ordre du classement est gardé)
+  return rows
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => (b.r.total ?? -Infinity) - (a.r.total ?? -Infinity) || a.i - b.i)
+    .map((x) => x.r);
 }

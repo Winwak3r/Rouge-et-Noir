@@ -9,6 +9,7 @@ import type {
   ProviderMatchDetail,
   ProviderOdds,
   ProviderPlayer,
+  ProviderMatchOdds,
   ProviderPhases,
   ProviderSubstitution,
   ProviderTeam,
@@ -228,6 +229,54 @@ export function parsePhases(summary: Json): ProviderPhases {
   };
 }
 
+/** Cote américaine (+150, -120) → décimale (2,50 ; 1,83). */
+export function americanToDecimal(raw: unknown): number | null {
+  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").replace(/^\+/, ""));
+  if (!Number.isFinite(n) || n === 0) return null;
+  return n > 0 ? 1 + n / 100 : 1 + 100 / Math.abs(n);
+}
+
+const decimalFrom = (v: unknown): number | null => {
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  if (s.includes("/")) return fractionalToDecimal(s); // « 13/10 »
+  if (/^[+-]\d+$/.test(s)) return americanToDecimal(s); // « +150 »
+  const d = Number(s.replace(",", "."));
+  return Number.isFinite(d) && d > 1 ? d : null;
+};
+
+/**
+ * Cotes 1-N-2 du match, quel que soit le format fourni par ESPN :
+ * Bet365 (bettingOdds.teamOdds, fractionnaires), moneyLine américaines, ou moneyline.{home,draw,away}.
+ */
+export function parseMatchOdds(summary: Json): ProviderMatchOdds | null {
+  for (const o of summary?.odds ?? []) {
+    // 1) Bet365 : bettingOdds.teamOdds.{preMatchMoneyLineHome, …Draw, …Away}
+    const team = o?.bettingOdds?.teamOdds;
+    if (team && typeof team === "object") {
+      const pick = (re: RegExp) => {
+        const k = Object.keys(team).find((x) => re.test(x.toLowerCase()));
+        return k ? decimalFrom(team[k]?.value ?? team[k]) : null;
+      };
+      const r = { home: pick(/moneyline.*home|home.*moneyline/), draw: pick(/moneyline.*draw|draw/), away: pick(/moneyline.*away|away.*moneyline/) };
+      if (r.home && r.draw && r.away) return r as ProviderMatchOdds;
+    }
+    // 2) homeTeamOdds.moneyLine / drawOdds.moneyLine / awayTeamOdds.moneyLine (américaines)
+    const h = americanToDecimal(o?.homeTeamOdds?.moneyLine);
+    const d = americanToDecimal(o?.drawOdds?.moneyLine);
+    const a = americanToDecimal(o?.awayTeamOdds?.moneyLine);
+    if (h && d && a) return { home: h, draw: d, away: a };
+    // 3) moneyline.{home,draw,away}.close|open.odds
+    const ml = o?.moneyline;
+    if (ml) {
+      const v = (side: string) => decimalFrom(ml?.[side]?.close?.odds ?? ml?.[side]?.open?.odds);
+      const r = { home: v("home"), draw: v("draw"), away: v("away") };
+      if (r.home && r.draw && r.away) return r as ProviderMatchOdds;
+    }
+  }
+  return null;
+}
+
 export function parseScorerOdds(summary: Json): ProviderOdds[] {
   for (const o of summary?.odds ?? []) {
     const list = o?.bettingOdds?.playerOdds?.preMatchAnyTimeGoalScorer;
@@ -319,6 +368,7 @@ export function parseSummary(summary: Json): ProviderMatchDetail {
     yellowCards: parseYellowCards(summary),
     substitutions: parseSubstitutions(summary),
     phases: parsePhases(summary),
+    matchOdds: parseMatchOdds(summary),
     scorerOdds: parseScorerOdds(summary),
     lineups: parseLineups(summary),
   };

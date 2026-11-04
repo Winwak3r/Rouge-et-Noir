@@ -402,6 +402,7 @@ export default async function HomePage() {
                 competition={m.competition}
                 home={{ id: m.homeTeam.externalId, name: m.homeTeam.name }}
                 away={{ id: m.awayTeam.externalId, name: m.awayTeam.name }}
+                odds={{ home: m.oddsHome, draw: m.oddsDraw, away: m.oddsAway }}
               />
             </section>
           </div>

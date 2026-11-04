@@ -137,11 +137,6 @@ export async function Header() {
                   </span>
                   Ligues
                 </Link>
-                {user.role === "ADMIN" && (
-                  <Link href="/admin" className="hbtn">
-                    Admin
-                  </Link>
-                )}
               </div>
             ) : (
               <>
@@ -154,7 +149,6 @@ export async function Header() {
                 </Link>
               </>
             )}
-            <ThemeSwitch className="hidden sm:inline-flex" />
           </div>
           <Link href="/" aria-label="Rouge & Noir — accueil" className="col-start-2 row-start-1 justify-self-center rounded focus-visible:outline-2 focus-visible:outline-noir">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -194,8 +188,8 @@ export async function Header() {
             <span className="text-right text-[10px] leading-tight text-neutral-500 sm:text-xs">
               Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
             </span>
-            {/* Mobile : interrupteur du thème sous la dernière synchro, tout à droite */}
-            <ThemeSwitch className="inline-flex sm:hidden" />
+            {/* Interrupteur du thème sous la dernière synchro, tout à droite (mobile et ordinateur) */}
+            <ThemeSwitch className="inline-flex" />
           </div>
           {/* Sous le pseudo : choix de la ligue (ordinateur) et classement de la ligue (toute la largeur sur mobile) */}
           <div className="col-span-2 col-start-1 row-start-2 mt-1.5 flex min-w-0 items-stretch gap-2">
