@@ -400,8 +400,8 @@ export default async function HomePage() {
               {title("Avant match")}
               <MatchStats
                 competition={m.competition}
-                home={{ id: m.homeTeam.externalId, name: m.homeTeam.name }}
-                away={{ id: m.awayTeam.externalId, name: m.awayTeam.name }}
+                home={{ id: m.homeTeam.externalId, name: m.homeTeam.name, logo: m.homeTeam.logoUrl }}
+                away={{ id: m.awayTeam.externalId, name: m.awayTeam.name, logo: m.awayTeam.logoUrl }}
                 odds={{ home: m.oddsHome, draw: m.oddsDraw, away: m.oddsAway }}
               />
             </section>

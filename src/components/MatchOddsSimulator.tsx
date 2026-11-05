@@ -20,8 +20,8 @@ const fmt = (n: number | null) => (n === null ? "" : n.toFixed(2).replace(".", "
 /** Simulation des cotes du match : aperçu immédiat des indices, puis enregistrement facultatif. */
 export function MatchOddsSimulator(props: {
   matchId: string;
-  home: { name: string; rennes: boolean };
-  away: { name: string; rennes: boolean };
+  home: { name: string; rennes: boolean; logo?: string | null };
+  away: { name: string; rennes: boolean; logo?: string | null };
   current: { home: number | null; draw: number | null; away: number | null };
 }) {
   const [v, setV] = useState({ home: fmt(props.current.home), draw: fmt(props.current.draw), away: fmt(props.current.away) });

@@ -57,17 +57,17 @@ export default async function OddsAdminPage({ searchParams }: { searchParams: Pr
           </p>
 
           <section className="card space-y-3">
-            <h2 className="font-display text-xl font-bold uppercase tracking-wide">Cotes du match et indices de victoire</h2>
+            <h2 className="font-display text-xl font-bold uppercase tracking-wide">Cotes du match et chances de victoire</h2>
             <p className="text-sm text-neutral-600">
-              Saisis des cotes (victoire / nul / victoire) pour voir aussitôt les indices de 1 à 5. « Enregistrer » les affiche
+              Saisis des cotes (victoire / nul / victoire) pour voir aussitôt les chances de victoire en pourcentage. « Enregistrer » les affiche
               dans l’avant-match du site. Les vraies cotes récupérées par la synchro, environ 48 h avant le match, remplacent ces
               valeurs.
             </p>
             <MatchOddsSimulator
               key={match!.id}
               matchId={match!.id}
-              home={{ name: match!.homeTeam.name, rennes: match!.rennesIsHome }}
-              away={{ name: match!.awayTeam.name, rennes: !match!.rennesIsHome }}
+              home={{ name: match!.homeTeam.name, rennes: match!.rennesIsHome, logo: match!.homeTeam.logoUrl }}
+              away={{ name: match!.awayTeam.name, rennes: !match!.rennesIsHome, logo: match!.awayTeam.logoUrl }}
               current={{ home: match!.oddsHome, draw: match!.oddsDraw, away: match!.oddsAway }}
             />
           </section>

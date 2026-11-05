@@ -7,6 +7,8 @@ import { computeTable, formPoints, recentScorers, teamForm, type CompResult } fr
 import { ordinalFr } from "@/lib/match-view";
 import { TeamLabel } from "./TeamLabel";
 import { OutcomeIndices } from "./OutcomeIndices";
+import { fetchHeadToHead, headToHeadSummary } from "@/lib/stats/h2h";
+import { formatShortNumeric } from "@/lib/dates";
 import { PlayerName } from "./PlayerName";
 
 const SEASON = Number(process.env.SEASON_START_YEAR ?? 2026);
@@ -14,6 +16,7 @@ const SEASON = Number(process.env.SEASON_START_YEAR ?? 2026);
 interface Side {
   id: number;
   name: string;
+  logo?: string | null;
 }
 
 /** « STATISTIQUES » du prochain match : forme, buteurs récents, classements (général, domicile / extérieur). */
@@ -71,15 +74,19 @@ export async function MatchStats(props: {
       {props.odds && (
         <OutcomeIndices
           odds={props.odds}
-          home={{ name: props.home.name, rennes: props.home.id === RENNES }}
-          away={{ name: props.away.name, rennes: props.away.id === RENNES }}
+          home={{ name: props.home.name, rennes: props.home.id === RENNES, logo: props.home.logo }}
+          away={{ name: props.away.name, rennes: props.away.id === RENNES, logo: props.away.logo }}
         />
       )}
       <div className="grid grid-cols-2 gap-3 text-sm">
         {sides.map((s) => (
           <div key={s.team.id} className="min-w-0 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-            <p className="truncate font-semibold">
-              <TeamLabel name={s.team.name} rennes={s.team.id === Number(process.env.ESPN_TEAM_ID ?? 169)} />
+            <p className="flex min-w-0 items-center gap-2 font-semibold">
+              {s.team.logo && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={s.team.logo} alt="" className="h-6 w-6 shrink-0 object-contain" />
+              )}
+              <TeamLabel name={s.team.name} rennes={s.team.id === Number(process.env.ESPN_TEAM_ID ?? 169)} className="truncate" />
             </p>
             {withTables && (
               <>
@@ -146,6 +153,7 @@ export async function MatchStats(props: {
           </div>
         ))}
       </div>
+      <HeadToHead slug={slug} competition={props.competition} home={props.home} away={props.away} />
       <p className="mt-2 text-[11px] text-neutral-500">
         {withTables ? "Matchs de cette compétition uniquement. " : "Matchs de Coupe de France uniquement. "}Données ESPN, mises à jour toutes les 6 h.
       </p>
@@ -165,5 +173,64 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
 function Box({ children }: { children: ReactNode }) {
   return (
     <p className="text-sm text-neutral-600">{children}</p>
+  );
+}
+
+/** Les 5 dernières confrontations directes, avec la même équipe à domicile. */
+async function HeadToHead(props: { slug: string; competition: CompetitionCode; home: Side; away: Side }) {
+  const list = await fetchHeadToHead({
+    slug: props.slug,
+    competition: props.competition,
+    homeId: props.home.id,
+    awayId: props.away.id,
+    seasonStartYear: SEASON,
+  }).catch(() => []);
+  const RENNES = Number(process.env.ESPN_TEAM_ID ?? 169);
+  const sum = headToHeadSummary(list);
+  const tone = { V: "bg-[#00C853]", N: "bg-neutral-400", D: "bg-[#E53935]" } as const;
+  const Crest = ({ url }: { url?: string | null }) =>
+    // eslint-disable-next-line @next/next/no-img-element
+    url ? <img src={url} alt="" className="h-4 w-4 shrink-0 object-contain" /> : null;
+  return (
+    <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
+      <p className="flex flex-wrap items-center gap-x-2 text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">
+        Confrontations directes · <TeamLabel name={props.home.name} rennes={props.home.id === RENNES} /> à domicile
+        {list.length > 0 && (
+          <span className="ml-auto normal-case tracking-normal text-neutral-600">
+            <TeamLabel name={props.home.name} rennes={props.home.id === RENNES} /> : {sum.wins} V · {sum.draws} N · {sum.losses} D
+          </span>
+        )}
+      </p>
+      {list.length === 0 ? (
+        <p className="mt-1 text-neutral-600">Aucune confrontation récente dans cette configuration.</p>
+      ) : (
+        <ul className="mt-2 space-y-1">
+          {list.map((m, i) => (
+            <li key={i} className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-2">
+              <span className="text-xs tabular-nums text-neutral-500">{formatShortNumeric(m.date)}</span>
+              <span className="flex min-w-0 items-center justify-end gap-1.5 text-right">
+                <TeamLabel name={props.home.name} rennes={props.home.id === RENNES} className={`truncate ${m.result === "V" ? "font-bold" : ""}`} />
+                <Crest url={props.home.logo} />
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="font-display text-base font-bold tabular-nums">
+                  {m.homeGoals}-{m.awayGoals}
+                </span>
+                <span
+                  className={`inline-grid h-4 w-4 place-items-center rounded text-[9px] font-bold text-white ${tone[m.result]}`}
+                  title={`Résultat pour ${props.home.name}`}
+                >
+                  {m.result}
+                </span>
+              </span>
+              <span className="flex min-w-0 items-center gap-1.5">
+                <Crest url={props.away.logo} />
+                <TeamLabel name={props.away.name} rennes={props.away.id === RENNES} className={`truncate ${m.result === "D" ? "font-bold" : ""}`} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

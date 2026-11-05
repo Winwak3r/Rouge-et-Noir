@@ -43,8 +43,14 @@ export function parseScoreboardResults(data: Json): CompResult[] {
 }
 
 /** Matchs terminés d'une équipe dans la compétition (calendrier de l'équipe, mis en cache 6 h). */
-async function fetchTeamResults(slug: string, competition: CompetitionCode, teamId: number, seasonStartYear: number): Promise<CompResult[]> {
-  const res = await fetch(`${BASE}/${slug}/teams/${teamId}/schedule?season=${seasonStartYear}`, { ...CACHE, signal: AbortSignal.timeout(15_000) });
+export async function fetchTeamResults(
+  slug: string,
+  competition: CompetitionCode,
+  teamId: number,
+  seasonStartYear: number,
+  cache: { next: { revalidate: number } } = CACHE,
+): Promise<CompResult[]> {
+  const res = await fetch(`${BASE}/${slug}/teams/${teamId}/schedule?season=${seasonStartYear}`, { ...cache, signal: AbortSignal.timeout(15_000) });
   if (!res.ok) return [];
   const data = await res.json();
   const out: CompResult[] = [];
