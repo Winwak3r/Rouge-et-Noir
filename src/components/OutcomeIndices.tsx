@@ -36,7 +36,7 @@ export function OutcomeIndices(props: {
         <Chance
           title={
             <>
-              <Logo url={props.home.logo} /> Victoire <TeamLabel name={props.home.name} rennes={props.home.rennes} />
+              <Logo url={props.home.logo} /> <TeamLabel name={props.home.name} rennes={props.home.rennes} />
             </>
           }
           idx={i.home}
@@ -45,13 +45,12 @@ export function OutcomeIndices(props: {
         <Chance
           title={
             <>
-              <Logo url={props.away.logo} /> Victoire <TeamLabel name={props.away.name} rennes={props.away.rennes} />
+              <Logo url={props.away.logo} /> <TeamLabel name={props.away.name} rennes={props.away.rennes} />
             </>
           }
           idx={i.away}
         />
       </div>
-      <p className="text-[11px] text-neutral-500">Probabilités d’après les cotes du match.</p>
     </div>
   );
 }

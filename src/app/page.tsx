@@ -391,8 +391,8 @@ export default async function HomePage() {
       // Prochain match — en haut : Mon prono (gauche) · Avant match (droite) ; en bas : Pronostics et points
       return (
         <MatchAccordion key={m.id} h={h}>
-          <div className="grid gap-6 md:grid-cols-2">
-            <section className="min-w-0">
+          <div className="space-y-6">
+            <section className="min-w-0 md:max-w-xl">
               {title("Mon prono")}
               {predictionNode}
             </section>

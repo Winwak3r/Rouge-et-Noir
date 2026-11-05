@@ -7,7 +7,7 @@ import { computeTable, formPoints, recentScorers, teamForm, type CompResult } fr
 import { ordinalFr } from "@/lib/match-view";
 import { TeamLabel } from "./TeamLabel";
 import { OutcomeIndices } from "./OutcomeIndices";
-import { fetchHeadToHead, headToHeadSummary } from "@/lib/stats/h2h";
+import { fetchHeadToHead } from "@/lib/stats/h2h";
 import { formatShortNumeric } from "@/lib/dates";
 import { PlayerName } from "./PlayerName";
 
@@ -69,15 +69,28 @@ export async function MatchStats(props: {
   });
 
   const RENNES = Number(process.env.ESPN_TEAM_ID ?? 169);
+  const block = (titleText: string, children: ReactNode) => (
+    <div className="rounded-xl border border-neutral-200 p-3">
+      <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">{titleText}</h4>
+      {children}
+    </div>
+  );
+  // Ordinateur : à gauche « Probabilité de victoire » puis « Comparatif », à droite « Confrontations directes »
   return (
-    <div className="space-y-3">
-      {props.odds && (
-        <OutcomeIndices
-          odds={props.odds}
-          home={{ name: props.home.name, rennes: props.home.id === RENNES, logo: props.home.logo }}
-          away={{ name: props.away.name, rennes: props.away.id === RENNES, logo: props.away.logo }}
-        />
-      )}
+    <div className="grid gap-3 md:grid-cols-2 md:items-start">
+      <div className="min-w-0 space-y-3">
+      {props.odds &&
+        block(
+          "Probabilité de victoire",
+          <OutcomeIndices
+            odds={props.odds}
+            home={{ name: props.home.name, rennes: props.home.id === RENNES, logo: props.home.logo }}
+            away={{ name: props.away.name, rennes: props.away.id === RENNES, logo: props.away.logo }}
+          />,
+        )}
+      {block(
+        "Comparatif",
+        <>
       <div className="grid grid-cols-2 gap-3 text-sm">
         {sides.map((s) => (
           <div key={s.team.id} className="min-w-0 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
@@ -153,10 +166,15 @@ export async function MatchStats(props: {
           </div>
         ))}
       </div>
-      <HeadToHead slug={slug} competition={props.competition} home={props.home} away={props.away} />
       <p className="mt-2 text-[11px] text-neutral-500">
         {withTables ? "Matchs de cette compétition uniquement. " : "Matchs de Coupe de France uniquement. "}Données ESPN, mises à jour toutes les 6 h.
       </p>
+        </>,
+      )}
+      </div>
+      <div className="min-w-0">
+        {block("Confrontations directes", <HeadToHead slug={slug} competition={props.competition} home={props.home} away={props.away} />)}
+      </div>
     </div>
   );
 }
@@ -186,21 +204,12 @@ async function HeadToHead(props: { slug: string; competition: CompetitionCode; h
     seasonStartYear: SEASON,
   }).catch(() => []);
   const RENNES = Number(process.env.ESPN_TEAM_ID ?? 169);
-  const sum = headToHeadSummary(list);
   const tone = { V: "bg-[#00C853]", N: "bg-neutral-400", D: "bg-[#E53935]" } as const;
   const Crest = ({ url }: { url?: string | null }) =>
     // eslint-disable-next-line @next/next/no-img-element
     url ? <img src={url} alt="" className="h-4 w-4 shrink-0 object-contain" /> : null;
   return (
-    <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
-      <p className="flex flex-wrap items-center gap-x-2 text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">
-        Confrontations directes · <TeamLabel name={props.home.name} rennes={props.home.id === RENNES} /> à domicile
-        {list.length > 0 && (
-          <span className="ml-auto normal-case tracking-normal text-neutral-600">
-            <TeamLabel name={props.home.name} rennes={props.home.id === RENNES} /> : {sum.wins} V · {sum.draws} N · {sum.losses} D
-          </span>
-        )}
-      </p>
+    <div className="text-sm">
       {list.length === 0 ? (
         <p className="mt-1 text-neutral-600">Aucune confrontation récente dans cette configuration.</p>
       ) : (
