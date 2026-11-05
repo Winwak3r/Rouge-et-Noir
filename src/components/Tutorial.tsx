@@ -18,9 +18,7 @@ const STEPS: Step[] = [
   {
     target: "calendar",
     title: "Le calendrier",
-    text: "Tous les matchs du Stade Rennais : Ligue 1, coupe d’Europe et Coupe de France. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
-    mobileText:
-      "Le bouton central te ramène toujours au calendrier : tous les matchs du Stade Rennais. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
+    text: "La page d’accueil de Rouge & Noir. Accède au calendrier et aux résultats des matchs du Stade Rennais : Ligue 1, coupe d’Europe (si qualifié) et Coupe de France. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
   },
   {
     target: "leagues",
@@ -119,10 +117,24 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
     if (!step) return;
     const el = findTarget(targetOf(step));
     if (!el) return;
-    const r = el.getBoundingClientRect();
+    // Union de l'élément et de ses enfants : le bouton rond du calendrier dépasse de son lien
+    const rects = [el, ...el.querySelectorAll<HTMLElement>("*")].map((x) => x.getBoundingClientRect()).filter((x) => x.width && x.height);
+    const r = {
+      top: Math.min(...rects.map((x) => x.top)),
+      left: Math.min(...rects.map((x) => x.left)),
+      bottom: Math.max(...rects.map((x) => x.bottom)),
+      right: Math.max(...rects.map((x) => x.right)),
+      get width() {
+        return this.right - this.left;
+      },
+      get height() {
+        return this.bottom - this.top;
+      },
+    };
+    const pad = el.closest("nav") ? 10 : PAD; // barre du bas : marge plus large autour du bouton
     // un élément très haut (calendrier) : on n'éclaire que le haut, visible à l'écran
     const height = Math.min(r.height, window.innerHeight * 0.45);
-    setBox({ top: r.top - PAD, left: r.left - PAD, width: r.width + 2 * PAD, height: height + 2 * PAD });
+    setBox({ top: r.top - pad, left: r.left - pad, width: r.width + 2 * pad, height: height + 2 * pad });
   }, [step]);
 
   // Amener l'élément à l'écran, puis le mesurer (et suivre défilement / redimensionnement)
