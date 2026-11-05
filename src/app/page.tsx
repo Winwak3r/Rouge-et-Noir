@@ -86,7 +86,9 @@ export default async function HomePage() {
     user
       ? prisma.prediction.findMany({
           where: { userId: user.id },
-          include: { scorer: { select: { id: true, name: true, photoUrl: true, externalId: true, officialPhotoUrl: true, customPhotoAt: true } } },
+          include: {
+            scorer: { select: { id: true, name: true, photoUrl: true, externalId: true, officialPhotoUrl: true, customPhotoAt: true, shirtNumber: true } },
+          },
         })
       : [],
     user
@@ -275,43 +277,63 @@ export default async function HomePage() {
     const myBonus = my ? bonusOf(m.id, my) : null;
     const myScore = my ? (m.rennesIsHome ? `${my.rennesGoals} - ${my.opponentGoals}` : `${my.opponentGoals} - ${my.rennesGoals}`) : null;
     const myScorer = my ? (my.scorer?.name ?? (my.noScorerPick ? "Aucun buteur rennais" : null)) : null;
+    const scorerPhoto = (size: number, caption: boolean) =>
+      my?.scorer ? (
+        <PlayerPhoto name={my.scorer.name} url={playerPhotoUrl(my.scorer)} size={size} shape="card" number={my.scorer.shirtNumber} className="self-center" />
+      ) : (
+        <ScorerPlaceholder mode={my?.noScorerPick ? "none" : "unknown"} size={size} caption={caption} />
+      );
+    const pointsText = myBonus != null ? `+${myBonus} pt${myBonus > 1 ? "s" : ""}` : null;
     const summaryNode = my ? (
-      <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Score</p>
-            {/* Tableau d'affichage : club (logo + nom) · chiffres lumineux · club */}
-            <div className="mt-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
-              <span className="flex min-w-0 items-center justify-end gap-2 text-right">
-                <TeamLabel
-                  name={m.homeTeam.name}
-                  rennes={m.rennesIsHome}
-                  className="truncate font-display text-base font-bold uppercase tracking-wide sm:text-xl"
-                />
-                {m.homeTeam.logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.homeTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-10 sm:w-10" />
-                )}
-              </span>
-              <span aria-label={`Score pronostiqué ${myScore}`} className="font-club text-4xl font-semibold leading-none tabular-nums text-noir sm:text-6xl">
-                {myScore?.replace(" - ", " – ")}
-              </span>
-              <span className="flex min-w-0 items-center gap-2">
-                {m.awayTeam.logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.awayTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-10 sm:w-10" />
-                )}
-                <TeamLabel
-                  name={m.awayTeam.name}
-                  rennes={!m.rennesIsHome}
-                  className="truncate font-display text-base font-bold uppercase tracking-wide sm:text-xl"
-                />
-              </span>
-            </div>
+      // Ordinateur : score et buteur sur une seule ligne, à la même hauteur ; mobile : score puis buteur
+      <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm md:flex md:items-stretch md:gap-5 md:space-y-0">
+        <div className="md:flex md:min-w-0 md:flex-1 md:flex-col md:justify-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Score</p>
+          <div className="mt-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
+            <span className="flex min-w-0 items-center justify-end gap-2 text-right">
+              <TeamLabel name={m.homeTeam.name} rennes={m.rennesIsHome} className="truncate font-display text-base font-bold uppercase tracking-wide sm:text-xl" />
+              {m.homeTeam.logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={m.homeTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-9 sm:w-9" />
+              )}
+            </span>
+            <span aria-label={`Score pronostiqué ${myScore}`} className="font-club text-4xl font-semibold leading-none tabular-nums text-noir sm:text-5xl">
+              {myScore?.replace(" - ", " – ")}
+            </span>
+            <span className="flex min-w-0 items-center gap-2">
+              {m.awayTeam.logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={m.awayTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-9 sm:w-9" />
+              )}
+              <TeamLabel name={m.awayTeam.name} rennes={!m.rennesIsHome} className="truncate font-display text-base font-bold uppercase tracking-wide sm:text-xl" />
+            </span>
           </div>
-      <div className="flex items-stretch gap-3">
-        <div className="min-w-0 flex-1 space-y-2">
+        </div>
 
-          <div>
+        {/* Ordinateur : le buteur à droite du score — photo (avec son numéro), puis « Nom complet · +3 pts » */}
+        <div className="hidden min-w-0 items-center gap-3 border-l border-neutral-200 pl-5 md:flex">
+          {scorerPhoto(80, false)}
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Buteur</p>
+            {myScorer ? (
+              <p className="whitespace-nowrap text-base font-semibold">
+                {my?.scorer ? my.scorer.name : myScorer}
+                {pointsText && (
+                  <>
+                    <span className="mx-1.5 text-neutral-400">·</span>
+                    <span className="font-bold text-green-700">{pointsText}</span>
+                  </>
+                )}
+              </p>
+            ) : (
+              <p className="italic text-neutral-500">Pas de pari buteur</p>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile : le buteur sous le score, photo à droite */}
+        <div className="flex items-stretch gap-3 md:hidden">
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Buteur</p>
             {myScorer ? (
               <>
@@ -326,14 +348,8 @@ export default async function HomePage() {
               <p className="italic text-neutral-500">Pas de pari buteur</p>
             )}
           </div>
+          {scorerPhoto(112, true)}
         </div>
-        {/* Photo officielle du buteur choisi, en grand, dans l'espace libre à droite */}
-        {my?.scorer ? (
-          <PlayerPhoto name={my.scorer.name} url={playerPhotoUrl(my.scorer)} size={112} shape="card" className="self-center" />
-        ) : (
-          <ScorerPlaceholder mode={my?.noScorerPick ? "none" : "unknown"} />
-        )}
-      </div>
       </div>
     ) : null;
     const predictionNode = (
@@ -464,7 +480,7 @@ export default async function HomePage() {
       return (
         <MatchAccordion key={m.id} h={h}>
           <div className="space-y-6">
-            <section className="min-w-0 md:max-w-xl">
+            <section className="min-w-0">
               {title("Mon prono")}
               {predictionNode}
             </section>

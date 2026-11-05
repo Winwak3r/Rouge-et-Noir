@@ -3,7 +3,7 @@
  * - « unknown » : pas encore de buteur choisi → silhouette et point d'interrogation ;
  * - « none » : pari « Aucun buteur rennais » → silhouette plus foncée, barrée d'une diagonale rouge.
  */
-export function ScorerPlaceholder({ mode, size = 112 }: { mode: "unknown" | "none"; size?: number }) {
+export function ScorerPlaceholder({ mode, size = 112, caption = true }: { mode: "unknown" | "none"; size?: number; caption?: boolean }) {
   const none = mode === "none";
   return (
     <figure className="flex shrink-0 flex-col items-center gap-1 self-center" style={{ width: size }}>
@@ -27,7 +27,7 @@ export function ScorerPlaceholder({ mode, size = 112 }: { mode: "unknown" | "non
           </span>
         )}
       </div>
-      {none && <figcaption className="text-center text-[11px] font-semibold leading-tight text-neutral-600">Aucun buteur rennais</figcaption>}
+      {none && caption && <figcaption className="text-center text-[11px] font-semibold leading-tight text-neutral-600">Aucun buteur rennais</figcaption>}
     </figure>
   );
 }
