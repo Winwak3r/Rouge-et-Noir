@@ -26,6 +26,7 @@ import { runSmartSync } from "@/lib/sync/sync";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { PlayerPhoto } from "@/components/PlayerPhoto";
 import { PlayerName } from "@/components/PlayerName";
+import { TeamLabel } from "@/components/TeamLabel";
 import { activeLeagueScope } from "@/lib/leagues";
 
 export const dynamic = "force-dynamic";
@@ -265,16 +266,41 @@ export default async function HomePage() {
     const myScore = my ? (m.rennesIsHome ? `${my.rennesGoals} - ${my.opponentGoals}` : `${my.opponentGoals} - ${my.rennesGoals}`) : null;
     const myScorer = my ? (my.scorer?.name ?? (my.noScorerPick ? "Aucun buteur rennais" : null)) : null;
     const summaryNode = my ? (
-      <div className="flex items-stretch gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
-        <div className="min-w-0 flex-1 space-y-2">
+      <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Score</p>
-            <p className="font-display text-2xl font-bold tabular-nums">
-              <span className="mr-2 text-sm font-medium text-neutral-600">{m.homeTeam.shortName ?? m.homeTeam.name}</span>
-              {myScore}
-              <span className="ml-2 text-sm font-medium text-neutral-600">{m.awayTeam.shortName ?? m.awayTeam.name}</span>
-            </p>
+            {/* Tableau d'affichage : club (logo + nom) · chiffres lumineux · club */}
+            <div className="mt-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
+              <span className="flex min-w-0 items-center justify-end gap-2 text-right">
+                <TeamLabel
+                  name={m.homeTeam.name}
+                  rennes={m.rennesIsHome}
+                  className="truncate font-club text-base font-semibold uppercase tracking-wide sm:text-xl"
+                />
+                {m.homeTeam.logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.homeTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-10 sm:w-10" />
+                )}
+              </span>
+              <span className="led-board rounded-lg px-3 py-1.5 sm:px-5 sm:py-2" aria-label={`Score pronostiqué ${myScore}`}>
+                <span className="led-digits font-led text-3xl font-black tabular-nums sm:text-5xl">{myScore?.replace(" - ", "-")}</span>
+              </span>
+              <span className="flex min-w-0 items-center gap-2">
+                {m.awayTeam.logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.awayTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-10 sm:w-10" />
+                )}
+                <TeamLabel
+                  name={m.awayTeam.name}
+                  rennes={!m.rennesIsHome}
+                  className="truncate font-club text-base font-semibold uppercase tracking-wide sm:text-xl"
+                />
+              </span>
+            </div>
           </div>
+      <div className="flex items-stretch gap-3">
+        <div className="min-w-0 flex-1 space-y-2">
+
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Buteur</p>
             {myScorer ? (
@@ -295,6 +321,7 @@ export default async function HomePage() {
         {my?.scorer && (
           <PlayerPhoto name={my.scorer.name} url={playerPhotoUrl(my.scorer)} size={112} shape="card" className="self-center" />
         )}
+      </div>
       </div>
     ) : null;
     const predictionNode = (
@@ -360,7 +387,17 @@ export default async function HomePage() {
       />
     ) : null;
 
-    const title = (t: string) => <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-neutral-500">{t}</h3>;
+    const ICONS: Record<string, string> = { "Mon prono": "🔮", "Avant match": "🧐", "Pronostics et points": "🍿", "Résultat officiel": "📣" };
+    const title = (t: string) => (
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
+        {ICONS[t] && (
+          <span aria-hidden className="section-icon">
+            {ICONS[t]}
+          </span>
+        )}
+        {t}
+      </h3>
+    );
     const noLeagueNote =
       user && !scope ? (
         <p className="mt-2 text-xs text-neutral-600">

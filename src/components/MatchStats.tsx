@@ -194,7 +194,7 @@ export async function MatchStats(props: {
         ))}
       </div>
       <p className="mt-2 text-[11px] text-neutral-500">
-        {withTables ? "Matchs de cette compétition uniquement. " : "Matchs de Coupe de France uniquement. "}Données ESPN, mises à jour toutes les 6 h.
+        {withTables ? "Matchs de cette compétition uniquement." : "Matchs de Coupe de France uniquement."}
       </p>
             </>
           ),

@@ -92,7 +92,12 @@ export function MatchResult(props: {
 
   return (
     <div>
-      <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-neutral-500">{props.title}</h3>
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
+        <span aria-hidden className="section-icon">
+          📣
+        </span>
+        {props.title}
+      </h3>
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
         <div className="min-w-0 text-right">
           <p className="truncate font-semibold">
