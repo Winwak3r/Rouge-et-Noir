@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Barlow_Condensed, Inter, Orbitron, Oswald } from "next/font/google";
+import { Barlow_Condensed, Inter, Oswald } from "next/font/google";
 import { cookies } from "next/headers";
 import { Header } from "@/components/Header";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
@@ -8,8 +8,7 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const barlow = Barlow_Condensed({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-barlow" });
-// Chiffres du score façon panneau lumineux, et noms des clubs
-const orbitron = Orbitron({ subsets: ["latin"], weight: ["700", "900"], variable: "--font-orbitron" });
+// Chiffres du score du pronostic
 const oswald = Oswald({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-oswald" });
 
 export const metadata: Metadata = {
@@ -32,7 +31,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // Thème choisi sur cet appareil (cookie) ; clair par défaut. Posé côté serveur : aucun clignotement.
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   return (
-    <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable} ${orbitron.variable} ${oswald.variable}`}>
+    <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable} ${oswald.variable}`}>
       <body className="min-h-screen overflow-x-clip bg-page font-sans text-neutral-900 antialiased">
         <Header />
         <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-16">{children}</main>

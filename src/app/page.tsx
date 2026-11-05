@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { after } from "next/server";
 import { cookies } from "next/headers";
@@ -27,6 +28,7 @@ import { playerPhotoUrl } from "@/lib/player-photo";
 import { PlayerPhoto } from "@/components/PlayerPhoto";
 import { PlayerName } from "@/components/PlayerName";
 import { TeamLabel } from "@/components/TeamLabel";
+import { ScorerPlaceholder } from "@/components/ScorerPlaceholder";
 import { activeLeagueScope } from "@/lib/leagues";
 
 export const dynamic = "force-dynamic";
@@ -275,15 +277,15 @@ export default async function HomePage() {
                 <TeamLabel
                   name={m.homeTeam.name}
                   rennes={m.rennesIsHome}
-                  className="truncate font-club text-base font-semibold uppercase tracking-wide sm:text-xl"
+                  className="truncate font-display text-base font-bold uppercase tracking-wide sm:text-xl"
                 />
                 {m.homeTeam.logoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={m.homeTeam.logoUrl} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-10 sm:w-10" />
                 )}
               </span>
-              <span className="led-board rounded-lg px-3 py-1.5 sm:px-5 sm:py-2" aria-label={`Score pronostiqué ${myScore}`}>
-                <span className="led-digits font-led text-3xl font-black tabular-nums sm:text-5xl">{myScore?.replace(" - ", "-")}</span>
+              <span aria-label={`Score pronostiqué ${myScore}`} className="font-club text-4xl font-semibold leading-none tabular-nums text-noir sm:text-6xl">
+                {myScore?.replace(" - ", " – ")}
               </span>
               <span className="flex min-w-0 items-center gap-2">
                 {m.awayTeam.logoUrl && (
@@ -293,7 +295,7 @@ export default async function HomePage() {
                 <TeamLabel
                   name={m.awayTeam.name}
                   rennes={!m.rennesIsHome}
-                  className="truncate font-club text-base font-semibold uppercase tracking-wide sm:text-xl"
+                  className="truncate font-display text-base font-bold uppercase tracking-wide sm:text-xl"
                 />
               </span>
             </div>
@@ -318,8 +320,10 @@ export default async function HomePage() {
           </div>
         </div>
         {/* Photo officielle du buteur choisi, en grand, dans l'espace libre à droite */}
-        {my?.scorer && (
+        {my?.scorer ? (
           <PlayerPhoto name={my.scorer.name} url={playerPhotoUrl(my.scorer)} size={112} shape="card" className="self-center" />
+        ) : (
+          <ScorerPlaceholder mode={my?.noScorerPick ? "none" : "unknown"} />
         )}
       </div>
       </div>
@@ -387,11 +391,34 @@ export default async function HomePage() {
       />
     ) : null;
 
-    const ICONS: Record<string, string> = { "Mon prono": "🔮", "Avant match": "🧐", "Pronostics et points": "🍿", "Résultat officiel": "📣" };
+    const svg = (d: ReactNode) => (
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {d}
+      </svg>
+    );
+    const ICONS: Record<string, ReactNode> = {
+      // crayon : ma saisie
+      "Mon prono": svg(
+        <>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+        </>,
+      ),
+      // histogramme : les chiffres avant le match
+      "Avant match": svg(<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />),
+      // groupe : les pronostics de la ligue
+      "Pronostics et points": svg(
+        <>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </>,
+      ),
+    };
     const title = (t: string) => (
       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
         {ICONS[t] && (
-          <span aria-hidden className="section-icon">
+          <span aria-hidden className="section-icon text-rouge">
             {ICONS[t]}
           </span>
         )}

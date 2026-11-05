@@ -93,8 +93,12 @@ export function MatchResult(props: {
   return (
     <div>
       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
-        <span aria-hidden className="section-icon">
-          📣
+        <span aria-hidden className="section-icon text-rouge">
+          {/* drapeau à damier : le résultat */}
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 22V4" />
+            <path d="M4 4h13l-2 4 2 4H4" />
+          </svg>
         </span>
         {props.title}
       </h3>
