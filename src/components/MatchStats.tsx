@@ -7,6 +7,8 @@ import { computeTable, formPoints, recentScorers, teamForm, type CompResult } fr
 import { ordinalFr } from "@/lib/match-view";
 import { TeamLabel } from "./TeamLabel";
 import { OutcomeIndices } from "./OutcomeIndices";
+import { PreMatchTabs } from "./PreMatchTabs";
+import { outcomeIndices } from "@/lib/match-odds";
 import { fetchHeadToHead } from "@/lib/stats/h2h";
 import { formatShortNumeric } from "@/lib/dates";
 import { PlayerName } from "./PlayerName";
@@ -69,28 +71,52 @@ export async function MatchStats(props: {
   });
 
   const RENNES = Number(process.env.ESPN_TEAM_ID ?? 169);
-  const block = (titleText: string, children: ReactNode) => (
-    <div className="rounded-xl border border-neutral-200 p-3">
-      <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">{titleText}</h4>
-      {children}
-    </div>
+  const odds = props.odds;
+  const indices = odds?.home && odds?.draw && odds?.away ? outcomeIndices({ home: odds.home, draw: odds.draw, away: odds.away }) : null;
+  const pct = (x: number) => `${Math.round(x * 100)} %`;
+  const icon = (d: ReactNode) => (
+    <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {d}
+    </svg>
   );
-  // Ordinateur : à gauche « Probabilité de victoire » puis « Comparatif », à droite « Confrontations directes »
+  const h2h = <HeadToHead slug={slug} competition={props.competition} home={props.home} away={props.away} />;
+
   return (
-    <div className="grid gap-3 md:grid-cols-2 md:items-start">
-      <div className="min-w-0 space-y-3">
-      {props.odds &&
-        block(
-          "Probabilité de victoire",
-          <OutcomeIndices
-            odds={props.odds}
-            home={{ name: props.home.name, rennes: props.home.id === RENNES, logo: props.home.logo }}
-            away={{ name: props.away.name, rennes: props.away.id === RENNES, logo: props.away.logo }}
-          />,
-        )}
-      {block(
-        "Comparatif",
-        <>
+    <PreMatchTabs
+      initial={indices ? "proba" : "compare"}
+      panels={[
+        {
+          key: "proba",
+          label: "Probabilités de victoire",
+          hint: indices
+            ? `${pct(indices.home.probability)} · nul ${pct(indices.draw.probability)} · ${pct(indices.away.probability)}`
+            : "Environ 48 h avant le match",
+          icon: icon(
+            <>
+              <path d="M3 3v18h18" />
+              <path d="M7 15l4-4 3 3 5-6" />
+            </>,
+          ),
+          content: (
+            <OutcomeIndices
+              odds={odds ?? { home: null, draw: null, away: null }}
+              home={{ name: props.home.name, rennes: props.home.id === RENNES, logo: props.home.logo }}
+              away={{ name: props.away.name, rennes: props.away.id === RENNES, logo: props.away.logo }}
+            />
+          ),
+        },
+        {
+          key: "compare",
+          label: "Comparatif",
+          hint: "Classement, forme, buteurs",
+          icon: icon(
+            <>
+              <path d="M12 3v18" />
+              <path d="M5 7h4M5 12h4M5 17h4M15 7h4M15 12h4M15 17h4" />
+            </>,
+          ),
+          content: (
+            <>
       <div className="grid grid-cols-2 gap-3 text-sm">
         {sides.map((s) => (
           <div key={s.team.id} className="min-w-0 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
@@ -169,13 +195,22 @@ export async function MatchStats(props: {
       <p className="mt-2 text-[11px] text-neutral-500">
         {withTables ? "Matchs de cette compétition uniquement. " : "Matchs de Coupe de France uniquement. "}Données ESPN, mises à jour toutes les 6 h.
       </p>
-        </>,
-      )}
-      </div>
-      <div className="min-w-0">
-        {block("Confrontations directes", <HeadToHead slug={slug} competition={props.competition} home={props.home} away={props.away} />)}
-      </div>
-    </div>
+            </>
+          ),
+        },
+        {
+          key: "h2h",
+          label: "Confrontations directes",
+          hint: "Les 5 derniers face-à-face",
+          icon: icon(
+            <>
+              <path d="M8 7h12l-3-3M16 17H4l3 3" />
+            </>,
+          ),
+          content: h2h,
+        },
+      ]}
+    />
   );
 }
 
