@@ -41,14 +41,17 @@ export interface MatchHeader {
   mine: "complete" | "score" | "scorer" | "incomplete" | null;
 }
 
-function Team({ t, open }: { t: MatchHeader["home"]; open: boolean }) {
+/** Équipe : à domicile, le logo vient APRÈS le nom (symétrie avec l'équipe à l'extérieur, logo avant le nom). */
+function Team({ t, open, home = false }: { t: MatchHeader["home"]; open: boolean; home?: boolean }) {
+  const logo = t.logo ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={t.logo} alt="" width={20} height={20} loading="lazy" className={`h-5 w-5 shrink-0 object-contain ${open ? "rounded-full bg-white p-px" : ""}`} />
+  ) : null;
   return (
     <span className={`inline-flex min-w-0 items-center gap-1.5 ${t.rennes ? "font-extrabold" : "font-semibold"}`}>
-      {t.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={t.logo} alt="" width={20} height={20} loading="lazy" className={`h-5 w-5 shrink-0 object-contain ${open ? "rounded-full bg-white p-px" : ""}`} />
-      ) : null}
+      {!home && logo}
       <TeamLabel name={t.name} rennes={t.rennes} className="truncate" />
+      {home && logo}
     </span>
   );
 }
@@ -126,7 +129,7 @@ export function MatchAccordion({ h, children }: { h: MatchHeader; children: Reac
               {h.score?.pens && <span>· {h.score.pens}</span>}
             </span>
             <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <Team t={h.home} open={open} />
+              <Team t={h.home} open={open} home />
               <span className="font-display text-lg font-bold tabular-nums">
                 {h.score ? `${h.score.home} - ${h.score.away}` : "–"}
               </span>
