@@ -236,3 +236,13 @@
 .section-icon {
   @apply grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white ring-1 ring-neutral-300;
 }
+
+/* Liste des buteurs : se déplie en poussant le contenu situé en dessous */
+@keyframes menu-unfold {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 18rem; }
+}
+.menu-unfold { animation: menu-unfold 220ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .menu-unfold { animation: none; }
+}

@@ -171,7 +171,8 @@ export function ScorerSelect(props: {
           aria-labelledby={props.labelledBy}
           aria-activedescendant={`${id}-${active}`}
           tabIndex={-1}
-          className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-neutral-200 bg-surface p-1 shadow-lg"
+          // Dans le flux de la page (et non par-dessus) : le reste du contenu descend sous la liste
+          className="menu-unfold mt-1 max-h-72 w-full overflow-auto rounded-lg border border-neutral-200 bg-surface p-1 shadow-lg"
         >
           {items.map((it, i) => (
             <li
