@@ -7,6 +7,8 @@ export interface ProviderTeam {
   name: string;
   shortName: string | null;
   logoUrl: string | null;
+  color?: string | null; // couleurs ESPN (« 004170 »)
+  altColor?: string | null;
 }
 
 export interface ProviderMatch {

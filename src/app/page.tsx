@@ -26,6 +26,8 @@ import { maxPredictedGoals } from "@/lib/settings";
 import { runSmartSync } from "@/lib/sync/sync";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { PlayerPhoto } from "@/components/PlayerPhoto";
+import { clubLogo } from "@/lib/club-logo";
+import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { TeamLabel } from "@/components/TeamLabel";
 import { ScorerPlaceholder } from "@/components/ScorerPlaceholder";
@@ -57,6 +59,12 @@ export default async function HomePage() {
     prisma.prediction.groupBy({ by: ["matchId"], where: inScope ? { userId: inScope } : {}, _count: { _all: true } }),
     getLeagueLogos(),
   ]);
+  // Écussons : officiels ou factices selon le réglage de l'administration
+  const logoMode = await clubLogosMode();
+  for (const m of matches) {
+    m.homeTeam.logoUrl = clubLogo(m.homeTeam, logoMode);
+    m.awayTeam.logoUrl = clubLogo(m.awayTeam, logoMode);
+  }
 
   // Synchro en arrière-plan après l'envoi de la page : elle ne fait que ce qui est nécessaire.
   after(() => runSmartSync({ reason: "visite" }).catch(() => undefined));

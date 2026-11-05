@@ -67,11 +67,15 @@ export async function currentSeason() {
 }
 
 async function upsertTeam(t: ProviderTeam) {
-  return prisma.team.upsert({
+  const colors = t.color && t.altColor ? { color1: `#${t.color.replace(/^#/, "")}`, color2: `#${t.altColor.replace(/^#/, "")}` } : {};
+  const team = await prisma.team.upsert({
     where: { externalId: t.externalId },
-    create: { externalId: t.externalId, name: t.name, shortName: t.shortName, logoUrl: t.logoUrl },
+    create: { externalId: t.externalId, name: t.name, shortName: t.shortName, logoUrl: t.logoUrl, ...colors },
     update: { name: t.name, shortName: t.shortName, logoUrl: t.logoUrl ?? undefined },
   });
+  // Couleurs ESPN seulement si aucune n'est enregistrée (celles réglées par l'admin sont gardées)
+  if (!team.color1 && colors.color1) await prisma.team.update({ where: { id: team.id }, data: colors });
+  return team;
 }
 
 // ─── Calendrier ─────────────────────────────────────────────────────────────

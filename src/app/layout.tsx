@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Barlow_Condensed, Inter, Oswald } from "next/font/google";
 import { cookies } from "next/headers";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import "./globals.css";
 
@@ -34,7 +35,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable} ${oswald.variable}`}>
       <body className="min-h-screen overflow-x-clip bg-page font-sans text-neutral-900 antialiased">
         <Header />
-        <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-16">{children}</main>
+        <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:pb-16">{children}</main>
+        <Footer />
       </body>
     </html>
   );

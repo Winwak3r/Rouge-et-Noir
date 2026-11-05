@@ -52,6 +52,8 @@ export function parseTeam(t: Json): ProviderTeam {
     name: String(t?.displayName ?? t?.name ?? "?"),
     shortName: t?.shortDisplayName ?? t?.abbreviation ?? null,
     logoUrl: t?.logo ?? t?.logos?.[0]?.href ?? null,
+    color: t?.color ? String(t.color) : null,
+    altColor: t?.alternateColor ? String(t.alternateColor) : null,
   };
 }
 

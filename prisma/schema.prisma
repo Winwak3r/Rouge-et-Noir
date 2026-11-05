@@ -274,6 +274,9 @@ model Team {
   name       String
   shortName  String?
   logoUrl    String?
+  // Les deux couleurs dominantes du club (logo factice) : réglables dans l'administration
+  color1     String?
+  color2     String?
 
   homeMatches Match[] @relation("HomeTeam")
   awayMatches Match[] @relation("AwayTeam")

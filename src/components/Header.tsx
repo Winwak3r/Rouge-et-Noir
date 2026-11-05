@@ -11,6 +11,8 @@ import { LeagueSwitcher } from "./LeagueSwitcher";
 import { BottomNav } from "./BottomNav";
 import { Avatar } from "./Avatar";
 import { CompetitionBadge } from "./CompetitionBadge";
+import { clubLogo } from "@/lib/club-logo";
+import { clubLogosMode } from "@/lib/club-logo-mode";
 import { LeagueWelcome } from "./LeagueWelcome";
 import { Tutorial } from "./Tutorial";
 import { NotifPrompt } from "./NotifPrompt";
@@ -52,8 +54,9 @@ export async function Header() {
   ]);
   const rennes = await prisma.team.findUnique({
     where: { externalId: Number(process.env.ESPN_TEAM_ID ?? 169) },
-    select: { logoUrl: true },
+    select: { logoUrl: true, name: true, color1: true, color2: true },
   });
+  const rennesLogo = rennes ? clubLogo(rennes, await clubLogosMode()) : null;
   const [membershipCount, createdCount, adminCount] = leagueInfo;
   // Ligue tout juste rejointe : fenêtre de bienvenue
   const welcomeId = user ? (await cookies()).get(WELCOME_COOKIE)?.value : undefined;
@@ -169,9 +172,9 @@ export async function Header() {
             </Link>
             <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className="hbtn">
               <span className="hicon bg-white">
-                {rennes?.logoUrl ? (
+                {rennesLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={rennes.logoUrl} alt="" width={16} height={16} className="h-[72%] w-[72%] object-contain" />
+                  <img src={rennesLogo} alt="" width={16} height={16} className="h-[72%] w-[72%] object-contain" />
                 ) : (
                   <Logo className="h-[72%] w-[72%]" />
                 )}

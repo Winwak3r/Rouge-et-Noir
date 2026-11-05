@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { StandingsTabs } from "@/components/StandingsTabs";
 import { TeamLabel } from "@/components/TeamLabel";
 import { getLeagueLogos } from "@/lib/league-logos";
+import { prisma } from "@/lib/db";
+import { clubLogo } from "@/lib/club-logo";
+import { clubLogosMode } from "@/lib/club-logo-mode";
 import { fetchScorerLeaders, fetchStandings, type ScorerRow, type StandingRow } from "@/lib/providers/espn-standings";
 
 export const metadata: Metadata = { title: "Classements" };
@@ -26,6 +29,15 @@ export default async function OfficialStandingsPage() {
     load(() => fetchScorerLeaders("uefa.europa", SEASON), "Classement des buteurs indisponible pour le moment."),
     getLeagueLogos(),
   ]);
+
+  // Écussons factices si l'administration les a choisis
+  if ((await clubLogosMode()) === "generic") {
+    const teams = await prisma.team.findMany({ select: { externalId: true, color1: true, color2: true } });
+    const byId = new Map(teams.map((t) => [t.externalId, t]));
+    for (const d of [l1, uel]) {
+      if ("rows" in d) for (const r of d.rows) r.logo = clubLogo({ name: r.name, ...byId.get(r.teamId) }, "generic");
+    }
+  }
 
   return (
     <div className="space-y-6">

@@ -495,3 +495,28 @@ export async function setMatchOddsAction(_: AdminState, form: FormData): Promise
   refresh("/admin/cotes");
   return { message: "Cotes enregistrées : les indices s’affichent dans l’avant-match." };
 }
+
+/** Écussons des clubs : logos officiels ou logos factices (rond aux deux couleurs du club). */
+export async function setClubLogosModeAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const { CLUB_LOGOS_SETTING } = await import("@/lib/club-logo");
+  const mode = str(form, "mode") === "generic" ? "generic" : "official";
+  await prisma.appSetting.upsert({ where: { key: CLUB_LOGOS_SETTING }, create: { key: CLUB_LOGOS_SETTING, value: mode }, update: { value: mode } });
+  await audit(admin.id, "CLUB_LOGOS_MODE", "AppSetting", CLUB_LOGOS_SETTING, undefined, { mode });
+  for (const p of ["/", "/admin/logos", "/classements-srfc"]) revalidatePath(p, "layout");
+  return { message: mode === "generic" ? "Logos factices affichés pour les clubs." : "Logos officiels affichés pour les clubs." };
+}
+
+/** Les deux couleurs du logo factice d'un club. */
+export async function saveClubColorsAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const teamId = str(form, "teamId");
+  const ok = (c: string) => /^#[0-9a-f]{6}$/i.test(c);
+  const color1 = str(form, "color1");
+  const color2 = str(form, "color2");
+  if (!ok(color1) || !ok(color2)) return { error: "Couleurs invalides." };
+  await prisma.team.update({ where: { id: teamId }, data: { color1, color2 } });
+  await audit(admin.id, "CLUB_COLORS", "Team", teamId, undefined, { color1, color2 });
+  for (const p of ["/", "/admin/logos", "/classements-srfc"]) revalidatePath(p, "layout");
+  return { message: "Couleurs enregistrées." };
+}
