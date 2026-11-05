@@ -88,6 +88,7 @@ export async function MatchStats(props: {
         {
           key: "proba",
           label: "Probabilités de victoire",
+          shortLabel: "Probabilités",
           hint: indices
             ? `${pct(indices.home.probability)} · nul ${pct(indices.draw.probability)} · ${pct(indices.away.probability)}`
             : "Environ 48 h avant le match",
@@ -201,6 +202,7 @@ export async function MatchStats(props: {
         {
           key: "h2h",
           label: "Confrontations directes",
+          shortLabel: "Confrontations",
           hint: "Les 5 derniers face-à-face",
           icon: icon(
             <>
