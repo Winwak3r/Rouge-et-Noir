@@ -12,10 +12,11 @@ export function PlayerPhoto(props: Parameters<typeof PhotoOnly>[0]) {
       <PhotoOnly {...props} className="" />
       <span
         aria-label={`numéro ${props.number}`}
-        className="absolute right-1 top-0.5 font-display font-bold leading-none text-white"
+        className="absolute right-1 top-0.5 font-display font-bold leading-none tracking-tight text-[#1a1a1a]"
         style={{
-          fontSize: Math.max(11, Math.round(size * 0.17)),
-          textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 3px #000",
+          // Chiffres condensés, gras et foncés, comme sur les photos officielles (léger halo clair pour rester lisible)
+          fontSize: Math.max(12, Math.round(size * 0.22)),
+          textShadow: "0 0 3px rgba(255, 255, 255, 0.85)",
         }}
       >
         {props.number}
