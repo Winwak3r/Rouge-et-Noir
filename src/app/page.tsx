@@ -594,14 +594,14 @@ export default async function HomePage() {
 
         {top && (
           <section className="space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-neutral-500">{live ? "Match en cours" : "Match terminé"}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-wide text-noir">{live ? "Match en cours" : "Match terminé"}</h2>
             {renderMatch(top, { layout: "top" })}
           </section>
         )}
 
         {next ? (
           <section className="space-y-3" data-tour="calendar">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-neutral-500">Prochain match</h2>
+            <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
             {renderMatch(next, { layout: "next" })}
           </section>
         ) : (
@@ -609,7 +609,7 @@ export default async function HomePage() {
         )}
 
         <section className="space-y-3" data-tour="calendar">
-          <h2 className="text-xs font-bold uppercase tracking-wide text-neutral-500">Calendrier 2026/2027</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Calendrier 2026/2027</h2>
           <CompetitionTabs
             defaultCode={(next ?? top)?.competition ?? "LIGUE_1"}
             tabs={ORDER.map((code) => {

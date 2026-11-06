@@ -77,7 +77,7 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Classement</h1>
+        <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Classement</h1>
         {!scope && me && (
           <p className="mt-2 text-sm text-neutral-600">
             Tu n’es dans aucune ligue : voici le classement Général R&N.{" "}

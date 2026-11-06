@@ -8,6 +8,8 @@
   --color-rouge: #e1001a;
   --color-rouge-fonce: #b00014;
   --color-noir: #111111;
+  /* Thème clair : fond des blocs gris clair un peu plus marqué (le thème sombre a sa propre valeur) */
+  --color-neutral-50: #efefef;
   --color-l1: #1d4ed8;
   --color-uel: #ea7600;
   --color-uel-fonce: #c2410c; /* orange plus soutenu : texte blanc lisible sur l'en-tête ouvert */

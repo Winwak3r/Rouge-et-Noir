@@ -21,7 +21,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-6">
-      <h1 className="page-title">Ligues</h1>
+      <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Ligues</h1>
       <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Mes ligues</h2>
         <span
