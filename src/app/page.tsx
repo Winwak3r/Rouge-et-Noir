@@ -516,15 +516,14 @@ export default async function HomePage() {
     }
 
     if (editable) {
-      // Calendrier, pronostics ouverts : comme le prochain match, sans la rubrique « Avant match »
+      // Calendrier, pronostics ouverts : même « Mon prono » que le prochain match (toute la largeur :
+      // score et buteur sur une ligne sur PC), sans la rubrique « Avant match »
       return (
         <MatchAccordion key={m.id} h={h}>
-          <div className="grid gap-6 md:grid-cols-2">
-            <section className="min-w-0">
-              {title("Mon prono")}
-              {predictionNode}
-            </section>
-          </div>
+          <section className="min-w-0">
+            {title("Mon prono")}
+            {predictionNode}
+          </section>
           {pronosSection}
         </MatchAccordion>
       );
