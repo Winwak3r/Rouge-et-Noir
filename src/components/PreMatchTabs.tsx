@@ -72,7 +72,7 @@ export function PreMatchTabs({ panels, initial }: { panels: PreMatchPanel[]; ini
         })}
       </div>
 
-      <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div className="overflow-hidden" data-swipe-ignore onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {panels.map((p) => {
           const on = p.key === active;
           return (

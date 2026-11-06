@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode, type TouchEvent } from "react";
 import { COMPETITIONS, type CompetitionCode } from "@/lib/competitions";
 import { CompetitionBadge } from "./CompetitionBadge";
 
@@ -24,6 +24,28 @@ export function CompetitionTabs(props: {
     setSelected(c);
   };
   const active = props.tabs.find((t) => t.code === selected) ?? props.tabs[0];
+
+  // Mobile : balayage horizontal d'un doigt → compétition voisine (vers la gauche = suivante)
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: TouchEvent) => {
+    const el = e.target as HTMLElement;
+    // Pas de changement depuis une zone qui défile en largeur ou un champ de saisie
+    if (el.closest(".overflow-x-auto, input, select, textarea, [data-swipe-ignore]")) {
+      touch.current = null;
+      return;
+    }
+    touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const onTouchEnd = (e: TouchEvent) => {
+    const t = touch.current;
+    touch.current = null;
+    if (!t) return;
+    const dx = e.changedTouches[0].clientX - t.x;
+    const dy = e.changedTouches[0].clientY - t.y;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return; // trop court, ou défilement vertical
+    const next = props.tabs[index(selected) + (dx < 0 ? 1 : -1)];
+    if (next) choose(next.code);
+  };
 
   return (
     <div className="space-y-4">
@@ -52,7 +74,7 @@ export function CompetitionTabs(props: {
           );
         })}
       </div>
-      <div className="overflow-hidden">
+      <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div
           key={`${active.code}-${changes.current}`}
           className={`space-y-3 ${direction === "right" ? "slide-from-right" : direction === "left" ? "slide-from-left" : ""}`}
