@@ -161,7 +161,7 @@ export async function Header() {
           </Link>
           <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end">
             <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
-            <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : ""}`}>
+            <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon">
                 <svg aria-hidden viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
@@ -170,7 +170,7 @@ export async function Header() {
               </span>
               <span className="max-[359px]:hidden">Règles</span>
             </Link>
-            <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className="hbtn">
+            <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className={`hbtn ${user ? "" : "hidden"}`}>
               <span className="hicon bg-white">
                 {rennesLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element

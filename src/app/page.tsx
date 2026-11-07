@@ -29,6 +29,7 @@ import { PlayerPhoto } from "@/components/PlayerPhoto";
 import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
+import { Landing } from "@/components/landing/Landing";
 import { TeamLabel } from "@/components/TeamLabel";
 import { ScorerPlaceholder } from "@/components/ScorerPlaceholder";
 import { activeLeagueScope } from "@/lib/leagues";
@@ -41,6 +42,8 @@ const ORDER: CompetitionCode[] = ["LIGUE_1", "EUROPA_LEAGUE", "COUPE_DE_FRANCE"]
 export default async function HomePage() {
   const now = new Date();
   const user = await getCurrentUser();
+  // Visiteur sans compte : page d'accueil de présentation, sans accès au site
+  if (!user) return <Landing />;
   // Ligue affichée : classement et pronostics des autres limités à ses joueurs (sinon tous les joueurs)
   const scope = user ? await activeLeagueScope(user) : null;
   // Sans ligue : on ne voit que ses propres pronostics (pas ceux des autres joueurs du site)

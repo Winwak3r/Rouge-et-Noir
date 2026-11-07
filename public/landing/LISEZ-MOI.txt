@@ -1,0 +1,3 @@
+Capture d'écran du site pour la page d'accueil des visiteurs (téléphone de la 2e page) :
+déposez ici une image portrait nommée « apercu.png » (idéalement 1080 × 2280 px, capture d'un téléphone).
+Sans ce fichier, un aperçu dessiné du site s'affiche à la place.

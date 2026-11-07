@@ -16,4 +16,10 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/compte/:path*", "/admin/:path*", "/joueur/:path*", "/ligue/:path*", "/ligues/:path*"] };
+// Tout le site, sauf : l'accueil (présentation aux visiteurs), connexion / inscription et leurs suites,
+// les invitations, les pages d'information, l'API et les fichiers.
+export const config = {
+  matcher: [
+    "/((?!_next/|api/|.*\\..*|connexion|inscription|mot-de-passe-oublie|reinitialiser|verifier-email|rejoindre|mentions-legales|donnees-partenaires|contact|$).*)",
+  ],
+};
