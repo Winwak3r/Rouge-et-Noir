@@ -116,7 +116,11 @@ export function MatchAccordion({ h, children }: { h: MatchHeader; children: Reac
         aria-expanded={open}
         disabled={h.cancelled}
         className={`relative flex w-full items-start gap-3 p-3 text-left transition-colors sm:p-4 ${
-          open ? `rounded-tr-lg text-white ${OPEN[h.competition].bg}` : h.cancelled ? "cursor-default" : "rounded-r-lg hover:bg-neutral-50"
+          open
+            ? `rounded-tr-lg text-white ${OPEN[h.competition].bg}`
+            : h.cancelled
+              ? "cursor-default"
+              : `match-head match-head-${h.competition.toLowerCase()} rounded-r-lg hover:bg-neutral-50`
         }`}
       >
         <span className={`flex w-full items-start gap-3 ${h.cancelled ? "opacity-35" : ""}`}>
