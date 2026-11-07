@@ -124,120 +124,162 @@ export function MyPrediction(props: {
     );
   }
 
-  return (
-    <form action={action} className="space-y-4">
-      <input type="hidden" name="matchId" value={props.matchId} />
-      {half && (
-        <p className="text-xs text-orange-700">Choisis un score pour les deux équipes, ou « – » pour les deux.</p>
-      )}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
-        {scoreSelect("home", props.rennesIsHome ? "rennesGoals" : "opponentGoals", props.homeName)}
-        <span className="pb-2 font-display text-xl font-bold text-neutral-400" aria-hidden>
-          –
-        </span>
-        {scoreSelect("away", props.rennesIsHome ? "opponentGoals" : "rennesGoals", props.awayName)}
-      </div>
+  // Pastille d'étape (1 · Score, 2 · Buteur, 3 · Bonus) : le parcours se lit d'un coup d'œil
+  const step = (n: number, label: string, extra?: ReactNode) => (
+    <p className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-neutral-500">
+      <span className="grid h-5 w-5 place-items-center rounded-full bg-rouge text-[11px] text-white">{n}</span>
+      {label}
+      {extra}
+    </p>
+  );
+  const SHORT: Record<BonusKind, string> = { KOUIGN_AMANN: "Kouign-Amann", GALETTES_SAUCISSES: "Galettes Saucisses", PILE_CREPES: "Pile de Crêpes" };
 
-      <div>
-        <span id={id("scorer-label")} className="label">
-          Buteur rennais
-        </span>
-        <ScorerSelect
-          name="scorerId"
-          value={v.scorer}
-          onChange={(scorer) => setV((c) => ({ ...c, scorer }))}
-          scorers={props.scorers}
-          noScorerBonus={props.noScorerBonus}
-          labelledBy={id("scorer-label")}
-          lineupPublished={props.lineupPublished}
-        />
-        <p className="mt-1 text-xs text-neutral-500">
-          {v.scorer === NO_SCORER
-            ? `+${props.noScorerBonus} points si aucun joueur rennais ne marque.`
-            : chosen
-              ? `+${chosen.bonus} point${chosen.bonus > 1 ? "s" : ""} s’il marque (points figés au coup d’envoi).`
-              : "Plus un buteur est improbable, plus il rapporte de points."}
-        </p>
-        {props.savedScorerOut && v.scorer === (init?.scorerId ?? "") && (
-          <p role="alert" className="mt-2 rounded-lg border border-red-300 bg-red-100 px-3 py-2 text-xs text-red-800">
-            ⚠️ {props.savedScorerOut} ne figure pas sur la feuille de match : il ne pourra pas marquer. Choisis un autre buteur.
+  return (
+    <form action={action} className="space-y-3">
+      <input type="hidden" name="matchId" value={props.matchId} />
+      {half && <p className="text-xs text-orange-700">Choisis un score pour les deux équipes, ou « – » pour les deux.</p>}
+
+      {/* Ordinateur : score et buteur sur une même ligne */}
+      <div className="grid gap-3 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:items-start md:gap-5">
+        <div>
+          {step(1, "Score")}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+            {scoreSelect("home", props.rennesIsHome ? "rennesGoals" : "opponentGoals", props.homeName)}
+            <span className="pb-2 font-display text-xl font-bold text-neutral-400" aria-hidden>
+              –
+            </span>
+            {scoreSelect("away", props.rennesIsHome ? "opponentGoals" : "rennesGoals", props.awayName)}
+          </div>
+        </div>
+
+        <div>
+          {step(2, "Buteur rennais")}
+          <span id={id("scorer-label")} className="sr-only">
+            Buteur rennais
+          </span>
+          <ScorerSelect
+            name="scorerId"
+            value={v.scorer}
+            onChange={(scorer) => setV((c) => ({ ...c, scorer }))}
+            scorers={props.scorers}
+            noScorerBonus={props.noScorerBonus}
+            labelledBy={id("scorer-label")}
+            lineupPublished={props.lineupPublished}
+          />
+          <p className="mt-1 text-xs text-neutral-500">
+            {v.scorer === NO_SCORER
+              ? `+${props.noScorerBonus} points si aucun joueur rennais ne marque.`
+              : chosen
+                ? `+${chosen.bonus} point${chosen.bonus > 1 ? "s" : ""} s’il marque (points figés au coup d’envoi).`
+                : "Plus un buteur est improbable, plus il rapporte de points."}
           </p>
-        )}
-        {v.scorer === NO_SCORER && rennesGoals >= 1 && (
-          <p role="alert" className="mt-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-xs text-orange-800">
-            ⚠️ Tu prévois au moins un but du Stade Rennais avec « Aucun buteur rennais » : cela signifie que le ou les buts rennais
-            seraient des buts contre leur camp de l’équipe adverse.
-          </p>
-        )}
+          {props.savedScorerOut && v.scorer === (init?.scorerId ?? "") && (
+            <p role="alert" className="mt-2 rounded-lg border border-red-300 bg-red-100 px-3 py-2 text-xs text-red-800">
+              ⚠️ {props.savedScorerOut} ne figure pas sur la feuille de match : il ne pourra pas marquer. Choisis un autre buteur.
+            </p>
+          )}
+          {v.scorer === NO_SCORER && rennesGoals >= 1 && (
+            <p role="alert" className="mt-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-xs text-orange-800">
+              ⚠️ Tu prévois au moins un but du Stade Rennais avec « Aucun buteur rennais » : cela signifie que le ou les buts rennais
+              seraient des buts contre leur camp de l’équipe adverse.
+            </p>
+          )}
+        </div>
       </div>
 
       {props.bonus && (
-        <fieldset className="space-y-2 rounded-xl border border-neutral-200 p-3">
-          <legend className="px-1 text-xs font-bold uppercase tracking-wide text-neutral-500">Les Spécialités Maison</legend>
+        <div>
+          {step(
+            3,
+            "Spécialité maison",
+            <span
+              className="font-normal normal-case tracking-normal text-neutral-500"
+              title="Un seul bonus par match. Il ne vaut que pour cette ligue : pour tes autres ligues, change de ligue et joue-le aussi là-bas."
+            >
+              · facultatif · ligue <strong className="text-neutral-700">{props.bonus.leagueName}</strong> ⓘ
+            </span>,
+          )}
           <input type="hidden" name="bonusLeagueId" value={props.bonus.leagueId} />
           <input type="hidden" name="bonusKind" value={bonusKind} />
-          <p className="text-xs text-neutral-600">
-            Bonus pour la ligue <strong>{props.bonus.leagueName}</strong> (un seul par match). Pour tes autres ligues, change de ligue
-            et joue-le aussi là-bas.
-          </p>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {BONUS_KINDS.map((k) => {
-              const left = props.bonus!.stock[k];
-              const on = bonusKind === k;
-              const needsScorer = k !== "KOUIGN_AMANN" && (v.scorer === "" || v.scorer === NO_SCORER);
-              const disabled = !on && (left <= 0 || needsScorer);
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={on}
-                  disabled={disabled}
-                  onClick={() => setBonusKind(on ? "" : k)}
-                  title={needsScorer ? "Choisis d’abord un buteur rennais" : left <= 0 ? "Plus aucun dans cette ligue cette saison" : BONUS_INFO[k].tagline}
-                  className={`flex items-center gap-2 rounded-lg border p-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                    on ? "border-rouge bg-rouge/10 ring-1 ring-rouge" : "border-neutral-200 hover:border-neutral-400"
-                  }`}
-                >
-                  <BonusIcon kind={k} size={38} />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-bold leading-tight">{BONUS_INFO[k].name}</span>
-                    <span className="block text-[11px] leading-tight text-neutral-600">{BONUS_INFO[k].effect}</span>
-                    <span className={`block text-[11px] font-semibold ${left > 0 ? "text-green-700" : "text-neutral-400"}`}>
-                      {left} restant{left > 1 ? "s" : ""}
+          {/* Les trois bonus en pastilles compactes ; le second buteur apparaît à côté si besoin */}
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <div role="radiogroup" aria-label="Spécialité maison" className="flex flex-wrap gap-2">
+              {BONUS_KINDS.map((k) => {
+                const left = props.bonus!.stock[k];
+                const on = bonusKind === k;
+                const needsScorer = k !== "KOUIGN_AMANN" && (v.scorer === "" || v.scorer === NO_SCORER);
+                const disabled = !on && (left <= 0 || needsScorer);
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    disabled={disabled}
+                    onClick={() => setBonusKind(on ? "" : k)}
+                    title={
+                      needsScorer
+                        ? `${BONUS_INFO[k].name} : choisis d’abord un buteur rennais`
+                        : left <= 0
+                          ? `${BONUS_INFO[k].name} : plus aucun dans cette ligue cette saison`
+                          : `${BONUS_INFO[k].name} : ${BONUS_INFO[k].effect}`
+                    }
+                    className={`inline-flex items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                      on ? "border-rouge bg-rouge text-white" : "border-neutral-300 hover:border-neutral-500"
+                    }`}
+                  >
+                    <BonusIcon kind={k} size={26} />
+                    {SHORT[k]}
+                    <span
+                      aria-label={`${left} restant${left > 1 ? "s" : ""}`}
+                      className={`grid h-5 min-w-5 place-items-center rounded-full px-1 text-[11px] font-bold ${
+                        on ? "bg-white text-rouge" : left > 0 ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-500"
+                      }`}
+                    >
+                      {left}
                     </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {bonusKind === "GALETTES_SAUCISSES" && (
-            <div>
-              <span id={id("second-label")} className="label">
-                Second buteur rennais
-              </span>
-              <ScorerSelect
-                name="secondScorerId"
-                value={second}
-                onChange={setSecond}
-                scorers={props.scorers.filter((p) => p.id !== v.scorer)}
-                noScorerBonus={0}
-                labelledBy={id("second-label")}
-                lineupPublished={props.lineupPublished}
-              />
+                  </button>
+                );
+              })}
             </div>
-          )}
-          {bonusKind && <p className="text-xs italic text-neutral-600">« {BONUS_INFO[bonusKind].tagline} »</p>}
-        </fieldset>
+            {bonusKind === "GALETTES_SAUCISSES" && (
+              <div className="min-w-0 md:flex-1">
+                <span id={id("second-label")} className="sr-only">
+                  Second buteur rennais
+                </span>
+                <ScorerSelect
+                  name="secondScorerId"
+                  value={second}
+                  onChange={setSecond}
+                  scorers={props.scorers.filter((p) => p.id !== v.scorer)}
+                  noScorerBonus={0}
+                  labelledBy={id("second-label")}
+                  lineupPublished={props.lineupPublished}
+                />
+              </div>
+            )}
+          </div>
+          <p className="mt-1.5 text-xs text-neutral-500">
+            {bonusKind ? (
+              <>
+                <strong className="text-neutral-700">{BONUS_INFO[bonusKind].effect}.</strong>{" "}
+                {bonusKind === "GALETTES_SAUCISSES" && !second ? "Choisis ton second buteur. " : ""}
+                <em>« {BONUS_INFO[bonusKind].tagline} »</em>
+              </>
+            ) : (
+              "Touche une spécialité pour la jouer sur ce match (le chiffre indique combien il t’en reste)."
+            )}
+          </p>
+        </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="submit"
-          disabled={pending || half || (v.home === "" && !init)}
-          className="rounded bg-rouge px-3 py-1.5 text-sm font-semibold text-white hover:bg-rouge-fonce disabled:opacity-40"
-        >
-          {pending ? "Enregistrement…" : "Enregistrer mon pronostic"}
-        </button>
+      {/* Actions, alignées à droite */}
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-neutral-200 pt-3">
+        {state.error && (
+          <span role="alert" className="mr-auto text-xs font-medium text-red-700">
+            {state.error}
+          </span>
+        )}
         <button
           type="submit"
           name="clearPrediction"
@@ -252,7 +294,13 @@ export function MyPrediction(props: {
         >
           Réinitialiser
         </button>
-        {state.error && <span role="alert" className="text-xs font-medium text-red-700">{state.error}</span>}
+        <button
+          type="submit"
+          disabled={pending || half || (v.home === "" && !init)}
+          className="rounded bg-rouge px-4 py-1.5 text-sm font-semibold text-white hover:bg-rouge-fonce disabled:opacity-40"
+        >
+          {pending ? "Enregistrement…" : "Enregistrer mon pronostic"}
+        </button>
       </div>
     </form>
   );
