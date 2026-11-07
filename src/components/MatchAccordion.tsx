@@ -45,7 +45,7 @@ export interface MatchHeader {
 function Team({ t, open, home = false }: { t: MatchHeader["home"]; open: boolean; home?: boolean }) {
   const logo = t.logo ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={t.logo} alt="" width={20} height={20} loading="lazy" className={`h-5 w-5 shrink-0 object-contain ${open ? "rounded-full bg-white p-px" : ""}`} />
+    <img src={t.logo} alt="" width={20} height={20} loading="lazy" className={`shrink-0 object-contain ${open ? "h-6 w-6 rounded-md bg-white p-0.5" : "h-5 w-5"}`} />
   ) : null;
   return (
     <span className={`inline-flex min-w-0 items-center gap-1.5 ${t.rennes ? "font-extrabold" : "font-semibold"}`}>

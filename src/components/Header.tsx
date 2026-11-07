@@ -178,9 +178,9 @@ export async function Header() {
               <span className="hicon bg-white">
                 {rennesLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={rennesLogo} alt="" width={16} height={16} className="h-[72%] w-[72%] object-contain" />
+                  <img src={rennesLogo} alt="" width={16} height={16} className="h-[62%] w-[62%] object-contain" />
                 ) : (
-                  <Logo className="h-[72%] w-[72%]" />
+                  <Logo className="h-[62%] w-[62%]" />
                 )}
               </span>
               {/* Sur mobile : blason + podium, pour ne pas déborder */}
