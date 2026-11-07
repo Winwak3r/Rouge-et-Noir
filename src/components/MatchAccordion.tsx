@@ -124,7 +124,7 @@ export function MatchAccordion({ h, children }: { h: MatchHeader; children: Reac
         }`}
       >
         <span className={`flex w-full items-start gap-3 ${h.cancelled ? "opacity-35" : ""}`}>
-          <span className={`mt-0.5 w-10 shrink-0 font-display text-2xl font-black ${open ? "text-white/60" : "text-neutral-300"}`}>{h.code}</span>
+          <span className={`mt-0.5 w-10 shrink-0 font-display text-2xl font-black ${open ? "text-white/60" : "match-code"}`}>{h.code}</span>
           <span className="min-w-0 flex-1">
             <span className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:hidden">{badges(true)}</span>
             <span className={`mb-1 flex items-center gap-1.5 text-sm ${open ? "text-white/85" : "text-neutral-600"}`}>

@@ -314,3 +314,7 @@ body::before {
 :root[data-theme="dark"] .match-head-ligue_1:hover { background-color: #162443; }
 :root[data-theme="dark"] .match-head-europa_league:hover { background-color: #3a2410; }
 :root[data-theme="dark"] .match-head-coupe_de_france:hover { background-color: #3d151a; }
+
+/* Journée du match (J1, J2…) : plus foncée en thème clair, plus claire en thème sombre */
+.match-code { color: #7a7a7a; }
+:root[data-theme="dark"] .match-code { color: #a3a3a3; }
