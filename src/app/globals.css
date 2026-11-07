@@ -248,3 +248,10 @@
 @media (prefers-reduced-motion: reduce) {
   .menu-unfold { animation: none; }
 }
+
+/* Thème sombre : fond d'écran à motif d'hermines bretonnes, tout au fond de la page (derrière tout le contenu) */
+:root[data-theme="dark"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='214'%3E%3Cg transform='translate(27 30) scale(1.25)' fill='%237d8791'%3E %3Cellipse cx='0' cy='-12' rx='1.6' ry='2.6'/%3E %3Cellipse cx='-4.2' cy='-9' rx='1.5' ry='2.4' transform='rotate(-55 -4.2 -9)'/%3E %3Cellipse cx='4.2' cy='-9' rx='1.5' ry='2.4' transform='rotate(55 4.2 -9)'/%3E %3Ccircle cx='0' cy='-8' r='1.8'/%3E %3Cpath d='M0 -5.5C2.6 -1 4.6 5 5.6 11.5L2.2 8.6L0 12.8L-2.2 8.6L-5.6 11.5C-4.6 5 -2.6 -1 0 -5.5Z'/%3E %3C/g%3E%3Cg transform='translate(82 137) scale(1.25)' fill='%237d8791'%3E %3Cellipse cx='0' cy='-12' rx='1.6' ry='2.6'/%3E %3Cellipse cx='-4.2' cy='-9' rx='1.5' ry='2.4' transform='rotate(-55 -4.2 -9)'/%3E %3Cellipse cx='4.2' cy='-9' rx='1.5' ry='2.4' transform='rotate(55 4.2 -9)'/%3E %3Ccircle cx='0' cy='-8' r='1.8'/%3E %3Cpath d='M0 -5.5C2.6 -1 4.6 5 5.6 11.5L2.2 8.6L0 12.8L-2.2 8.6L-5.6 11.5C-4.6 5 -2.6 -1 0 -5.5Z'/%3E %3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-position: top center;
+}
