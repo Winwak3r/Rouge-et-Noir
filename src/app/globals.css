@@ -309,3 +309,8 @@ body::before {
 :root:not([data-theme="dark"]) .match-head-ligue_1:hover { background-color: #e3e9fb; }
 :root:not([data-theme="dark"]) .match-head-europa_league:hover { background-color: #fdecd9; }
 :root:not([data-theme="dark"]) .match-head-coupe_de_france:hover { background-color: #fbe2e5; }
+
+/* Thème sombre : même effet au survol, en teintes foncées (le texte clair reste bien lisible) */
+:root[data-theme="dark"] .match-head-ligue_1:hover { background-color: #162443; }
+:root[data-theme="dark"] .match-head-europa_league:hover { background-color: #3a2410; }
+:root[data-theme="dark"] .match-head-coupe_de_france:hover { background-color: #3d151a; }
