@@ -11,6 +11,10 @@ import { formatDate } from "@/lib/dates";
 import { Avatar } from "@/components/Avatar";
 import { ProfileStats } from "@/components/ProfileStats";
 import { SeasonHistory } from "@/components/SeasonHistory";
+import { BonusIcon } from "@/components/BonusIcon";
+import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
+import { bonusStock } from "@/lib/bonus-data";
+import { prisma } from "@/lib/db";
 import { activeLeagueScope } from "@/lib/leagues";
 
 export const metadata: Metadata = { title: "Mon compte" };
@@ -54,9 +58,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         </form>
       </div>
 
-      <ProfileStats userId={user.id} memberIds={memberIds} since={scope?.since} competitions={scope?.competitions} showMissing={false} />
+      <ProfileStats userId={user.id} memberIds={memberIds} since={scope?.since} competitions={scope?.competitions} leagueId={scope && !scope.general ? scope.leagueId : null} showMissing={false} />
 
       <SeasonHistory userId={user.id} memberIds={memberIds} />
+
+      <BonusStocks userId={user.id} />
 
       <section className="card max-w-md">
         <h2 className="mb-4 font-display text-xl font-bold uppercase tracking-wide">Photo de profil</h2>
@@ -91,5 +97,37 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <ChangePasswordForm />
       </section>
     </div>
+  );
+}
+
+
+/** « Les Spécialités Maison » restantes dans chacune de mes ligues (saison en cours). */
+async function BonusStocks({ userId }: { userId: string }) {
+  const [season, memberships] = await Promise.all([
+    prisma.season.findFirst({ where: { isCurrent: true }, select: { id: true } }),
+    prisma.leagueMember.findMany({ where: { userId, isActive: true }, include: { league: { select: { id: true, name: true } } } }),
+  ]);
+  if (!season || memberships.length === 0) return null;
+  const stocks = await Promise.all(memberships.map((m) => bonusStock(userId, m.league.id, season.id)));
+  return (
+    <section className="space-y-3">
+      <h2 className="font-display text-xl font-bold uppercase tracking-wide">Mes Spécialités Maison</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {memberships.map((m, i) => (
+          <div key={m.league.id} className="card space-y-2">
+            <p className="font-semibold">{m.league.name}</p>
+            <ul className="space-y-1.5">
+              {BONUS_KINDS.map((k) => (
+                <li key={k} className="flex items-center gap-2 text-sm">
+                  <BonusIcon kind={k} size={28} />
+                  <span className="flex-1">{BONUS_INFO[k].name}</span>
+                  <span className={`font-bold tabular-nums ${stocks[i][k] > 0 ? "text-green-700" : "text-neutral-400"}`}>{stocks[i][k]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

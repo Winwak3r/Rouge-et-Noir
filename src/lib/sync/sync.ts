@@ -8,9 +8,10 @@ import type { FootballProvider, ProviderTeam } from "@/lib/providers/types";
 import { emailRemindersEnabled, sendEmailReminders } from "@/lib/email-reminders";
 import { sendReminders } from "@/lib/push/send";
 import { syncSquadPhotos } from "./squad-photos-sync";
+import { bonusPoints } from "@/lib/scoring/bonus";
 import { notifyEves, notifyMatchProgress, notifyPrematch } from "@/lib/push/match-notify";
 import { getActiveRules, getRulesByVersion } from "@/lib/scoring/active-rules";
-import { lockTime, scoreParticipantForMatch } from "@/lib/scoring/engine";
+import { lockTime, oddsToBonus, scoreParticipantForMatch } from "@/lib/scoring/engine";
 import type { ScoreLine } from "@/lib/scoring/rules";
 
 const MIN = 60_000;
@@ -395,6 +396,7 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
   });
   if (m.status === "CANCELLED") {
     await prisma.predictionResult.deleteMany({ where: { matchId } });
+    await prisma.bonusUse.deleteMany({ where: { matchId } }); // match annulé : bonus rendus
     return 0;
   }
   if (!m.resultConfirmedAt || m.regHomeScore === null || m.regAwayScore === null) return 0;
@@ -421,6 +423,7 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
 
   const ops: Prisma.PrismaPromise<unknown>[] = [];
   let scored = 0;
+  const computed = new Map<string, { total: number; scorerPoints: number; scorerId: string | null }>();
   for (const u of users) {
     const p = byUser.get(u.id);
     const s = scoreParticipantForMatch(
@@ -451,6 +454,7 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
       continue;
     }
     scored++;
+    computed.set(u.id, { total: s.totalPoints, scorerPoints: s.scorerPoints, scorerId: p?.scorerId ?? null });
     const data = {
       predictionId: p?.id ?? null,
       category: s.category,
@@ -470,6 +474,29 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
         update: data,
       }),
     );
+  }
+  // « Les Spécialités Maison » : points ajoutés par chaque bonus joué (dans sa ligue)
+  const bonuses = await prisma.bonusUse.findMany({ where: { matchId } });
+  if (bonuses.length) {
+    const odds = await prisma.playerOdds.findMany({ where: { matchId } });
+    const oddsOf = new Map(odds.map((o) => [o.playerId, Number(o.odds)]));
+    const fallback = rules.scorerFallback.mode === "FIXED" ? rules.scorerFallback.fixedBonus : 0;
+    for (const b of bonuses) {
+      const c = computed.get(b.userId);
+      const secondOdds = b.secondScorerId ? oddsOf.get(b.secondScorerId) : undefined;
+      const points = c
+        ? bonusPoints({
+            kind: b.kind,
+            matchTotal: c.total,
+            scorerId: c.scorerId,
+            scorerPoints: c.scorerPoints,
+            secondScorerId: b.secondScorerId,
+            secondScorerBonus: secondOdds ? oddsToBonus(secondOdds, rules) : fallback,
+            rennesGoalScorerIds: scorerIds,
+          })
+        : 0;
+      ops.push(prisma.bonusUse.update({ where: { id: b.id }, data: { points } }));
+    }
   }
   ops.push(prisma.match.update({ where: { id: matchId }, data: { scoredAt: new Date(), rulesVersion: rules.version } }));
   await prisma.$transaction(ops);

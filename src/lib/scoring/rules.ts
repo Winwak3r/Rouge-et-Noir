@@ -26,6 +26,8 @@ export interface ScoringRules {
   noScorerBonus: number;
   /** Règle de secours quand aucune cote n'a été figée pour le buteur choisi. */
   scorerFallback: { mode: "FIXED" | "NONE"; fixedBonus: number };
+  /** « Les Spécialités Maison » : nombre de bonus par saison, dans chaque ligue */
+  bonusQuotas?: { KOUIGN_AMANN: number; GALETTES_SAUCISSES: number; PILE_CREPES: number };
 }
 
 export const DEFAULT_RULES: ScoringRules = {
@@ -35,4 +37,5 @@ export const DEFAULT_RULES: ScoringRules = {
   scorerBonus: { oddsDivisor: 2, minBonus: 1, maxBonus: 6 },
   noScorerBonus: 2,
   scorerFallback: { mode: "FIXED", fixedBonus: 1 },
+  bonusQuotas: { KOUIGN_AMANN: 1, GALETTES_SAUCISSES: 2, PILE_CREPES: 2 },
 };

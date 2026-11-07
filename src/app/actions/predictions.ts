@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { BONUS_INFO, BONUS_KINDS, bonusChoiceError, type BonusKind } from "@/lib/scoring/bonus";
+import { bonusStock } from "@/lib/bonus-data";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { canEditPrediction } from "@/lib/scoring/engine";
@@ -54,6 +56,7 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
 
   if (removing) {
     await prisma.prediction.deleteMany({ where: { userId: user.id, matchId } });
+    await prisma.bonusUse.deleteMany({ where: { userId: user.id, matchId } }); // plus de pronostic : bonus rendus
     revalidatePath("/");
     return { success: "Pronostic réinitialisé.", savedAt: undefined };
   }
@@ -89,6 +92,10 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
   // Ici les deux scores sont forcément renseignés (cas « – / – » traité plus haut)
   if (rennesGoals === null || opponentGoals === null) return { error: "Choisis un score pour les deux équipes." };
 
+  // « Les Spécialités Maison » : bonus joué dans la ligue affichée (vérifié AVANT d'enregistrer)
+  const bonus = await checkBonus(form, { userId: user.id, match, scorerId, noScorerPick });
+  if ("error" in bonus) return { error: bonus.error };
+
   try {
     await prisma.prediction.upsert({
       where: { userId_matchId: { userId: user.id, matchId } },
@@ -101,6 +108,46 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
     throw e;
   }
 
+  if (bonus.leagueId) {
+    const key = { userId_leagueId_matchId: { userId: user.id, leagueId: bonus.leagueId, matchId } };
+    if (bonus.kind) {
+      await prisma.bonusUse.upsert({
+        where: key,
+        create: { userId: user.id, leagueId: bonus.leagueId, matchId, kind: bonus.kind, secondScorerId: bonus.secondScorerId },
+        update: { kind: bonus.kind, secondScorerId: bonus.secondScorerId, points: null },
+      });
+    } else {
+      await prisma.bonusUse.deleteMany({ where: { userId: user.id, leagueId: bonus.leagueId, matchId } });
+    }
+  }
+
   revalidatePath("/");
   return { success: "Ton pronostic a bien été enregistré.", savedAt: now.toISOString() };
+}
+
+
+/** Bonus choisi dans le formulaire : vérifié (ligue, stock, conditions). Rien à faire sans ligue. */
+async function checkBonus(
+  form: FormData,
+  ctx: { userId: string; match: { id: string; seasonId: string }; scorerId: string | null; noScorerPick: boolean },
+): Promise<{ error: string } | { leagueId: string | null; kind: BonusKind | null; secondScorerId: string | null }> {
+  const leagueId = typeof form.get("bonusLeagueId") === "string" ? (form.get("bonusLeagueId") as string) : "";
+  if (!leagueId) return { leagueId: null, kind: null, secondScorerId: null };
+  const member = await prisma.leagueMember.findUnique({ where: { leagueId_userId: { leagueId, userId: ctx.userId } } });
+  if (!member?.isActive) return { leagueId: null, kind: null, secondScorerId: null };
+  const raw = String(form.get("bonusKind") ?? "");
+  if (!raw) return { leagueId, kind: null, secondScorerId: null };
+  if (!BONUS_KINDS.includes(raw as BonusKind)) return { error: "Bonus inconnu." };
+  const kind = raw as BonusKind;
+  const secondRaw = String(form.get("secondScorerId") ?? "");
+  const secondScorerId = kind === "GALETTES_SAUCISSES" && secondRaw ? secondRaw : null;
+  const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick, secondScorerId });
+  if (err) return { error: err };
+  if (secondScorerId) {
+    const ok = await prisma.player.findFirst({ where: { id: secondScorerId, seasonId: ctx.match.seasonId, isActive: true }, select: { id: true } });
+    if (!ok) return { error: "Le second buteur ne fait plus partie de l’effectif." };
+  }
+  const stock = await bonusStock(ctx.userId, leagueId, ctx.match.seasonId, ctx.match.id);
+  if (stock[kind] <= 0) return { error: `Tu n’as plus de « ${BONUS_INFO[kind].name} » dans cette ligue cette saison.` };
+  return { leagueId, kind, secondScorerId };
 }

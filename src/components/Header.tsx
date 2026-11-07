@@ -11,6 +11,8 @@ import { LeagueSwitcher } from "./LeagueSwitcher";
 import { BottomNav } from "./BottomNav";
 import { Avatar } from "./Avatar";
 import { CompetitionBadge } from "./CompetitionBadge";
+import { leagueBonusPoints } from "@/lib/bonus-data";
+import { withBonuses } from "@/lib/scoring/bonus";
 import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { LeagueWelcome } from "./LeagueWelcome";
@@ -46,9 +48,11 @@ export async function Header() {
           }),
           prisma.predictionResult.findMany({
             where: { user: { isActive: true }, userId: { in: [...(ids ?? [])] }, ...scopeResultFilter(scope) },
-            select: { userId: true, category: true, totalPoints: true, correctScorer: true },
+            select: { userId: true, matchId: true, category: true, totalPoints: true, correctScorer: true },
           }),
-        ]).then(([users, rows]) => buildStandings(users.map((u) => ({ userId: u.id, pseudo: u.pseudo })), rows))
+          // Ligue : ses bonus « Spécialités Maison » s'ajoutent (pas dans le Général R&N)
+          scope && !scope.general ? leagueBonusPoints(scope.leagueId) : Promise.resolve([]),
+        ]).then(([users, rows, bonuses]) => buildStandings(users.map((u) => ({ userId: u.id, pseudo: u.pseudo })), withBonuses(rows, bonuses)))
       : Promise.resolve(null),
     prisma.syncLog.findFirst({ where: { status: { not: "FAILED" } }, orderBy: { startedAt: "desc" } }),
   ]);

@@ -367,6 +367,7 @@ export async function cancelSimulationAction(_: AdminState, form: FormData): Pro
   const backup = match.simulation as unknown as { status?: "SCHEDULED" | "POSTPONED" };
   await prisma.$transaction([
     prisma.predictionResult.deleteMany({ where: { matchId: match.id } }),
+    prisma.bonusUse.updateMany({ where: { matchId: match.id }, data: { points: null } }),
     prisma.matchGoal.deleteMany({ where: { matchId: match.id } }),
     prisma.matchCard.deleteMany({ where: { matchId: match.id } }),
     prisma.match.update({
@@ -519,4 +520,32 @@ export async function saveClubColorsAction(_: AdminState, form: FormData): Promi
   await audit(admin.id, "CLUB_COLORS", "Team", teamId, undefined, { color1, color2 });
   for (const p of ["/", "/admin/logos", "/classements-srfc"]) revalidatePath(p, "layout");
   return { message: "Couleurs enregistrées." };
+}
+
+
+/** Ajouter (ou retirer) un bonus à un joueur dans une ligue. */
+export async function grantBonusAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const [userId, leagueId] = str(form, "member").split(":");
+  const kind = str(form, "kind");
+  const delta = str(form, "mode") === "remove" ? -1 : 1;
+  if (!["KOUIGN_AMANN", "GALETTES_SAUCISSES", "PILE_CREPES"].includes(kind)) return { error: "Bonus inconnu." };
+  const member = await prisma.leagueMember.findUnique({ where: { leagueId_userId: { leagueId, userId } }, include: { user: true, league: true } });
+  if (!member) return { error: "Ce joueur n’est pas dans cette ligue." };
+  await prisma.bonusGrant.create({ data: { userId, leagueId, kind: kind as "KOUIGN_AMANN", delta } });
+  await audit(admin.id, "BONUS_GRANT", "BonusGrant", `${userId}:${leagueId}`, undefined, { kind, delta });
+  refresh("/admin/bonus");
+  return { message: `${delta > 0 ? "Bonus ajouté à" : "Bonus retiré à"} ${member.user.pseudo} (ligue ${member.league.name}).` };
+}
+
+/** Rendre un bonus joué (le retirer d'un match pas encore verrouillé ou annulé par erreur). */
+export async function refundBonusAction(_: AdminState, form: FormData): Promise<AdminState> {
+  const admin = await requireAdmin();
+  const id = str(form, "bonusId");
+  const b = await prisma.bonusUse.findUnique({ where: { id }, include: { user: true } });
+  if (!b) return { error: "Bonus introuvable." };
+  await prisma.bonusUse.delete({ where: { id } });
+  await audit(admin.id, "BONUS_REFUND", "BonusUse", id, { kind: b.kind, matchId: b.matchId, leagueId: b.leagueId });
+  refresh("/admin/bonus");
+  return { message: `Bonus rendu à ${b.user.pseudo}.` };
 }

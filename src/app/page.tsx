@@ -30,6 +30,9 @@ import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { Landing } from "@/components/landing/Landing";
+import { BonusIcon } from "@/components/BonusIcon";
+import { BONUS_INFO, withBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
+import { bonusStock } from "@/lib/bonus-data";
 import { TeamLabel } from "@/components/TeamLabel";
 import { ScorerPlaceholder } from "@/components/ScorerPlaceholder";
 import { activeLeagueScope } from "@/lib/leagues";
@@ -62,6 +65,12 @@ export default async function HomePage() {
     prisma.prediction.groupBy({ by: ["matchId"], where: inScope ? { userId: inScope } : {}, _count: { _all: true } }),
     getLeagueLogos(),
   ]);
+  // « Les Spécialités Maison » de la ligue affichée (le Général R&N n'en a pas)
+  const bonusLeague = user && scope && !scope.general ? { id: scope.leagueId, name: scope.name } : null;
+  const currentSeasonId = matches[0]?.seasonId ?? null;
+  const leagueBonuses: LeagueBonus[] = bonusLeague ? await loadLeagueBonuses(bonusLeague.id, matches.map((x) => x.id)) : [];
+  const bonusStockAll: BonusQuotas | null = bonusLeague && currentSeasonId ? await bonusStock(user!.id, bonusLeague.id, currentSeasonId) : null;
+
   // Écussons : officiels ou factices selon le réglage de l'administration
   const logoMode = await clubLogosMode();
   for (const m of matches) {
@@ -222,7 +231,13 @@ export default async function HomePage() {
       );
     }
 
-    const matchResults = allResults.filter((r) => r.matchId === m.id);
+    const matchBonuses = leagueBonuses.filter((b) => b.matchId === m.id);
+    // Points de la ligue : ceux du pronostic + ceux des bonus joués dans cette ligue
+    const matchResults = withBonuses(
+      allResults.filter((r) => r.matchId === m.id),
+      matchBonuses,
+    );
+    const myBonusUse = user ? matchBonuses.find((b) => b.userId === user.id) : undefined;
     // Points en direct : match en cours, ou terminé mais pas encore confirmé
     const nowScore =
       !m.resultConfirmedAt && score && (m.status === "LIVE" || m.status === "INTERRUPTED" || m.status === "FINISHED")
@@ -334,6 +349,17 @@ export default async function HomePage() {
           </div>
         </div>
 
+        {myBonusUse && (
+          <div className="flex items-center gap-2 border-neutral-200 md:border-l md:pl-5">
+            <BonusIcon kind={myBonusUse.kind} size={40} />
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Spécialité maison</p>
+              <p className="whitespace-nowrap font-semibold">{BONUS_INFO[myBonusUse.kind].name}</p>
+              {myBonusUse.secondScorer && <p className="truncate text-xs text-neutral-600">2e buteur : {myBonusUse.secondScorer.name}</p>}
+            </div>
+          </div>
+        )}
+
         {/* Mobile : le buteur sous le score, photo à droite */}
         <div className="flex items-stretch gap-3 md:hidden">
           <div className="min-w-0 flex-1">
@@ -394,6 +420,17 @@ export default async function HomePage() {
             }
             initial={my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null}
             summary={opts.layout === "next" || (opts.layout !== "top" && editable) ? summaryNode : undefined}
+            bonus={
+              bonusLeague && bonusStockAll
+                ? {
+                    leagueId: bonusLeague.id,
+                    leagueName: bonusLeague.name,
+                    // stock sans compter le bonus déjà posé sur CE match
+                    stock: myBonusUse ? { ...bonusStockAll, [myBonusUse.kind]: bonusStockAll[myBonusUse.kind] + 1 } : bonusStockAll,
+                    current: myBonusUse ? { kind: myBonusUse.kind, secondScorerId: myBonusUse.secondScorerId } : null,
+                  }
+                : undefined
+            }
           />
         ) : editable ? (
           <p className="text-sm text-neutral-600">
@@ -404,7 +441,12 @@ export default async function HomePage() {
           </p>
         ) : null
     );
-    const comparisonNode = user && rows.length > 0 ? <Comparison rows={rows} live={m.status === "LIVE" || m.status === "INTERRUPTED"} /> : null;
+    const rowsWithBonus = rows.map((r) => {
+      const b = matchBonuses.find((x) => x.userId === r.userId);
+      // le bonus des autres n'est visible qu'après le coup d'envoi (le mien, toujours)
+      return b && (isPublic || r.mine) ? { ...r, bonus: { kind: b.kind, points: b.points, second: b.secondScorer?.name ?? null } } : r;
+    });
+    const comparisonNode = user && rows.length > 0 ? <Comparison rows={rowsWithBonus} live={m.status === "LIVE" || m.status === "INTERRUPTED"} /> : null;
     const resultNode = score ? (
       <MatchResult
         title={finalScore ? (m.resultConfirmedAt ? "Résultat officiel" : "Résultat officiel (en attente de confirmation)") : "Résultat officiel · en direct"}
@@ -638,3 +680,13 @@ export default async function HomePage() {
     </AccordionGroup>
   );
 }
+
+
+/** Bonus « Spécialités Maison » joués dans une ligue, sur les matchs affichés. */
+async function loadLeagueBonuses(leagueId: string, matchIds: string[]) {
+  return prisma.bonusUse.findMany({
+    where: { leagueId, matchId: { in: matchIds } },
+    include: { secondScorer: { select: { name: true } } },
+  });
+}
+type LeagueBonus = Awaited<ReturnType<typeof loadLeagueBonuses>>[number];

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import type { ChipTone, CompRow, RowStatus } from "@/lib/match-view";
 import { Avatar } from "./Avatar";
+import { BonusIcon } from "./BonusIcon";
+import { BONUS_INFO } from "@/lib/scoring/bonus";
 
 // Vert : exact · vert clair : bon écart · jaune : bon vainqueur · rouge : faux
 // Pastille avant le score / le buteur — vert éclatant : exact · vert normal : bon écart · vert clair : bon vainqueur · rouge : faux
@@ -101,6 +103,17 @@ export function Comparison({ rows, live = false }: { rows: CompRow[]; live?: boo
                   <Status label="Buteur" s={r.scorerStatus} />
                 </span>
                 <span className="col-start-2 row-span-2 row-start-1 shrink-0 text-right text-xs text-neutral-500 sm:col-start-3 sm:row-span-1">
+                  {/* Spécialité maison jouée dans cette ligue */}
+                  {r.bonus && (
+                    <span
+                      className="mr-2 inline-flex items-center gap-1 align-middle"
+                      title={`${BONUS_INFO[r.bonus.kind].name}${r.bonus.second ? ` (2e buteur : ${r.bonus.second})` : ""}${r.bonus.points != null ? ` : +${r.bonus.points} pt${r.bonus.points > 1 ? "s" : ""}` : ""}`}
+                    >
+                      <BonusIcon kind={r.bonus.kind} size={20} />
+                      {r.bonus.points != null && r.bonus.points > 0 && <span className="text-[11px] font-bold text-green-700">+{r.bonus.points}</span>}
+                      <span className="sr-only">{BONUS_INFO[r.bonus.kind].name}</span>
+                    </span>
+                  )}
                   Total{" "}
                   <strong className="ml-1 text-sm tabular-nums text-green-700">{r.total === null ? "—" : `${r.total} pts`}</strong>
                   {live && r.provisional && r.total !== null && (

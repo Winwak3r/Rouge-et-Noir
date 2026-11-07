@@ -89,6 +89,8 @@ model User {
   emailTokens  EmailToken[]
   leagues      LeagueMember[]
   leaguesMade  League[]      @relation("LeagueCreator")
+  bonusUses    BonusUse[]
+  bonusGrants  BonusGrant[]
 }
 
 // ─── Ligues : groupes de joueurs qui jouent entre eux ───────────────────────
@@ -112,6 +114,8 @@ model League {
   createdBy User?          @relation("LeagueCreator", fields: [createdById], references: [id], onDelete: SetNull)
   members   LeagueMember[]
   image     LeagueImage?
+  bonusUses   BonusUse[]
+  bonusGrants BonusGrant[]
 }
 
 model LeagueMember {
@@ -299,6 +303,7 @@ model Match {
   // Feuille de match publiée (titulaires + remplaçants), en général 1 h avant le coup d'envoi.
   lineupAt     DateTime?
   events       MatchEvent[]
+  bonusUses    BonusUse[]
   // Cotes du match (victoire domicile / nul / victoire extérieur), pour les indices d'avant-match
   oddsHome     Float?
   oddsDraw     Float?
@@ -364,6 +369,7 @@ model Player {
   lineups     MatchLineup[]
   predictions Prediction[]
   image       PlayerImage?
+  secondScorerBonuses BonusUse[] @relation("SecondScorer")
 
   @@unique([externalId, seasonId])
 }
@@ -565,4 +571,48 @@ model MatchEvent {
   match            Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, externalEventKey])
+}
+
+// ─── « Les Spécialités Maison » : bonus joués dans UNE ligue ────────────────
+
+enum BonusKind {
+  KOUIGN_AMANN
+  GALETTES_SAUCISSES
+  PILE_CREPES
+}
+
+model BonusUse {
+  id             String    @id @default(cuid())
+  userId         String
+  leagueId       String
+  matchId        String
+  kind           BonusKind
+  secondScorerId String? // Galettes Saucisses : le second buteur
+  points         Int? // points AJOUTÉS une fois le match noté
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league       League  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  match        Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  secondScorer Player? @relation("SecondScorer", fields: [secondScorerId], references: [id])
+
+  @@unique([userId, leagueId, matchId]) // un seul bonus par match et par ligue
+  @@index([leagueId])
+  @@index([matchId])
+}
+
+// Bonus ajoutés (ou rendus) par l'administrateur à un joueur, dans une ligue.
+model BonusGrant {
+  id        String    @id @default(cuid())
+  userId    String
+  leagueId  String
+  kind      BonusKind
+  delta     Int       @default(1)
+  createdAt DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@index([userId, leagueId])
 }

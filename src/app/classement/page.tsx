@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { activeLeagueScope, generalPlayers } from "@/lib/leagues";
 import { getLeagueLogos } from "@/lib/league-logos";
+import { withBonuses } from "@/lib/scoring/bonus";
 
 export const metadata: Metadata = { title: "Classement" };
 export const dynamic = "force-dynamic";
@@ -38,7 +39,7 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
     prisma.user.findMany({ where: { isActive: true, id: { in: [...everyone] } }, select: { id: true, pseudo: true, avatarUpdatedAt: true } }),
     prisma.predictionResult.findMany({
       where: { user: { isActive: true }, userId: { in: [...everyone] } },
-      select: { userId: true, category: true, totalPoints: true, correctScorer: true, match: { select: { kickoffAt: true, competition: true } } },
+      select: { userId: true, matchId: true, category: true, totalPoints: true, correctScorer: true, match: { select: { kickoffAt: true, competition: true } } },
     }),
   ]);
   const avatarOf = new Map(users.map((u) => [u.id, u.avatarUpdatedAt?.getTime() ?? null]));
@@ -47,11 +48,17 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
   const ALL: Code[] = ["LIGUE_1", "EUROPA_LEAGUE", "COUPE_DE_FRANCE"];
   // Données de chaque vue : joueurs + résultats bruts ; le classement est calculé dans le navigateur
   // (ce qui permet de le recalculer instantanément selon les compétitions cochées).
-  const viewData = (ids: Set<string>, since: Date | null, competitions: Code[]) => ({
+  const bonusRows = await prisma.bonusUse.findMany({
+    where: { leagueId: { in: memberships.map((m) => m.leagueId) }, points: { not: null } },
+    select: { leagueId: true, userId: true, matchId: true, points: true },
+  });
+  const viewData = (ids: Set<string>, since: Date | null, competitions: Code[], leagueId?: string) => ({
     competitions,
     players: users.filter((u) => ids.has(u.id)).map((u) => ({ userId: u.id, pseudo: u.pseudo, avatarAt: avatarOf.get(u.id) ?? null })),
-    results: results
-      .filter((r) => ids.has(r.userId) && (!since || r.match.kickoffAt >= since) && competitions.includes(r.match.competition))
+    results: withBonuses(
+      results.filter((r) => ids.has(r.userId) && (!since || r.match.kickoffAt >= since) && competitions.includes(r.match.competition)),
+      leagueId ? bonusRows.filter((b) => b.leagueId === leagueId) : [], // le Général R&N reste sans bonus
+    )
       .map((r) => ({ userId: r.userId, category: r.category, totalPoints: r.totalPoints, correctScorer: r.correctScorer, competition: r.match.competition })),
   });
 
@@ -61,7 +68,7 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
       name: m.league.name,
       imageAt: m.league.imageUpdatedAt?.getTime() ?? null,
       note: "Classement de la ligue depuis sa création : tous ses joueurs sont partis de 0 point.",
-      ...viewData(new Set(m.league.members.map((x) => x.userId)), m.league.createdAt, m.league.competitions),
+      ...viewData(new Set(m.league.members.map((x) => x.userId)), m.league.createdAt, m.league.competitions, m.leagueId),
     })),
     {
       key: "general",

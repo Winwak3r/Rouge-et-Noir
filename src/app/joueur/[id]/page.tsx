@@ -63,7 +63,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
           ))}
         </section>
       )}
-      <ProfileStats userId={u.id} memberIds={scope?.memberIds ?? null} since={scope?.since} competitions={scope?.competitions} />
+      <ProfileStats userId={u.id} memberIds={scope?.memberIds ?? null} since={scope?.since} competitions={scope?.competitions} leagueId={scope && !scope.general ? scope.leagueId : null} />
     </div>
   );
 }

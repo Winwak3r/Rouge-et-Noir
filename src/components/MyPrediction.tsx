@@ -3,6 +3,8 @@
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { savePredictionAction, type PredictionState } from "@/app/actions/predictions";
 import { NO_SCORER, ScorerSelect, type ScorerOption } from "./ScorerSelect";
+import { BonusIcon } from "./BonusIcon";
+import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib/scoring/bonus";
 import { TeamLabel } from "./TeamLabel";
 
 export type { ScorerOption };
@@ -27,6 +29,13 @@ export function MyPrediction(props: {
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
   /** Encart « Score / Buteur » affiché quand le formulaire est replié. */
   summary?: ReactNode;
+  /** « Les Spécialités Maison » : bonus jouable dans la ligue affichée (absent pour le Général R&N ou sans ligue) */
+  bonus?: {
+    leagueId: string;
+    leagueName: string;
+    stock: BonusQuotas; // restant dans la ligue, sans compter le bonus déjà posé sur ce match
+    current: { kind: BonusKind; secondScorerId: string | null } | null;
+  };
 }) {
   const [state, action, pending] = useActionState<PredictionState, FormData>(savePredictionAction, {});
   const [expanded, setExpanded] = useState(false);
@@ -37,6 +46,8 @@ export function MyPrediction(props: {
     scorer: init?.scorerId ?? (init?.noScorerPick ? NO_SCORER : ""),
   });
   const [v, setV] = useState(fromProps);
+  const [bonusKind, setBonusKind] = useState<BonusKind | "">(props.bonus?.current?.kind ?? "");
+  const [second, setSecond] = useState(props.bonus?.current?.secondScorerId ?? "");
   const initKey = JSON.stringify(init);
   useEffect(() => setV(fromProps()), [initKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -160,6 +171,65 @@ export function MyPrediction(props: {
         )}
       </div>
 
+      {props.bonus && (
+        <fieldset className="space-y-2 rounded-xl border border-neutral-200 p-3">
+          <legend className="px-1 text-xs font-bold uppercase tracking-wide text-neutral-500">Les Spécialités Maison</legend>
+          <input type="hidden" name="bonusLeagueId" value={props.bonus.leagueId} />
+          <input type="hidden" name="bonusKind" value={bonusKind} />
+          <p className="text-xs text-neutral-600">
+            Bonus pour la ligue <strong>{props.bonus.leagueName}</strong> (un seul par match). Pour tes autres ligues, change de ligue
+            et joue-le aussi là-bas.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {BONUS_KINDS.map((k) => {
+              const left = props.bonus!.stock[k];
+              const on = bonusKind === k;
+              const needsScorer = k !== "KOUIGN_AMANN" && (v.scorer === "" || v.scorer === NO_SCORER);
+              const disabled = !on && (left <= 0 || needsScorer);
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={on}
+                  disabled={disabled}
+                  onClick={() => setBonusKind(on ? "" : k)}
+                  title={needsScorer ? "Choisis d’abord un buteur rennais" : left <= 0 ? "Plus aucun dans cette ligue cette saison" : BONUS_INFO[k].tagline}
+                  className={`flex items-center gap-2 rounded-lg border p-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                    on ? "border-rouge bg-rouge/10 ring-1 ring-rouge" : "border-neutral-200 hover:border-neutral-400"
+                  }`}
+                >
+                  <BonusIcon kind={k} size={38} />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-bold leading-tight">{BONUS_INFO[k].name}</span>
+                    <span className="block text-[11px] leading-tight text-neutral-600">{BONUS_INFO[k].effect}</span>
+                    <span className={`block text-[11px] font-semibold ${left > 0 ? "text-green-700" : "text-neutral-400"}`}>
+                      {left} restant{left > 1 ? "s" : ""}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {bonusKind === "GALETTES_SAUCISSES" && (
+            <div>
+              <span id={id("second-label")} className="label">
+                Second buteur rennais
+              </span>
+              <ScorerSelect
+                name="secondScorerId"
+                value={second}
+                onChange={setSecond}
+                scorers={props.scorers.filter((p) => p.id !== v.scorer)}
+                noScorerBonus={0}
+                labelledBy={id("second-label")}
+                lineupPublished={props.lineupPublished}
+              />
+            </div>
+          )}
+          {bonusKind && <p className="text-xs italic text-neutral-600">« {BONUS_INFO[bonusKind].tagline} »</p>}
+        </fieldset>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="submit"
@@ -173,7 +243,11 @@ export function MyPrediction(props: {
           name="clearPrediction"
           value="1"
           disabled={pending}
-          onClick={() => setV({ home: "", away: "", scorer: "" })}
+          onClick={() => {
+            setV({ home: "", away: "", scorer: "" });
+            setBonusKind("");
+            setSecond("");
+          }}
           className="rounded border border-neutral-300 bg-surface px-3 py-1.5 text-sm font-semibold text-noir hover:bg-neutral-100 disabled:opacity-40"
         >
           Réinitialiser

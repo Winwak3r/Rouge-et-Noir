@@ -3,6 +3,8 @@ import { ordinalFr } from "@/lib/match-view";
 import { rankHistory } from "@/lib/rank-history";
 import { buildStandings } from "@/lib/scoring/ranking";
 import { scopeResultFilter } from "@/lib/leagues";
+import { leagueBonusPoints } from "@/lib/bonus-data";
+import { withBonuses } from "@/lib/scoring/bonus";
 import { RankSparkline } from "./RankSparkline";
 
 /** Bloc « Classement » (position, points, évolution sur 5 matchs) et statistiques d'un joueur. */
@@ -14,6 +16,8 @@ export async function ProfileStats(props: {
   since?: Date | null;
   /** Compétitions de la ligue : seuls leurs matchs comptent. */
   competitions?: string[] | null;
+  /** Ligue dont les bonus s'ajoutent au classement (aucune pour le Général R&N) */
+  leagueId?: string | null;
   showMissing?: boolean;
 }) {
   const { userId } = props;
@@ -40,6 +44,10 @@ export async function ProfileStats(props: {
     }),
   ]);
   const people = participants.map((p) => ({ userId: p.id, pseudo: p.pseudo }));
+  if (inScope && props.leagueId) {
+    const withB = withBonuses(allResults, await leagueBonusPoints(props.leagueId));
+    allResults.splice(0, allResults.length, ...withB);
+  }
   const me = buildStandings(people, allResults).find((x) => x.userId === userId);
   const history = rankHistory(
     userId,

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getActiveRules } from "@/lib/scoring/active-rules";
+import { BonusIcon } from "@/components/BonusIcon";
+import { BONUS_INFO, BONUS_KINDS, DEFAULT_BONUS_QUOTAS } from "@/lib/scoring/bonus";
 import { oddsToBonus } from "@/lib/scoring/engine";
 
 export const metadata: Metadata = { title: "Règles du jeu" };
@@ -100,6 +102,36 @@ export default async function RulesPage() {
           </li>
           <li>La ligue « Par défaut » (choisie dans « Ligues ») est celle affichée à chaque connexion.</li>
           <li>Le classement « Général R&amp;N » réunit tous les joueurs inscrits dans une ligue et ayant pronostiqué, sur toute la saison.</li>
+        </ul>
+      </section>
+
+      <section className="card space-y-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Les Spécialités Maison</h2>
+        <p className="text-sm text-neutral-700">
+          Trois bonus à jouer pendant la saison, <strong>dans chacune de tes ligues</strong> : chaque ligue te donne son propre stock.
+        </p>
+        <ul className="space-y-3">
+          {BONUS_KINDS.map((k) => (
+            <li key={k} className="flex items-start gap-3">
+              <BonusIcon kind={k} size={44} />
+              <span className="text-sm text-neutral-700">
+                <strong className="text-noir">{BONUS_INFO[k].name}</strong> ({(r.bonusQuotas ?? DEFAULT_BONUS_QUOTAS)[k]} par saison et par ligue) :{" "}
+                {k === "KOUIGN_AMANN" && "tous les points du match sont doublés (score et buteur). Un pronostic à 0 point reste à 0 : le bonus est perdu."}
+                {k === "GALETTES_SAUCISSES" &&
+                  "tu choisis un second buteur rennais, différent du premier. S’il marque, il rapporte ses propres points, en plus du premier."}
+                {k === "PILE_CREPES" &&
+                  "les points de ton buteur sont comptés à chaque but qu’il marque, sans plafond : un buteur à 3 points qui fait un triplé rapporte 9 points."}
+                <span className="block italic text-neutral-500">« {BONUS_INFO[k].tagline} »</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <ul className="list-disc space-y-1 pl-5 text-sm text-neutral-700">
+          <li>Un bonus se joue dans le formulaire du pronostic, avant le verrouillage du match, et s’applique à la <strong>ligue affichée</strong>.</li>
+          <li>Un seul bonus par match et par ligue. Tant que le match n’est pas verrouillé, tu peux le retirer ou en changer : il t’est rendu.</li>
+          <li>Il faut un pronostic de score ; les Galettes Saucisses et la Pile de Crêpes demandent aussi un buteur (pas « Aucun buteur rennais »).</li>
+          <li>Match annulé : le bonus est rendu. Les bonus non utilisés sont perdus en fin de saison.</li>
+          <li>Les points des bonus comptent dans le classement de la ligue où ils ont été joués, pas dans le classement Général R&amp;N.</li>
         </ul>
       </section>
 
