@@ -16,7 +16,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { COMPETITIONS, type CompetitionCode } from "@/lib/competitions";
 import { announceCookie, effectiveContent, shouldShowAnnouncement } from "@/lib/announcement";
-import { endOfNextDayParis, formatDateTime } from "@/lib/dates";
+import { endOfNextDayParis, formatDateTime, formatShortNumeric } from "@/lib/dates";
 import { getLeagueLogos } from "@/lib/league-logos";
 import { PHASE, buildMatchRows, matchPhase } from "@/lib/match-view";
 import { getActiveRules } from "@/lib/scoring/active-rules";
@@ -30,6 +30,8 @@ import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { Landing } from "@/components/landing/Landing";
+import { PredictionSheet } from "@/components/PredictionSheet";
+import { OutcomeIndices } from "@/components/OutcomeIndices";
 import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, withBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
 import { bonusStock } from "@/lib/bonus-data";
@@ -381,21 +383,7 @@ export default async function HomePage() {
         </div>
       </div>
     ) : null;
-    const predictionNode = (
-      user ? (
-          <MyPrediction
-            matchId={m.id}
-            open={editable}
-            deadline={
-              m.status === "POSTPONED" && !m.deadlineAt ? "à la nouvelle heure officielle du coup d’envoi" : formatDateTime(lockTime(m))
-            }
-            homeName={m.homeTeam.name}
-            awayName={m.awayTeam.name}
-            rennesIsHome={m.rennesIsHome}
-            maxGoals={maxGoals}
-            noScorerBonus={rules.noScorerBonus}
-            scorers={
-              editable
+    const scorerOptions = editable
                 ? players
                     // joueurs avec une cote ET (si elle est publiée) sur la feuille de match ; le choix enregistré reste visible
                     .filter((p) => (matchOdds?.has(p.id) && (!matchLineup || matchLineup.has(p.id))) || p.id === my?.scorerId)
@@ -412,16 +400,9 @@ export default async function HomePage() {
                         role,
                       } as const;
                     })
-                : []
-            }
-            lineupPublished={Boolean(matchLineup)}
-            savedScorerOut={
-              matchLineup && my?.scorerId && !matchLineup.has(my.scorerId) ? (my.scorer?.name ?? "Ton buteur") : null
-            }
-            initial={my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null}
-            summary={opts.layout === "next" || (opts.layout !== "top" && editable) ? summaryNode : undefined}
-            bonus={
-              bonusLeague && bonusStockAll
+                : [];
+    const savedOut = matchLineup && my?.scorerId && !matchLineup.has(my.scorerId) ? (my.scorer?.name ?? "Ton buteur") : null;
+    const bonusProp = bonusLeague && bonusStockAll
                 ? {
                     leagueId: bonusLeague.id,
                     leagueName: bonusLeague.name,
@@ -429,8 +410,64 @@ export default async function HomePage() {
                     stock: myBonusUse ? { ...bonusStockAll, [myBonusUse.kind]: bonusStockAll[myBonusUse.kind] + 1 } : bonusStockAll,
                     current: myBonusUse ? { kind: myBonusUse.kind, secondScorerId: myBonusUse.secondScorerId } : null,
                   }
-                : undefined
+                : undefined;
+    // Mobile : fiche plein écran pour un match à pronostiquer (score en en-tête, 3 onglets)
+    const sheetNode =
+      user && editable ? (
+        <PredictionSheet
+          matchId={m.id}
+          title={`${h.code} · ${formatShortNumeric(m.kickoffAt)} ${formatDateTime(m.kickoffAt).split(" à ")[1] ?? ""}`.trim()}
+          competitionLogo={logos[m.competition] ?? null}
+          home={{ name: m.homeTeam.name, logo: m.homeTeam.logoUrl, rennes: m.rennesIsHome }}
+          away={{ name: m.awayTeam.name, logo: m.awayTeam.logoUrl, rennes: !m.rennesIsHome }}
+          rennesIsHome={m.rennesIsHome}
+          maxGoals={maxGoals}
+          noScorerBonus={rules.noScorerBonus}
+          scorers={scorerOptions}
+          lineupPublished={Boolean(matchLineup)}
+          savedScorerOut={savedOut}
+          initial={my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null}
+          bonus={bonusProp}
+          prematch={
+            opts.layout === "next" ? (
+              <MatchStats
+                competition={m.competition}
+                home={{ id: m.homeTeam.externalId, name: m.homeTeam.name, logo: m.homeTeam.logoUrl }}
+                away={{ id: m.awayTeam.externalId, name: m.awayTeam.name, logo: m.awayTeam.logoUrl }}
+                odds={{ home: m.oddsHome, draw: m.oddsDraw, away: m.oddsAway }}
+              />
+            ) : (
+              <div className="space-y-2">
+                <OutcomeIndices
+                  odds={{ home: m.oddsHome, draw: m.oddsDraw, away: m.oddsAway }}
+                  home={{ name: m.homeTeam.name, rennes: m.rennesIsHome, logo: m.homeTeam.logoUrl }}
+                  away={{ name: m.awayTeam.name, rennes: !m.rennesIsHome, logo: m.awayTeam.logoUrl }}
+                />
+                <p className="text-xs text-neutral-500">Le comparatif et les confrontations directes s’affichent pour le prochain match.</p>
+              </div>
+            )
+          }
+        />
+      ) : undefined;
+    const predictionNode = (
+      user ? (
+          <MyPrediction
+            matchId={m.id}
+            open={editable}
+            deadline={
+              m.status === "POSTPONED" && !m.deadlineAt ? "à la nouvelle heure officielle du coup d’envoi" : formatDateTime(lockTime(m))
             }
+            homeName={m.homeTeam.name}
+            awayName={m.awayTeam.name}
+            rennesIsHome={m.rennesIsHome}
+            maxGoals={maxGoals}
+            noScorerBonus={rules.noScorerBonus}
+            scorers={scorerOptions}
+            lineupPublished={Boolean(matchLineup)}
+            savedScorerOut={savedOut}
+            initial={my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null}
+            summary={opts.layout === "next" || (opts.layout !== "top" && editable) ? summaryNode : undefined}
+            bonus={bonusProp}
           />
         ) : editable ? (
           <p className="text-sm text-neutral-600">
@@ -523,7 +560,7 @@ export default async function HomePage() {
     if (opts.layout === "next") {
       // Prochain match — en haut : Mon prono (gauche) · Avant match (droite) ; en bas : Pronostics et points
       return (
-        <MatchAccordion key={m.id} h={h}>
+        <MatchAccordion key={m.id} h={h} sheet={sheetNode}>
           <div className="space-y-6">
             <section className="min-w-0">
               {title("Mon prono")}
@@ -564,7 +601,7 @@ export default async function HomePage() {
       // Calendrier, pronostics ouverts : même « Mon prono » que le prochain match (toute la largeur :
       // score et buteur sur une ligne sur PC), sans la rubrique « Avant match »
       return (
-        <MatchAccordion key={m.id} h={h}>
+        <MatchAccordion key={m.id} h={h} sheet={sheetNode}>
           <section className="min-w-0">
             {title("Mon prono")}
             {predictionNode}

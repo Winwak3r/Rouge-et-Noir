@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { SheetContext } from "./PredictionSheet";
 import type { CompetitionCode } from "@/lib/competitions";
 import type { Tone } from "@/lib/match-view";
 import { useAccordionGroup } from "./AccordionGroup";
@@ -56,8 +58,22 @@ function Team({ t, open, home = false }: { t: MatchHeader["home"]; open: boolean
   );
 }
 
-export function MatchAccordion({ h, children }: { h: MatchHeader; children: ReactNode }) {
+export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; children: ReactNode; sheet?: ReactNode }) {
   const group = useAccordionGroup();
+  // Mobile : un match à pronostiquer s'ouvre en fiche plein écran (au lieu de l'accordéon)
+  const [sheetOpen, setSheetOpen] = useState(false);
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [sheetOpen]);
+  const onHeaderClick = () => {
+    if (sheet && window.matchMedia("(max-width: 639px)").matches) setSheetOpen(true);
+    else group?.toggle(h.id);
+  };
   const open = !h.cancelled && group?.openId === h.id;
   const ref = useRef<HTMLElement>(null);
   const wasOpen = useRef(open);
@@ -112,7 +128,7 @@ export function MatchAccordion({ h, children }: { h: MatchHeader; children: Reac
     >
       <button
         type="button"
-        onClick={() => group?.toggle(h.id)}
+        onClick={onHeaderClick}
         aria-expanded={open}
         disabled={h.cancelled}
         className={`relative flex w-full items-start gap-3 p-3 text-left transition-colors sm:p-4 ${
@@ -162,6 +178,13 @@ export function MatchAccordion({ h, children }: { h: MatchHeader; children: Reac
           </div>
         </div>
       </div>
+      {sheetOpen &&
+        createPortal(
+          <div role="dialog" aria-modal="true" aria-label="Mon pronostic" className="fixed inset-0 z-[85] overflow-y-auto bg-page sm:hidden">
+            <SheetContext.Provider value={{ close: () => setSheetOpen(false) }}>{sheet}</SheetContext.Provider>
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }
