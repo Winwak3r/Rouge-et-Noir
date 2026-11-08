@@ -670,7 +670,7 @@ export default async function HomePage() {
         )}
 
         {next ? (
-          <section className="space-y-3" data-tour="top-match">
+          <section className="space-y-3" data-tour="next-match">
             <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
             {renderMatch(next, { layout: "next" })}
           </section>

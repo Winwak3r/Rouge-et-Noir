@@ -97,7 +97,6 @@ export async function Header() {
         <Tutorial
           waitForEvent={!user.notifPromptAt ? "notif-prompt-closed" : welcomeLeague ? "league-welcome-closed" : undefined}
           points={(await getActiveRules()).points}
-          matchHref={await nextMatchHref()}
         />
       )}
       {welcomeLeague && (
@@ -215,15 +214,4 @@ export async function Header() {
       )}
     </header>
   );
-}
-
-
-/** Page du prochain match à pronostiquer (visitée par le didacticiel), s'il y en a un. */
-async function nextMatchHref(): Promise<string | null> {
-  const m = await prisma.match.findFirst({
-    where: { status: "SCHEDULED", kickoffAt: { gt: new Date() } },
-    orderBy: { kickoffAt: "asc" },
-    select: { id: true },
-  });
-  return m ? `/match/${m.id}` : null;
 }

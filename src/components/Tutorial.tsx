@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { completeTutorialAction } from "@/app/actions/auth";
 
@@ -24,39 +24,14 @@ const STEPS: Step[] = [
     page: "home",
     target: "calendar",
     title: "Le calendrier",
-    text: "La page d’accueil de Rouge & Noir. Accède au calendrier et aux résultats des matchs du Stade Rennais : Ligue 1, coupe d’Europe (si qualifié) et Coupe de France.",
+    text: "La page d’accueil de Rouge & Noir. Accède au calendrier et aux résultats des matchs du Stade Rennais : Ligue 1, coupe d’Europe (si qualifié) et Coupe de France. Le match en direct et le prochain match du club s’affichent en tête.",
   },
   {
-    group: 1,
+    group: 2,
     page: "home",
-    target: "top-match",
-    title: "Le calendrier",
-    text: "Le match en cours (évolution du score en direct) ou le prochain match du club s’affiche en tête.",
-  },
-  {
-    group: 2,
-    page: "match",
-    tab: "pre",
-    target: "sheet-body",
+    target: "next-match",
     title: "Les pronostics",
-    text: "Ouvre un match du calendrier pour connaître les stats de la rencontre.",
-  },
-  { group: 2, page: "match", tab: "pre", target: "sheet-score", title: "Les pronostics", text: "Pour pronostiquer le score…" },
-  {
-    group: 2,
-    page: "match",
-    tab: "scorer",
-    target: "sheet-body",
-    title: "Les pronostics",
-    text: "Et un buteur rennais : plus il est improbable, plus il rapporte !",
-  },
-  {
-    group: 2,
-    page: "match",
-    tab: "bonus",
-    target: "sheet-body",
-    title: "Les pronostics",
-    text: "Si tu es gourmand, tu peux goûter aux spécialités maison ! 😋",
+    text: "Ouvre un match du calendrier pour connaître les stats de la rencontre, pronostiquer le score, et un buteur rennais : plus il est improbable, plus il rapporte ! Si tu es gourmand, tu peux aussi goûter aux spécialités maison ! 😋",
   },
   { group: 3, page: "home", target: "leagues", title: "Les ligues", text: "Crée une ligue, rejoins-en une avec un code et gère les tiennes." },
   {
@@ -119,9 +94,8 @@ export interface TutorialPoints {
 
 const fmt = (n: number) => `${n > 0 ? "+" : ""}${n} point${Math.abs(n) > 1 ? "s" : ""}`;
 
-export function Tutorial({ waitForEvent, points, matchHref }: { waitForEvent?: string; points: TutorialPoints; matchHref?: string | null }) {
+export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; points: TutorialPoints }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [ready, setReady] = useState(!waitForEvent);
   const [steps, setSteps] = useState<Step[]>([]);
   const [index, setIndex] = useState(0);
@@ -140,8 +114,8 @@ export function Tutorial({ waitForEvent, points, matchHref }: { waitForEvent?: s
   // Étapes retenues : celles de la page du match seulement s'il y a un match à pronostiquer
   useEffect(() => {
     if (!ready) return;
-    setSteps(STEPS.filter((s) => s.page === "home" || Boolean(matchHref)));
-  }, [ready, matchHref]);
+    setSteps(STEPS);
+  }, [ready]);
 
   const step = steps[index];
   // Toutes les étapes passées (dernières introuvables) : visite terminée
@@ -151,7 +125,7 @@ export function Tutorial({ waitForEvent, points, matchHref }: { waitForEvent?: s
       void completeTutorialAction();
     }
   }, [index, steps.length]);
-  const where = step ? (step.page === "match" ? matchHref! : "/") : null;
+  const where = step ? "/" : null;
   const onPage = Boolean(where && pathname === where);
 
   // Aller sur la bonne page (accueil ou page du match), ouvrir l'onglet voulu, puis attendre que l'élément
@@ -161,11 +135,7 @@ export function Tutorial({ waitForEvent, points, matchHref }: { waitForEvent?: s
     if (!step || !where) return;
     setFound(false);
     setBox(null);
-    if (pathname !== where) {
-      router.push(where);
-      return;
-    }
-    if (step.tab) window.dispatchEvent(new CustomEvent("sheet-tab", { detail: step.tab }));
+    if (pathname !== where) return; // visite guidée seulement sur l'accueil
     let tries = 0;
     const id = setInterval(() => {
       if (findTarget(targetOf(step))) {
@@ -226,7 +196,6 @@ export function Tutorial({ waitForEvent, points, matchHref }: { waitForEvent?: s
   const finish = () => {
     setOpen(false);
     void completeTutorialAction();
-    if (pathname !== "/") router.push("/");
   };
 
   if (!open || !ready || !onPage || !found || !step || !box) return null;
