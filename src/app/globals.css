@@ -311,7 +311,8 @@ body::before {
 }
 
 /* Thème clair : en-têtes des matchs (fermés) grisés ; au survol, teinte légère de la couleur de la compétition */
-:root:not([data-theme="dark"]) .match-head { background-color: #ececec; }
+:root:not([data-theme="dark"]) .match-head { background-color: #f3f3f3; }
+:root[data-theme="dark"] .match-head { background-color: #202020; }
 :root:not([data-theme="dark"]) .match-head-ligue_1:hover { background-color: #e3e9fb; }
 :root:not([data-theme="dark"]) .match-head-europa_league:hover { background-color: #fdecd9; }
 :root:not([data-theme="dark"]) .match-head-coupe_de_france:hover { background-color: #fbe2e5; }

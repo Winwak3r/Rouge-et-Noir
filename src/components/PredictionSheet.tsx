@@ -71,6 +71,14 @@ export function PredictionSheet(props: {
   // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits).
   // L'en-tête est en position fixe et une cale de hauteur constante réserve sa place : le réduire ne déplace pas
   // le contenu, donc le défilement ne « rebondit » pas entre les deux états.
+  useEffect(() => {
+    const onTab = (e: Event) => {
+      const t = (e as CustomEvent<string>).detail;
+      if (t === "pre" || t === "scorer" || t === "bonus") setTab(t);
+    };
+    window.addEventListener("sheet-tab", onTab);
+    return () => window.removeEventListener("sheet-tab", onTab);
+  }, []);
   // La zone de contenu défile seule, sous l'en-tête : réduire l'en-tête ne déplace pas le contenu (pas de va-et-vient)
   const bodyRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(false);
@@ -193,7 +201,7 @@ export function PredictionSheet(props: {
 
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
-      <div className="z-10 mx-auto w-full max-w-5xl shrink-0 bg-[var(--header-bg)] shadow-sm">
+      <div className="z-10 w-full shrink-0 bg-[var(--header-bg)] shadow-sm">
       <div className="mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
@@ -213,7 +221,7 @@ export function PredictionSheet(props: {
             {props.title}
           </p>
         </div>
-        <div className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-all duration-300 ${compact ? "-mt-10 pl-9" : "mt-2"}`}>
+        <div data-tour="sheet-score" className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-all duration-300 ${compact ? "-mt-10 pl-9" : "mt-2"}`}>
           {team(props.home, "home")}
           <div className="flex items-center gap-2">
             {scoreBox(home, setHome, props.rennesIsHome ? "rennesGoals" : "opponentGoals", props.home.name)}
@@ -225,6 +233,9 @@ export function PredictionSheet(props: {
         {half && <p className="mt-1 text-center text-xs text-orange-700">Choisis un score pour les deux équipes.</p>}
       </div>
 
+      </div>
+
+      <div className="mx-auto w-full max-w-5xl shrink-0">
       {/* Onglets */}
       {/* Trois onglets de même largeur, sans arrondi, qui remplissent toute la bande ; police adaptée à l'écran */}
       <div role="tablist" className="grid grid-cols-3 divide-x divide-neutral-200 border-y border-neutral-200">
@@ -245,9 +256,8 @@ export function PredictionSheet(props: {
         ))}
       </div>
       </div>
-
       <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto [overflow-anchor:none]">
-        <div className="mx-auto w-full max-w-5xl px-3 py-4">
+        <div data-tour="sheet-body" className="mx-auto w-full max-w-5xl px-3 py-4">
         {tab === "pre" && <div>{props.prematch}</div>}
 
         {tab === "bonus" &&
@@ -364,7 +374,7 @@ export function PredictionSheet(props: {
             aria-modal="true"
             aria-label={BONUS_INFO[popup].name}
             onClick={(e) => e.stopPropagation()}
-            className="w-full space-y-3 rounded-t-3xl bg-surface p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
+            className="mx-auto w-full max-w-5xl space-y-3 rounded-t-3xl bg-surface p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
           >
             <div className="flex items-center gap-3">
               <BonusIcon kind={popup} size={48} />

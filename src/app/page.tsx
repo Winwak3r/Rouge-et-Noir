@@ -663,14 +663,14 @@ export default async function HomePage() {
         )}
 
         {top && (
-          <section className="space-y-3">
+          <section className="space-y-3" data-tour={live ? "top-match" : undefined}>
             <h2 className="text-xs font-bold uppercase tracking-wide text-noir">{live ? "Match en cours" : "Match terminé"}</h2>
             {renderMatch(top, { layout: "top" })}
           </section>
         )}
 
         {next ? (
-          <section className="space-y-3" data-tour="calendar">
+          <section className="space-y-3" data-tour="top-match">
             <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
             {renderMatch(next, { layout: "next" })}
           </section>

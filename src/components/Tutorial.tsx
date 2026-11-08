@@ -1,10 +1,13 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { completeTutorialAction } from "@/app/actions/auth";
 
 interface Step {
+  group: number; // numéro d'étape affiché (1 à 7)
+  page: "home" | "match"; // accueil, ou page du prochain match à pronostiquer
+  tab?: "pre" | "scorer" | "bonus"; // onglet à ouvrir sur la page du match
   target: string; // repère (attribut data-tour) de l'élément à montrer sur ordinateur
   mobileTarget?: string; // … et sur mobile, s'il est différent
   title: string;
@@ -14,47 +17,76 @@ interface Step {
   scale?: boolean;
 }
 
+const GROUPS = 7;
 const STEPS: Step[] = [
   {
+    group: 1,
+    page: "home",
     target: "calendar",
     title: "Le calendrier",
-    text: "La page d’accueil de Rouge & Noir. Accède au calendrier et aux résultats des matchs du Stade Rennais : Ligue 1, coupe d’Europe (si qualifié) et Coupe de France. Ouvre un match pour pronostiquer le score et, si tu veux, un buteur rennais : plus il est improbable, plus il rapporte !",
+    text: "La page d’accueil de Rouge & Noir. Accède au calendrier et aux résultats des matchs du Stade Rennais : Ligue 1, coupe d’Europe (si qualifié) et Coupe de France.",
   },
   {
-    target: "leagues",
-    title: "Les ligues",
-    text: "Le bouton « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
-    mobileText: "Le bouton « Ligues » permet de créer une ligue, d’en rejoindre une avec un code et de gérer les tiennes.",
+    group: 1,
+    page: "home",
+    target: "top-match",
+    title: "Le calendrier",
+    text: "Le match en cours (évolution du score en direct) ou le prochain match du club s’affiche en tête.",
   },
   {
-    target: "league",
-    title: "Passer d’une ligue à l’autre",
-    text: "Tu joues dans plusieurs ligues ? Choisis ici celle à afficher : ton classement et les pronostics des autres joueurs suivent la ligue choisie.",
-    mobileText:
-      "Tu joues dans plusieurs ligues ? Touche ce bouton pour choisir celle à afficher : ton classement et les pronostics des autres joueurs suivent la ligue choisie.",
+    group: 2,
+    page: "match",
+    tab: "pre",
+    target: "sheet-body",
+    title: "Les pronostics",
+    text: "Ouvre un match du calendrier pour connaître les stats de la rencontre.",
+  },
+  { group: 2, page: "match", tab: "pre", target: "sheet-score", title: "Les pronostics", text: "Pour pronostiquer le score…" },
+  {
+    group: 2,
+    page: "match",
+    tab: "scorer",
+    target: "sheet-body",
+    title: "Les pronostics",
+    text: "Et un buteur rennais : plus il est improbable, plus il rapporte !",
   },
   {
+    group: 2,
+    page: "match",
+    tab: "bonus",
+    target: "sheet-body",
+    title: "Les pronostics",
+    text: "Si tu es gourmand, tu peux goûter aux spécialités maison ! 😋",
+  },
+  { group: 3, page: "home", target: "leagues", title: "Les ligues", text: "Crée une ligue, rejoins-en une avec un code et gère les tiennes." },
+  {
+    group: 4,
+    page: "home",
     target: "rank",
     mobileTarget: "rank-mobile",
-    title: "Ton classement",
-    text: "Ta position et tes points dans la ligue sélectionnée. Clique sur ce bloc pour afficher le classement complet de la ligue.",
-    mobileText: "Le bouton « Classement » affiche le classement complet de la ligue sélectionnée. Ta position et tes points restent visibles en haut de l’écran.",
+    title: "Les classements",
+    text: "Consulte le classement complet de la ligue sélectionnée.",
   },
   {
+    group: 5,
+    page: "home",
     target: "user-menu",
     title: "Ton compte",
-    text: "Le bouton « Mon compte » : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
-    mobileText: "Ton compte : photo de profil, notifications, adresse e-mail, mot de passe… et la déconnexion.",
+    text: "Photo de profil, mot de passe, notifications, déconnexion… Tu peux tout gérer depuis cet espace.",
   },
   {
+    group: 6,
+    page: "home",
     target: "standings",
     title: "Les classements officiels",
-    text: "Les classements officiels des compétitions du Stade Rennais FC, et les meilleurs buteurs.",
+    text: "Les classements officiels des compétitions du Stade Rennais FC, et les classements des buteurs.",
   },
   {
+    group: 7,
+    page: "home",
     target: "rules",
     title: "Les règles du jeu",
-    text: "Évidemment ! Tout le fonctionnement du jeu y est expliqué. Pour le score, voici ce que rapporte chaque pronostic :",
+    text: "Tout le fonctionnement du jeu y est expliqué. Pour le score, voici ce que rapporte chaque pronostic :",
     scale: true,
   },
 ];
@@ -87,8 +119,9 @@ export interface TutorialPoints {
 
 const fmt = (n: number) => `${n > 0 ? "+" : ""}${n} point${Math.abs(n) > 1 ? "s" : ""}`;
 
-export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; points: TutorialPoints }) {
+export function Tutorial({ waitForEvent, points, matchHref }: { waitForEvent?: string; points: TutorialPoints; matchHref?: string | null }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [ready, setReady] = useState(!waitForEvent);
   const [steps, setSteps] = useState<Step[]>([]);
   const [index, setIndex] = useState(0);
@@ -104,14 +137,47 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
     return () => window.removeEventListener(waitForEvent, go);
   }, [waitForEvent]);
 
-  // Étapes dont l'élément existe réellement à l'écran
+  // Étapes retenues : celles de la page du match seulement s'il y a un match à pronostiquer
   useEffect(() => {
-    if (!ready || pathname !== "/") return;
-    const t = setTimeout(() => setSteps(STEPS.filter((s) => findTarget(targetOf(s)))), 400);
-    return () => clearTimeout(t);
-  }, [ready, pathname]);
+    if (!ready) return;
+    setSteps(STEPS.filter((s) => s.page === "home" || Boolean(matchHref)));
+  }, [ready, matchHref]);
 
   const step = steps[index];
+  // Toutes les étapes passées (dernières introuvables) : visite terminée
+  useEffect(() => {
+    if (steps.length && index >= steps.length) {
+      setOpen(false);
+      void completeTutorialAction();
+    }
+  }, [index, steps.length]);
+  const where = step ? (step.page === "match" ? matchHref! : "/") : null;
+  const onPage = Boolean(where && pathname === where);
+
+  // Aller sur la bonne page (accueil ou page du match), ouvrir l'onglet voulu, puis attendre que l'élément
+  // apparaisse ; s'il n'apparaît pas (bouton absent sur cet écran), on passe à l'étape suivante.
+  const [found, setFound] = useState(false);
+  useEffect(() => {
+    if (!step || !where) return;
+    setFound(false);
+    setBox(null);
+    if (pathname !== where) {
+      router.push(where);
+      return;
+    }
+    if (step.tab) window.dispatchEvent(new CustomEvent("sheet-tab", { detail: step.tab }));
+    let tries = 0;
+    const id = setInterval(() => {
+      if (findTarget(targetOf(step))) {
+        clearInterval(id);
+        setFound(true);
+      } else if (++tries > 25) {
+        clearInterval(id);
+        setIndex((i) => i + 1);
+      }
+    }, 160);
+    return () => clearInterval(id);
+  }, [step, where, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const measure = useCallback(() => {
     if (!step) return;
@@ -139,7 +205,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
 
   // Amener l'élément à l'écran, puis le mesurer (et suivre défilement / redimensionnement)
   useEffect(() => {
-    if (!step) return;
+    if (!step || !found) return;
     const el = findTarget(targetOf(step));
     // éléments de la barre du bas ou de l'en-tête : toujours visibles, inutile de faire défiler
     if (el && !el.closest("nav, header")) el.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -151,7 +217,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure);
     };
-  }, [step, measure]);
+  }, [step, measure, found]);
 
   useLayoutEffect(() => {
     if (bubble.current) setBubbleH(bubble.current.offsetHeight);
@@ -160,9 +226,10 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
   const finish = () => {
     setOpen(false);
     void completeTutorialAction();
+    if (pathname !== "/") router.push("/");
   };
 
-  if (!open || !ready || pathname !== "/" || !step || !box) return null;
+  if (!open || !ready || !onPage || !found || !step || !box) return null;
 
   const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
   const vh = typeof window !== "undefined" ? window.innerHeight : 768;
@@ -173,9 +240,10 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
   const left = Math.min(Math.max(12, centerX - width / 2), vw - width - 12);
   const arrowX = Math.min(Math.max(18, centerX - left), width - 18); // la flèche vise le centre de l'élément
   const last = index === steps.length - 1;
+  const groups = Math.min(GROUPS, Math.max(...steps.map((x) => x.group)));
 
   return (
-    <div className="fixed inset-0 z-[120]" role="dialog" aria-modal="true" aria-label={`Didacticiel, étape ${index + 1} sur ${steps.length} : ${step.title}`}>
+    <div className="fixed inset-0 z-[120]" role="dialog" aria-modal="true" aria-label={`Didacticiel, étape ${step.group} sur ${groups} : ${step.title}`}>
       {/* Fond grisé avec une « fenêtre » sur l'élément décrit */}
       <div
         aria-hidden
@@ -197,7 +265,7 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
           }}
         />
         <p className="text-[11px] font-bold uppercase tracking-wide text-rouge">
-          Étape {index + 1} sur {steps.length}
+          Étape {step.group} sur {groups}
         </p>
         <h2 className="mt-0.5 font-display text-xl font-bold uppercase tracking-wide">{step.title}</h2>
         <p className="mt-1.5 text-sm text-neutral-700">{textOf(step)}</p>
@@ -228,8 +296,8 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
         <div className="mt-4 flex items-center justify-between gap-3">
           {/* Points de progression */}
           <span className="flex gap-1.5" aria-hidden>
-            {steps.map((s, i) => (
-              <span key={s.title} className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-rouge" : "bg-neutral-300"}`} />
+            {Array.from({ length: groups }, (_, g) => (
+              <span key={g} className={`h-1.5 w-1.5 rounded-full ${g + 1 === step.group ? "bg-rouge" : "bg-neutral-300"}`} />
             ))}
           </span>
           <span className="flex items-center gap-3">
