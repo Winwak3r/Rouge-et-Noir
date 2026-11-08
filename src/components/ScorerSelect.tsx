@@ -68,7 +68,7 @@ export function ScorerSelect(props: {
   const min = Math.min(...bonuses);
   const max = Math.max(...bonuses);
   const items: Item[] = [
-    { value: "", label: "Pas de pari buteur", pos: null, bonus: null, lvl: 0 },
+    { value: "", label: "Pronostic manquant", pos: null, bonus: null, lvl: 0 },
     ...(props.noScorerBonus > 0
       ? [{ value: NO_SCORER, label: "Aucun buteur rennais", pos: null, bonus: props.noScorerBonus, lvl: 0 }]
       : []),
@@ -159,7 +159,7 @@ export function ScorerSelect(props: {
           setOpen((o) => !o);
         }}
         onKeyDown={onKey}
-        className="input flex items-center gap-2 text-left"
+        className="input flex items-center gap-2 text-left transition-colors hover:border-rouge hover:bg-neutral-50"
       >
         {row(current)}
         <span aria-hidden className={`text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`}>▾</span>

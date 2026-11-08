@@ -388,7 +388,7 @@ export default async function HomePage() {
                 )}
               </p>
             ) : (
-              <p className="italic text-neutral-500">Pas de pari buteur</p>
+              <p className="italic text-neutral-500">Pronostic manquant</p>
             )}
           </div>
         </div>
@@ -417,7 +417,7 @@ export default async function HomePage() {
                 )}
               </>
             ) : (
-              <p className="italic text-neutral-500">Pas de pari buteur</p>
+              <p className="italic text-neutral-500">Pronostic manquant</p>
             )}
           </div>
           {scorerPhoto(112, true)}

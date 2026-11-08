@@ -137,7 +137,7 @@ export function PredictionSheet(props: {
         name={name}
         value={value}
         onChange={(e) => set(e.target.value)}
-        className={`appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 focus:border-rouge focus:outline-none ${
+        className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
           compact ? "h-11 w-11 rounded-xl text-2xl" : "h-16 w-16 text-4xl"
         }`}
         style={{ textAlignLast: "center" }}
@@ -274,7 +274,7 @@ export function PredictionSheet(props: {
                     type="button"
                     disabled={needsScorer && applied.length === 0}
                     onClick={() => openPopup(k)}
-                    className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors disabled:opacity-40 ${
+                    className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors enabled:hover:border-rouge enabled:hover:bg-rouge/5 disabled:opacity-40 ${
                       applied.length ? "border-rouge bg-rouge/10" : "border-neutral-200"
                     }`}
                   >
