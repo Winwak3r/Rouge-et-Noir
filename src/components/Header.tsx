@@ -144,6 +144,15 @@ export async function Header() {
                   </span>
                   Ligues
                 </Link>
+                <Link href="/classement" data-tour="rank" className="hbtn">
+                  <span className="hicon">
+                    <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
+                      <path d="M17 6h3v1a4 4 0 0 1-3 3.87M7 6H4v1a4 4 0 0 0 3 3.87" />
+                    </svg>
+                  </span>
+                  Classements
+                </Link>
               </div>
             ) : (
               <>
@@ -198,20 +207,6 @@ export async function Header() {
             {/* Interrupteur du thème sous la dernière synchro, tout à droite (mobile et ordinateur) */}
             <ThemeSwitch className="inline-flex" />
           </div>
-          {/* Ordinateur : sous « Mon compte », le bouton Classements (classements des ligues). Rien sur mobile. */}
-          {user && (
-            <div className="col-span-2 col-start-1 row-start-2 mt-1.5 hidden sm:flex">
-              <Link href="/classement" data-tour="rank" className="hbtn">
-                <span className="hicon">
-                  <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
-                    <path d="M17 6h3v1a4 4 0 0 1-3 3.87M7 6H4v1a4 4 0 0 0 3 3.87" />
-                  </svg>
-                </span>
-                Classements
-              </Link>
-            </div>
-          )}
         </div>
       </div>
       {user && (

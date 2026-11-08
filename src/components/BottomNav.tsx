@@ -97,7 +97,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
         {/* 4. Classement des ligues du joueur */}
         {item(
           "/classement",
-          "Classement",
+          "Classements",
           icon(
             <>
               <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />

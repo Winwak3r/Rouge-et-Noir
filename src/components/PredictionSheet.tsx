@@ -193,7 +193,7 @@ export function PredictionSheet(props: {
 
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
-      <div className="z-10 shrink-0 bg-[var(--header-bg)] shadow-sm">
+      <div className="z-10 mx-auto w-full max-w-5xl shrink-0 bg-[var(--header-bg)] shadow-sm">
       <div className="mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
@@ -427,7 +427,7 @@ export function PredictionSheet(props: {
       )}
 
       {/* Barre d'enregistrement, toujours visible */}
-      <div className="shrink-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
+      <div className="mx-auto w-full max-w-5xl shrink-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
         {state.error && (
           <p role="alert" className="mx-auto mb-2 max-w-5xl text-sm font-medium text-red-700">
             {state.error}

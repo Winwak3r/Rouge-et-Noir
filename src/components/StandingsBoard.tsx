@@ -86,6 +86,12 @@ export function StandingsBoard({
     window.addEventListener("league-view", onHeader);
     return () => window.removeEventListener("league-view", onHeader);
   }, [views]);
+  const choose = (id: string) => {
+    if (id === keyRef.current) return;
+    setDirection(views.findIndex((v) => v.key === id) > views.findIndex((v) => v.key === keyRef.current) ? "right" : "left");
+    changes.current++;
+    setKey(id);
+  };
   const view = views.find((v) => v.key === key) ?? views[0];
   const selected = picked[view.key] ?? view.competitions;
   const rows = useMemo(() => computeRows(view, selected), [view, selected]);
@@ -106,10 +112,38 @@ export function StandingsBoard({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-neutral-500">
-        <span className="sm:hidden">Change de ligue avec le bouton en bas à gauche de l’écran.</span>
-        <span className="hidden sm:inline">Change de ligue avec la liste « Ligue » en haut à gauche, sous ton pseudo.</span>
-      </p>
+      {/* Choix du classement à afficher : boutons sur ordinateur, liste déroulante sur mobile */}
+      {views.length > 1 && (
+        <>
+          <div role="tablist" aria-label="Classement à afficher" className="hidden flex-wrap gap-2 sm:flex">
+            {views.map((v) => (
+              <button
+                key={v.key}
+                type="button"
+                role="tab"
+                aria-selected={v.key === view.key}
+                onClick={() => choose(v.key)}
+                className={`inline-flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-sm font-semibold transition-colors ${
+                  v.key === view.key ? "border-rouge bg-rouge text-white" : "border-neutral-300 bg-[var(--color-surface)] hover:border-neutral-500"
+                }`}
+              >
+                {icon(v, 26)}
+                {v.name}
+              </button>
+            ))}
+          </div>
+          <label className="block sm:hidden">
+            <span className="sr-only">Classement à afficher</span>
+            <select value={view.key} onChange={(e) => choose(e.target.value)} className="input font-semibold">
+              {views.map((v) => (
+                <option key={v.key} value={v.key}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
+      )}
       <div className="overflow-hidden">
         <div key={`${view.key}-${changes.current}`} className={`space-y-3 ${direction === "right" ? "slide-from-right" : direction === "left" ? "slide-from-left" : ""}`}>
           <h2 className="flex items-center gap-3 font-display text-2xl font-bold uppercase tracking-wide">
