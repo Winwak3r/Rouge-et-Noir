@@ -198,67 +198,24 @@ export async function Header() {
             {/* Interrupteur du thème sous la dernière synchro, tout à droite (mobile et ordinateur) */}
             <ThemeSwitch className="inline-flex" />
           </div>
-          {/* Sous le pseudo : choix de la ligue (ordinateur) et classement de la ligue (toute la largeur sur mobile) */}
-          <div className="col-span-2 col-start-1 row-start-2 mt-1.5 flex min-w-0 items-stretch gap-2">
-            {user && myActiveLeagues.length > 0 && (
-              <LeagueSwitcher
-                className="max-sm:hidden"
-                leagues={[
-                  ...myActiveLeagues.map((m) => ({ id: m.league.id, name: m.league.name, imageAt: m.league.imageUpdatedAt?.getTime() ?? null })),
-                  { id: "general", name: "Général R&N", imageAt: null },
-                ]}
-                activeId={scope?.leagueId ?? null}
-              />
-            )}
+          {/* Ordinateur : sous « Mon compte », le bouton Classements (classements des ligues). Rien sur mobile. */}
           {user && (
-            <div className="flex min-w-0 flex-1 gap-2.5 sm:flex-none sm:shrink-0">
-              <Link
-                href="/classement"
-                data-tour="rank"
-                title="Voir le classement de la ligue"
-                className="hbox flex min-w-0 flex-1 flex-col gap-0.5 rounded-[10px] border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 transition-colors max-sm:pointer-events-none sm:flex-none sm:hover:border-neutral-400"
-              >
-                {/* Nom de la ligue mis en avant */}
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="truncate text-sm font-extrabold leading-tight text-neutral-900 sm:max-w-[11rem]">
-                    {scope ? scope.name : "Général"}
-                  </span>
-                  <span aria-hidden className="hidden text-neutral-400 sm:inline">›</span>
+            <div className="col-span-2 col-start-1 row-start-2 mt-1.5 hidden sm:flex">
+              <Link href="/classement" data-tour="rank" className="hbtn">
+                <span className="hicon">
+                  <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
+                    <path d="M17 6h3v1a4 4 0 0 1-3 3.87M7 6H4v1a4 4 0 0 0 3 3.87" />
+                  </svg>
                 </span>
-                {/* Rang et points, compétitions de la ligue calées à droite */}
-                <span className="flex items-center gap-2">
-                  <span className="whitespace-nowrap text-lg font-extrabold leading-tight">
-                    {rankText}
-                    {standings && <span className="ml-1.5 text-xs font-semibold text-neutral-500">sur {standings.length}</span>}
-                    <span className="mx-1.5 text-neutral-400">·</span>
-                    <span className="pts-points">{me?.totalPoints ?? 0}</span>
-                    <span className="ml-1 text-xs font-semibold text-neutral-500">pts</span>
-                  </span>
-                  <span className="ml-auto flex shrink-0 items-center gap-1" aria-label={`Compétitions : ${leagueComps.join(", ")}`}>
-                    {leagueComps.map((c) => (
-                      <CompetitionBadge key={c} code={c} logo={logos[c]} className="!h-5 !w-5 !text-[8px]" />
-                    ))}
-                  </span>
-                </span>
+                Classements
               </Link>
             </div>
           )}
-          </div>
         </div>
       </div>
       {user && (
-        <BottomNav
-          user={{ id: user.id, pseudo: user.pseudo, avatarAt: user.avatarUpdatedAt?.getTime() ?? null }}
-          activeLeagueId={scope?.leagueId ?? null}
-          leagues={
-            myActiveLeagues.length
-              ? [
-                  ...myActiveLeagues.map((m) => ({ id: m.league.id, name: m.league.name, imageAt: m.league.imageUpdatedAt?.getTime() ?? null })),
-                  { id: "general", name: "Général R&N", imageAt: null },
-                ]
-              : []
-          }
-        />
+        <BottomNav user={{ id: user.id, pseudo: user.pseudo, avatarAt: user.avatarUpdatedAt?.getTime() ?? null }} rennesLogo={rennesLogo} />
       )}
     </header>
   );

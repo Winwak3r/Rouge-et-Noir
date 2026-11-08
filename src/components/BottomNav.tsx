@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Avatar } from "./Avatar";
-import { LeagueSwitcher } from "./LeagueSwitcher";
 import { setNavDirection } from "@/lib/nav-direction";
 
 interface L {
@@ -23,7 +22,7 @@ const icon = (d: ReactNode) => (
  * Barre de navigation du bas (mobile) : ligue affichée · ligues · CALENDRIER (bouton central) · classements · compte.
  * Règles, thème et classement de la ligue restent en haut.
  */
-export function BottomNav(props: { leagues: L[]; activeLeagueId: string | null; user: { id: string; pseudo: string; avatarAt: number | null } }) {
+export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt: number | null }; rennesLogo: string | null }) {
   const path = usePathname();
   const on = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const item = (href: string, label: string, glyph: ReactNode, tour?: string) => (
@@ -45,20 +44,17 @@ export function BottomNav(props: { leagues: L[]; activeLeagueId: string | null; 
       className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:hidden"
     >
       <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-start px-1">
-        {/* 1. Ligue affichée (choix de la ligue) */}
-        {props.leagues.length > 0 ? (
-          <LeagueSwitcher variant="bottom" leagues={props.leagues} activeId={props.activeLeagueId} />
-        ) : (
-          item(
-            "/ligues",
-            "Ligue",
-            icon(
-              <>
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 8v8M8 12h8" />
-              </>,
-            ),
-          )
+        {/* 1. SRFC : classements officiels du Stade Rennais */}
+        {item(
+          "/classements-srfc",
+          "SRFC",
+          props.rennesLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={props.rennesLogo} alt="" className="h-6 w-6 object-contain" />
+          ) : (
+            icon(<circle cx="12" cy="12" r="9" />)
+          ),
+          "standings",
         )}
 
         {/* 2. Ligues (rejoindre, créer, gérer) */}

@@ -114,6 +114,13 @@ export function PredictionSheet(props: {
   const half = (home === "") !== (away === "");
   const chosen = props.scorers.find((p) => p.id === scorer);
   const rennesGoals = Number(props.rennesIsHome ? home : away);
+  // 0 but pour Rennes : aucun buteur rennais possible (seul « Aucun buteur rennais » reste proposé)
+  const rennesZero = (props.rennesIsHome ? home : away) === "0";
+  useEffect(() => {
+    if (!rennesZero) return;
+    if (scorer && scorer !== NO_SCORER) setScorer("");
+    setPerLeague((cur) => Object.fromEntries(Object.entries(cur).map(([k, v]) => [k, v === "GALETTE_SAUCISSE" ? "" : v])));
+  }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scoreBox = (value: string, set: (v: string) => void, name: string, label: string) => (
     <label className="relative">
@@ -310,11 +317,17 @@ export function PredictionSheet(props: {
             <span id={`${props.matchId}-m-scorer`} className="label">
               Buteur rennais
             </span>
+            {rennesZero && (
+              <p role="alert" className="rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-sm text-orange-800">
+                ⚠️ Tu as pronostiqué <strong>0 but</strong> pour le Stade Rennais : aucun joueur rennais ne peut marquer, le choix d’un
+                buteur est donc bloqué. Tu peux seulement parier « Aucun buteur rennais ».
+              </p>
+            )}
             <ScorerSelect
               name="scorerIdView"
               value={scorer}
               onChange={setScorer}
-              scorers={props.scorers}
+              scorers={rennesZero ? [] : props.scorers}
               noScorerBonus={props.noScorerBonus}
               labelledBy={`${props.matchId}-m-scorer`}
               lineupPublished={props.lineupPublished}

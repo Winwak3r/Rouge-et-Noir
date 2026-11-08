@@ -73,6 +73,13 @@ export function MyPrediction(props: {
   const goals = Array.from({ length: props.maxGoals + 1 }, (_, i) => i);
   const id = (s: string) => `${props.matchId}-${s}`;
   const rennesGoals = Number(props.rennesIsHome ? v.home : v.away);
+  // 0 but pour Rennes : aucun buteur rennais possible (seul « Aucun buteur rennais » reste proposé)
+  const rennesZero = rennesGoals === 0 && (props.rennesIsHome ? v.home : v.away) === "0";
+  useEffect(() => {
+    if (!rennesZero) return;
+    if (v.scorer && v.scorer !== NO_SCORER) setV((c) => ({ ...c, scorer: "" }));
+    if (bonusKind === "GALETTE_SAUCISSE") setBonusKind("");
+  }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
   const half = (v.home === "") !== (v.away === "");
 
   const scoreSelect = (field: "home" | "away", name: string, label: string) => (
@@ -156,11 +163,16 @@ export function MyPrediction(props: {
           <span id={id("scorer-label")} className="sr-only">
             Buteur rennais
           </span>
+          {rennesZero && (
+            <p role="alert" className="mb-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-xs text-orange-800">
+              ⚠️ 0 but pronostiqué pour le Stade Rennais : le choix d’un buteur est bloqué (seul « Aucun buteur rennais » reste possible).
+            </p>
+          )}
           <ScorerSelect
             name="scorerId"
             value={v.scorer}
             onChange={(scorer) => setV((c) => ({ ...c, scorer }))}
-            scorers={props.scorers}
+            scorers={rennesZero ? [] : props.scorers}
             noScorerBonus={props.noScorerBonus}
             labelledBy={id("scorer-label")}
             lineupPublished={props.lineupPublished}

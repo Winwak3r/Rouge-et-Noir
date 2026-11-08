@@ -92,6 +92,10 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
   // Ici les deux scores sont forcément renseignés (cas « – / – » traité plus haut)
   if (rennesGoals === null || opponentGoals === null) return { error: "Choisis un score pour les deux équipes." };
 
+  if (rennesGoals === 0 && scorerId) {
+    return { error: "Tu as pronostiqué 0 but pour le Stade Rennais : tu ne peux pas choisir de buteur rennais." };
+  }
+
   // « Les Spécialités Maison » : bonus joué dans la ligue affichée (vérifié AVANT d'enregistrer)
   const bonus = await checkBonus(form, { userId: user.id, match, scorerId, noScorerPick });
   if ("error" in bonus) return { error: bonus.error };

@@ -26,10 +26,10 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         {...data.sheet}
         prematch={
           <div className="space-y-4">
-            {/* Composition dès qu'elle est publiée, en tête de l'avant-match */}
-            {data.lineupPlayers.length > 0 && (
+            {/* Composition : en tête de l'avant-match, à partir d'1 h avant le coup d'envoi (invisible avant) */}
+            {data.lineupPlayers.length > 0 && Date.now() >= m.kickoffAt.getTime() - 3600_000 && (
               <section className="rounded-xl border border-neutral-200 bg-[var(--color-surface)] p-3">
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">Composition du Stade Rennais</h4>
+                <h4 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Composition</h4>
                 <LineupPitch players={data.lineupPlayers} />
               </section>
             )}

@@ -49,10 +49,7 @@ export function PreMatchTabs({ panels, initial, stacked = false }: { panels: Pre
       <div className="space-y-4">
         {panels.map((p) => (
           <section key={p.key} aria-label={p.label} className="rounded-xl border border-neutral-200 bg-[var(--color-surface)] p-3">
-            <h4 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-neutral-500">
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-rouge ring-1 ring-neutral-200">{p.icon}</span>
-              {p.label}
-            </h4>
+            <h4 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">{p.label}</h4>
             {p.content}
           </section>
         ))}

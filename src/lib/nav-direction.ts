@@ -3,11 +3,11 @@
 
 /** Position des onglets de la barre du bas (le choix de la ligue n'est pas une page). */
 export function tabIndex(path: string): number {
-  if (path === "/") return 1; // calendrier (centre)
-  if (path.startsWith("/classements-srfc")) return -1; // classements officiels : hors barre
-  if (path.startsWith("/ligue")) return 0; // /ligues et /ligue
-  if (path.startsWith("/classement")) return 2;
-  if (path.startsWith("/compte")) return 3;
+  if (path.startsWith("/classements-srfc")) return 0; // SRFC (à gauche)
+  if (path.startsWith("/ligue")) return 1; // /ligues et /ligue
+  if (path === "/") return 2; // calendrier (centre)
+  if (path.startsWith("/classement")) return 3;
+  if (path.startsWith("/compte")) return 4;
   return -1;
 }
 

@@ -12,7 +12,8 @@ describe("Sens des transitions de la barre du bas", () => {
   });
   it("même onglet, ou page hors barre : pas de glissement", () => {
     expect(directionBetween("/", "/")).toBeNull();
-    expect(directionBetween("/classements-srfc", "/")).toBeNull();
+    expect(directionBetween("/regles", "/")).toBeNull();
+    expect(directionBetween("/", "/classements-srfc")).toBe("left");
     expect(directionBetween("/ligue", "/ligues")).toBeNull();
   });
 });

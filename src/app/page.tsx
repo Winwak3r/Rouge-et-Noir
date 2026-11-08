@@ -30,6 +30,8 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { shortPlayerName } from "@/lib/player-name";
 import { Landing } from "@/components/landing/Landing";
+import { LeagueComparison } from "@/components/LeagueComparison";
+import { PastMatches } from "@/components/PastMatches";
 import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, withBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
 import { bonusStock } from "@/lib/bonus-data";
@@ -51,15 +53,24 @@ export default async function HomePage() {
   const scope = user ? await activeLeagueScope(user) : null;
   // Sans ligue : on ne voit que ses propres pronostics (pas ceux des autres joueurs du site)
   const inScope = scope ? { in: [...scope.memberIds] } : user ? { in: [user.id] } : undefined;
+  const scopeSet = new Set<string>(scope ? [...scope.memberIds] : user ? [user.id] : []);
+  // « Pronostics et points » : on peut afficher n'importe laquelle de mes ligues → joueurs de toutes mes ligues
+  const myLeagueMembers = user
+    ? await prisma.leagueMember.findMany({
+        where: { isActive: true, league: { members: { some: { userId: user.id, isActive: true } } } },
+        select: { leagueId: true, userId: true },
+      })
+    : [];
+  const inWide = user ? { in: [...new Set([...scopeSet, ...myLeagueMembers.map((x) => x.userId)])] } : undefined;
   const [matches, rules, users, allResults, predCounts, logos] = await Promise.all([
     prisma.match.findMany({ orderBy: { kickoffAt: "asc" }, include: { homeTeam: true, awayTeam: true, goals: true, cards: true, events: true } }),
     getActiveRules(),
     prisma.user.findMany({
-      where: { isActive: true, ...(inScope ? { id: inScope } : {}) },
+      where: { isActive: true, ...(inWide ? { id: inWide } : {}) },
       select: { id: true, pseudo: true, createdAt: true, avatarUpdatedAt: true },
     }),
     prisma.predictionResult.findMany({
-      where: { user: { isActive: true }, ...(inScope ? { userId: inScope } : {}) },
+      where: { user: { isActive: true }, ...(inWide ? { userId: inWide } : {}) },
       select: { userId: true, matchId: true, category: true, scorePoints: true, scorerPoints: true, totalPoints: true, correctScorer: true },
     }),
     prisma.prediction.groupBy({ by: ["matchId"], where: inScope ? { userId: inScope } : {}, _count: { _all: true } }),
@@ -115,7 +126,7 @@ export default async function HomePage() {
       : [],
     user
       ? prisma.prediction.findMany({
-          where: { matchId: { in: publicIds }, ...(inScope ? { userId: inScope } : {}) },
+          where: { matchId: { in: publicIds }, ...(inWide ? { userId: inWide } : {}) },
           select: {
             matchId: true,
             userId: true,
@@ -131,7 +142,7 @@ export default async function HomePage() {
     // Avant le coup d'envoi : seulement QUI a pronostiqué (aucun score)
     user
       ? prisma.prediction.findMany({
-          where: { matchId: { in: openIds }, ...(inScope ? { userId: inScope } : {}) },
+          where: { matchId: { in: openIds }, ...(inWide ? { userId: inWide } : {}) },
           select: { matchId: true, userId: true, scorerId: true, noScorerPick: true },
         })
       : [],
@@ -145,6 +156,12 @@ export default async function HomePage() {
 
   const standings = buildStandings(users.map((u) => ({ userId: u.id, pseudo: u.pseudo })), allResults);
   const usersByRank = standings.map((s) => users.find((u) => u.id === s.userId)!).filter(Boolean);
+  // Bonus de toutes mes ligues (pour l'affichage des pronostics de chacune)
+  const allLeagueBonuses = myLeagueMembers.length
+    ? await prisma.bonusUse.findMany({
+        where: { leagueId: { in: [...new Set(myLeagueMembers.map((x) => x.leagueId))] }, matchId: { in: matches.map((x) => x.id) } },
+      })
+    : [];
   const countBy = new Map(predCounts.map((c) => [c.matchId, c._count._all]));
   const myBy = new Map(mine.map((p) => [p.matchId, p]));
   const oddsBy = new Map<string, Map<string, number>>();
@@ -259,11 +276,6 @@ export default async function HomePage() {
     }
 
     const matchBonuses = leagueBonuses.filter((b) => b.matchId === m.id);
-    // Points de la ligue : ceux du pronostic + ceux des bonus joués dans cette ligue
-    const matchResults = withBonuses(
-      allResults.filter((r) => r.matchId === m.id),
-      matchBonuses,
-    );
     const myBonusUse = user ? matchBonuses.find((b) => b.userId === user.id) : undefined;
     // Points en direct : match en cours, ou terminé mais pas encore confirmé
     const nowScore =
@@ -280,16 +292,17 @@ export default async function HomePage() {
           rules,
         }
       : null;
-    const rows = user
+    const rowsFor = (ids: Set<string>, bonusRows: ReadonlyArray<{ userId: string; matchId: string; points: number | null }>) =>
+      user
       ? buildMatchRows({
-          users: usersByRank,
+          users: usersByRank.filter((u) => ids.has(u.id)),
           me: user.id,
           rennesIsHome: m.rennesIsHome,
           kickoffAt: m.kickoffAt,
           isPublic,
           preds: [
             // mon pronostic (toujours), ceux des autres seulement s'ils sont publics
-            ...(isPublic ? publicPreds.filter((p) => p.matchId === m.id) : my ? [my] : []).map((p) => ({
+            ...(isPublic ? publicPreds.filter((p) => p.matchId === m.id && ids.has(p.userId)) : my ? [my] : []).map((p) => ({
               userId: p.userId,
               rennesGoals: p.rennesGoals,
               opponentGoals: p.opponentGoals,
@@ -301,7 +314,7 @@ export default async function HomePage() {
             // avant le coup d'envoi : les autres n'apparaissent qu'avec « OK », sans aucun score
             ...(!isPublic
               ? predictedBefore
-                  .filter((p) => p.matchId === m.id && p.userId !== user.id)
+                  .filter((p) => p.matchId === m.id && p.userId !== user.id && ids.has(p.userId))
                   .map((p) => ({
                     userId: p.userId,
                     rennesGoals: 0,
@@ -312,10 +325,14 @@ export default async function HomePage() {
                   }))
               : []),
           ],
-          results: matchResults,
+          results: withBonuses(
+            allResults.filter((r) => r.matchId === m.id && ids.has(r.userId)),
+            bonusRows,
+          ),
           live: liveInput,
         })
       : [];
+    const rows = rowsFor(scopeSet, matchBonuses);
 
     const matchOdds = oddsBy.get(m.id);
     const matchLineup = m.lineupAt ? lineupBy.get(m.id) : undefined;
@@ -465,12 +482,21 @@ export default async function HomePage() {
           </p>
         ) : null
     );
-    const rowsWithBonus = rows.map((r) => {
-      const b = matchBonuses.find((x) => x.userId === r.userId);
-      // le bonus des autres n'est visible qu'après le coup d'envoi (le mien, toujours)
-      return b && (isPublic || r.mine) ? { ...r, bonus: { kind: b.kind, points: b.points } } : r;
-    });
-    const comparisonNode = user && rows.length > 0 ? <Comparison rows={rowsWithBonus} live={m.status === "LIVE" || m.status === "INTERRUPTED"} /> : null;
+    // le bonus des autres n'est visible qu'après le coup d'envoi (le mien, toujours)
+    const withBonusChip = (rs: typeof rows, br: ReadonlyArray<{ userId: string; kind: "KOUIGN_AMANN" | "GALETTE_SAUCISSE"; points: number | null }>) =>
+      rs.map((r) => {
+        const b = br.find((x) => x.userId === r.userId);
+        return b && (isPublic || r.mine) ? { ...r, bonus: { kind: b.kind, points: b.points } } : r;
+      });
+    // Une vue par ligue du joueur (la ligue affichée d'abord sélectionnée) ; sans ligue : ses seuls pronostics
+    const views = myLeagues.length
+      ? myLeagues.map((ml) => {
+          const ids = new Set(myLeagueMembers.filter((x) => x.leagueId === ml.league.id).map((x) => x.userId));
+          const br = allLeagueBonuses.filter((b) => b.leagueId === ml.league.id && b.matchId === m.id);
+          return { id: ml.league.id, name: ml.league.name, rows: withBonusChip(rowsFor(ids, br), br) };
+        })
+      : [{ id: "moi", name: "", rows: withBonusChip(rows, matchBonuses) }];
+    const comparisonNode = user && views.some((v) => v.rows.length > 0) ? true : null;
     const resultNode = score ? (
       <MatchResult
         title={finalScore ? (m.resultConfirmedAt ? "Résultat officiel" : "Résultat officiel (en attente de confirmation)") : "Résultat officiel · en direct"}
@@ -496,18 +522,26 @@ export default async function HomePage() {
           .
         </p>
       ) : null;
-    const pronosSection = (
+    const emptyNode = (
+      <p className="text-sm text-neutral-600">
+        {!user ? "Connecte-toi pour voir les pronostics des joueurs." : editable ? "Aucun pronostic pour l’instant." : "Aucun pronostic n’a été effectué."}
+      </p>
+    );
+    const pronosSection = comparisonNode ? (
+      <>
+        <LeagueComparison
+          title={title("Pronostics et points")}
+          views={views}
+          initial={scope && !scope.general ? scope.leagueId : undefined}
+          live={m.status === "LIVE" || m.status === "INTERRUPTED"}
+          empty={emptyNode}
+        />
+        {noLeagueNote}
+      </>
+    ) : (
       <section>
         {title("Pronostics et points")}
-        {comparisonNode ?? (
-          <p className="text-sm text-neutral-600">
-            {!user
-              ? "Connecte-toi pour voir les pronostics des joueurs."
-              : editable
-                ? "Aucun pronostic pour l’instant."
-                : "Aucun pronostic n’a été effectué."}
-          </p>
-        )}
+        {emptyNode}
         {noLeagueNote}
       </section>
     );
@@ -662,7 +696,11 @@ export default async function HomePage() {
                         : "Aucune autre rencontre programmée pour l’instant."}
                     </p>
                   ) : (
-                    list.map((m) => renderMatch(m))
+                    <div className="space-y-3">
+                      {/* Matchs déjà joués : masqués (sauf le « Match terminé » en haut de page), affichables d'un clic */}
+                      <PastMatches count={list.filter((m) => isPlayed(m)).length}>{list.filter((m) => isPlayed(m)).map((m) => renderMatch(m))}</PastMatches>
+                      {list.filter((m) => !isPlayed(m)).map((m) => renderMatch(m))}
+                    </div>
                   ),
               };
             })}
@@ -673,6 +711,11 @@ export default async function HomePage() {
   );
 }
 
+
+/** Match déjà joué (terminé ou annulé) : masqué par défaut dans le calendrier. */
+function isPlayed(m: { status: string }) {
+  return m.status === "FINISHED" || m.status === "CANCELLED";
+}
 
 /** Bonus « Spécialités Maison » joués dans une ligue, sur les matchs affichés. */
 async function loadLeagueBonuses(leagueId: string, matchIds: string[]) {
