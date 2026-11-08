@@ -92,7 +92,7 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
         <span className="min-w-0">
           <span className={`block text-[10px] font-bold uppercase tracking-wide ${muted}`}>Mon prono</span>
           <span className="block font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
-          <span className={`block max-w-[10rem] truncate text-xs ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
+          <span className={`block max-w-[10rem] truncate text-xs ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : <em>Pronostic manquant</em>}</span>
         </span>
         {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={30} />}
       </span>
