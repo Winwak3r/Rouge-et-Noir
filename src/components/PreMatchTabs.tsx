@@ -15,7 +15,7 @@ export interface PreMatchPanel {
  * Avant-match : trois boutons (Probabilités · Comparatif · Confrontations), un seul panneau affiché,
  * qui glisse dans le sens du bouton choisi. Sur mobile, on peut aussi balayer le panneau du doigt.
  */
-export function PreMatchTabs({ panels, initial }: { panels: PreMatchPanel[]; initial?: string }) {
+export function PreMatchTabs({ panels, initial, stacked = false }: { panels: PreMatchPanel[]; initial?: string; stacked?: boolean }) {
   const [active, setActive] = useState(initial ?? panels[0]?.key);
   const [dir, setDir] = useState<"left" | "right" | null>(null);
   const changes = useRef(0);
@@ -43,6 +43,22 @@ export function PreMatchTabs({ panels, initial }: { panels: PreMatchPanel[]; ini
     const next = panels[idx(active) + (dx < 0 ? 1 : -1)];
     if (next) go(next.key);
   };
+
+  if (stacked) {
+    return (
+      <div className="space-y-4">
+        {panels.map((p) => (
+          <section key={p.key} aria-label={p.label} className="rounded-xl border border-neutral-200 p-3">
+            <h4 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-neutral-500">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-rouge ring-1 ring-neutral-200">{p.icon}</span>
+              {p.label}
+            </h4>
+            {p.content}
+          </section>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

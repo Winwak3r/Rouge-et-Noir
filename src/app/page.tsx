@@ -431,6 +431,7 @@ export default async function HomePage() {
           prematch={
             opts.layout === "next" ? (
               <MatchStats
+                stacked
                 competition={m.competition}
                 home={{ id: m.homeTeam.externalId, name: m.homeTeam.name, logo: m.homeTeam.logoUrl }}
                 away={{ id: m.awayTeam.externalId, name: m.awayTeam.name, logo: m.awayTeam.logoUrl }}

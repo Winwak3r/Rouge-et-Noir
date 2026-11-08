@@ -7,6 +7,7 @@ import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib
 import { BonusIcon } from "./BonusIcon";
 import { NO_SCORER, ScorerSelect, type ScorerOption } from "./ScorerSelect";
 import { TeamLabel } from "./TeamLabel";
+import { teamAbbr } from "@/lib/team-abbr";
 
 /** Fermeture de la fiche, fournie par l'accordéon qui l'ouvre. */
 export const SheetContext = createContext<{ close: () => void } | null>(null);
@@ -43,6 +44,16 @@ export function PredictionSheet(props: {
   const [bonusKind, setBonusKind] = useState<BonusKind | "">(props.bonus?.current?.kind ?? "");
   const [second, setSecond] = useState(props.bonus?.current?.secondScorerId ?? "");
   const [tab, setTab] = useState<"pre" | "bonus" | "scorer">("pre");
+  // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits)
+  const formRef = useRef<HTMLFormElement>(null);
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    const scroller = formRef.current?.parentElement?.closest(".overflow-y-auto") ?? formRef.current?.parentElement;
+    if (!scroller) return;
+    const onScroll = () => setCompact((c) => (c ? scroller.scrollTop > 24 : scroller.scrollTop > 56)); // hystérésis : pas de clignotement
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Enregistré : la fiche se ferme et la page se met à jour
   const first = useRef(true);
@@ -69,7 +80,9 @@ export function PredictionSheet(props: {
         name={name}
         value={value}
         onChange={(e) => set(e.target.value)}
-        className="h-16 w-16 appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club text-4xl font-semibold text-noir focus:border-rouge focus:outline-none"
+        className={`appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 focus:border-rouge focus:outline-none ${
+          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-16 w-16 text-4xl"
+        }`}
         style={{ textAlignLast: "center" }}
       >
         <option value="">–</option>
@@ -81,26 +94,47 @@ export function PredictionSheet(props: {
       </select>
     </label>
   );
-  const team = (t: Side) => (
-    <div className="flex min-w-0 flex-col items-center gap-1">
-      {t.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={t.logo} alt="" className="h-14 w-14 object-contain" />
-      ) : (
-        <span className="h-14 w-14" />
-      )}
+  const team = (t: Side, side: "home" | "away") => {
+    const logo = t.logo ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={t.logo} alt="" className={`shrink-0 object-contain transition-all duration-300 ${compact ? "h-8 w-8" : "h-14 w-14"}`} />
+    ) : (
+      <span className={compact ? "h-8 w-8" : "h-14 w-14"} />
+    );
+    const name = compact ? (
+      <span className="font-display text-lg font-bold uppercase">{teamAbbr(t.name)}</span>
+    ) : (
       <TeamLabel name={t.name} rennes={t.rennes} className="max-w-full truncate font-display text-lg font-bold uppercase" />
-    </div>
-  );
+    );
+    return (
+      <div
+        className={`flex min-w-0 items-center gap-1.5 transition-all duration-300 ${
+          compact ? (side === "home" ? "flex-row justify-end" : "flex-row-reverse justify-end") : "flex-col"
+        }`}
+      >
+        {compact ? (
+          <>
+            {name}
+            {logo}
+          </>
+        ) : (
+          <>
+            {logo}
+            {name}
+          </>
+        )}
+      </div>
+    );
+  };
 
   const TABS = [
     ["pre", "Avant-match"],
-    ["bonus", "La spécialité maison"],
-    ["scorer", "Le buteur"],
+    ["scorer", "Mon buteur"],
+    ["bonus", "Les spécialités maison"],
   ] as const;
 
   return (
-    <form action={action} className="flex min-h-full flex-col">
+    <form ref={formRef} action={action} className="flex min-h-full flex-col">
       <input type="hidden" name="matchId" value={props.matchId} />
       {props.bonus && <input type="hidden" name="bonusLeagueId" value={props.bonus.leagueId} />}
       <input type="hidden" name="bonusKind" value={bonusKind} />
@@ -111,13 +145,17 @@ export function PredictionSheet(props: {
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
       <div className="sticky top-0 z-10 bg-[var(--header-bg)]">
       <div className="border-b border-neutral-200 px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
-        <div className="relative flex items-center justify-center">
+        <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <p className="flex items-center gap-1.5 text-sm font-semibold text-neutral-600">
+          <p
+            className={`flex items-center gap-1.5 overflow-hidden text-sm font-semibold text-neutral-600 transition-all duration-300 ${
+              compact ? "max-h-0 opacity-0" : "max-h-8 opacity-100"
+            }`}
+          >
             {props.competitionLogo && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={props.competitionLogo} alt="" className="h-5 w-5 rounded bg-white object-contain p-px" />
@@ -125,20 +163,21 @@ export function PredictionSheet(props: {
             {props.title}
           </p>
         </div>
-        <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          {team(props.home)}
+        <div className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-all duration-300 ${compact ? "-mt-10 pl-9" : "mt-2"}`}>
+          {team(props.home, "home")}
           <div className="flex items-center gap-2">
             {scoreBox(home, setHome, props.rennesIsHome ? "rennesGoals" : "opponentGoals", props.home.name)}
             <span className="font-display text-2xl font-bold text-neutral-400">–</span>
             {scoreBox(away, setAway, props.rennesIsHome ? "opponentGoals" : "rennesGoals", props.away.name)}
           </div>
-          {team(props.away)}
+          {team(props.away, "away")}
         </div>
         {half && <p className="mt-1 text-center text-xs text-orange-700">Choisis un score pour les deux équipes.</p>}
       </div>
 
       {/* Onglets */}
-      <div role="tablist" className="grid grid-cols-3 border-b border-neutral-200">
+      {/* Largeur de chaque onglet selon son libellé, police ajustée à l'écran : marge minimale sur les bords */}
+      <div role="tablist" className="flex border-b border-neutral-200">
         {TABS.map(([k, label]) => (
           <button
             key={k}
@@ -146,7 +185,8 @@ export function PredictionSheet(props: {
             role="tab"
             aria-selected={tab === k}
             onClick={() => setTab(k)}
-            className={`px-1 py-3 text-[13px] font-bold leading-tight transition-colors ${tab === k ? "bg-rouge text-white" : "text-neutral-600"}`}
+            style={{ flexGrow: label.length, flexBasis: 0, fontSize: "clamp(11px, 3.45vw, 15px)" }}
+            className={`whitespace-nowrap px-1.5 py-3 font-bold leading-tight transition-colors ${tab === k ? "bg-rouge text-white" : "text-neutral-600"}`}
           >
             {label}
           </button>
@@ -183,7 +223,7 @@ export function PredictionSheet(props: {
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{BONUS_INFO[k].name}</span>
                       <span className="block text-xs text-neutral-600">{BONUS_INFO[k].effect}</span>
-                      {needsScorer && <span className="block text-xs text-orange-700">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      {needsScorer && <span className="block text-xs text-orange-700">Choisis d’abord un buteur (onglet « Mon buteur »)</span>}
                     </span>
                     <span className={`grid h-7 min-w-7 place-items-center rounded-full px-1.5 text-sm font-bold ${left > 0 ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-500"}`}>
                       {left}

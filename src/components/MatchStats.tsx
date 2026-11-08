@@ -28,6 +28,8 @@ export async function MatchStats(props: {
   away: Side;
   /** Cotes du match (victoire domicile / nul / victoire extérieur) */
   odds?: { home: number | null; draw: number | null; away: number | null };
+  /** Rubriques à la suite (fiche mobile), sans les trois boutons */
+  stacked?: boolean;
 }) {
   const slug = ESPN_LEAGUES[props.competition];
   const withTables = props.competition !== "COUPE_DE_FRANCE";
@@ -83,6 +85,7 @@ export async function MatchStats(props: {
 
   return (
     <PreMatchTabs
+      stacked={props.stacked}
       initial={indices ? "proba" : "compare"}
       panels={[
         {
