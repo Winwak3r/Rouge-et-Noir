@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 export function BackButton() {
   const pathname = usePathname();
   const router = useRouter();
-  if (pathname === "/") return null;
+  if (pathname === "/" || pathname.startsWith("/match/")) return null; // la page d'un match a sa propre flèche
   const back = () => {
     // Page ouverte directement (lien, favori) : pas de page précédente sur le site → accueil
     const fromSite = typeof document !== "undefined" && document.referrer.startsWith(window.location.origin);
