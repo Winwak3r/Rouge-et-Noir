@@ -25,8 +25,8 @@ export function MatchPageShell({ matchId, children }: { matchId: string; childre
   const done = () => router.push(`/#match-${matchId}`);
   return (
     <div className="wallpaper-bg fixed inset-0 z-[60]">
-      {/* Même largeur que l'accueil */}
-      <div className="mx-auto flex h-full w-full max-w-5xl flex-col sm:border-x sm:border-neutral-200 sm:shadow-2xl">
+      {/* Toute la largeur de l'écran (contenu centré à l'intérieur) : la barre de défilement est tout à droite */}
+      <div className="flex h-full w-full flex-col">
         <SheetContext.Provider value={{ close, done }}>{children}</SheetContext.Provider>
       </div>
     </div>

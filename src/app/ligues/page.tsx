@@ -9,6 +9,10 @@ import { requireUser } from "@/lib/auth/session";
 import { myLeagues } from "@/lib/leagues";
 import { getLeagueLogos } from "@/lib/league-logos";
 import { MAX_LEAGUES, canJoinAnother } from "@/lib/league-rules";
+import { prisma } from "@/lib/db";
+import { bonusStock } from "@/lib/bonus-data";
+import { BonusIcon } from "@/components/BonusIcon";
+import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
 
 export const metadata: Metadata = { title: "Ligues" };
 export const dynamic = "force-dynamic";
@@ -16,7 +20,13 @@ export const dynamic = "force-dynamic";
 export default async function MyLeaguesPage({ searchParams }: { searchParams: Promise<{ rejoint?: string; invitation?: string }> }) {
   const user = await requireUser();
   const q = await searchParams;
-  const [leagues, logos] = await Promise.all([myLeagues(user.id), getLeagueLogos()]);
+  const [leagues, logos, season] = await Promise.all([
+    myLeagues(user.id),
+    getLeagueLogos(),
+    prisma.season.findFirst({ where: { isCurrent: true }, select: { id: true } }),
+  ]);
+  // « Les Spécialités Maison » restantes cette saison, dans chaque ligue
+  const stocks = season ? await Promise.all(leagues.map((m) => bonusStock(user.id, m.leagueId, season.id))) : [];
   const canAdd = canJoinAnother(leagues.length);
 
   return (
@@ -45,7 +55,8 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
         <p className="card text-sm text-neutral-600">Tu n’es dans aucune ligue pour l’instant.</p>
       ) : (
         <ul className="space-y-2">
-          {leagues.map((m) => {
+          {leagues.map((m, i) => {
+            const stock = stocks[i];
             const active = (user.activeLeagueId ?? leagues.find((x) => x.isActive)?.leagueId) === m.leagueId;
             return (
               <li key={m.leagueId} className={`card space-y-3 p-4 sm:flex sm:items-center sm:gap-3 sm:space-y-0 ${active ? "ring-2 ring-rouge" : ""}`}>
@@ -71,6 +82,17 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
                         ))}
                       </span>
                     </p>
+                    {stock && (
+                      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-600" aria-label="Bonus restants cette saison">
+                        {BONUS_KINDS.map((k) => (
+                          <span key={k} className="inline-flex items-center gap-1" title={`${BONUS_INFO[k].name} : ${stock[k]} restant(s) cette saison`}>
+                            <BonusIcon kind={k} size={22} />
+                            <span className={`font-bold tabular-nums ${stock[k] > 0 ? "text-green-700" : "text-neutral-400"}`}>{stock[k]}</span>
+                            <span>{BONUS_INFO[k].name.replace(/^(Le|La) /, "")}</span>
+                          </span>
+                        ))}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {/* Ligne 3 : les boutons */}

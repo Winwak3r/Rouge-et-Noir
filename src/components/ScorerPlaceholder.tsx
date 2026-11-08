@@ -11,7 +11,7 @@ export function ScorerPlaceholder({ mode, size = 112, caption = true }: { mode: 
     // Présenté comme la photo d'un joueur de l'équipe, avec le numéro 0
     return (
       <figure className="flex shrink-0 flex-col items-center gap-1 self-center" style={{ width: size }}>
-        <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={size} shape="card" number={0} />
+        <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={size} shape="card" number={null} />
         {caption && <figcaption className="text-center text-[11px] font-semibold leading-tight text-neutral-600">Aucun buteur rennais</figcaption>}
       </figure>
     );

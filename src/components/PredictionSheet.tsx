@@ -194,7 +194,7 @@ export function PredictionSheet(props: {
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
       <div className="z-10 shrink-0 bg-[var(--header-bg)] shadow-sm">
-      <div className="px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+      <div className="mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -246,12 +246,14 @@ export function PredictionSheet(props: {
       </div>
       </div>
 
-      <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-4 [overflow-anchor:none]">
+      <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto [overflow-anchor:none]">
+        <div className="mx-auto w-full max-w-5xl px-3 py-4">
         {tab === "pre" && <div>{props.prematch}</div>}
 
         {tab === "bonus" &&
           (props.leagues.length ? (
             <div className="space-y-3">
+              <h4 className="font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Les bonus</h4>
               <p className="text-sm text-neutral-600">Facultatif · une spécialité par match et par ligue.</p>
               {BONUS_KINDS.map((k) => {
                 const applied = props.leagues.filter((l) => perLeague[l.id] === k);
@@ -292,9 +294,10 @@ export function PredictionSheet(props: {
 
         {tab === "scorer" && (
           <div className="space-y-2">
+            <h4 className="font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Buteur rennais</h4>
             {scorer === NO_SCORER && (
               <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-surface)] p-3 ring-1 ring-neutral-200">
-                <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={96} shape="card" number={0} />
+                <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={96} shape="card" number={null} />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-500">Mon pari</p>
                   <p className="font-display text-2xl font-bold leading-tight">Aucun buteur rennais</p>
@@ -353,6 +356,7 @@ export function PredictionSheet(props: {
         )}
       </div>
 
+      </div>
       {popup && (
         <div className="absolute inset-0 z-30 flex items-end bg-black/50" onClick={() => setPopup(null)}>
           <div
@@ -425,11 +429,11 @@ export function PredictionSheet(props: {
       {/* Barre d'enregistrement, toujours visible */}
       <div className="shrink-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
         {state.error && (
-          <p role="alert" className="mb-2 text-sm font-medium text-red-700">
+          <p role="alert" className="mx-auto mb-2 max-w-5xl text-sm font-medium text-red-700">
             {state.error}
           </p>
         )}
-        <div className="flex gap-2">
+        <div className="mx-auto flex max-w-5xl gap-2">
           {init && (
             <button
               type="submit"

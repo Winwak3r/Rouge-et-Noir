@@ -174,7 +174,7 @@ export async function Header() {
               </span>
               <span className="max-[359px]:hidden">Règles</span>
             </Link>
-            <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className={`hbtn ${user ? "" : "hidden"}`}>
+            <Link href="/classements-srfc" aria-label="Classements officiels du Stade Rennais" data-tour="standings" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon bg-white">
                 {rennesLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -192,7 +192,7 @@ export async function Header() {
               <span className="hidden sm:inline">Classements</span>
             </Link>
           </nav>
-            <span className="text-right text-[10px] leading-tight text-neutral-500 sm:text-xs">
+            <span className="hidden text-right text-[10px] leading-tight text-neutral-500 sm:inline sm:text-xs">
               Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
             </span>
             {/* Interrupteur du thème sous la dernière synchro, tout à droite (mobile et ordinateur) */}

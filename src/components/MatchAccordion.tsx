@@ -81,7 +81,7 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
     p.scorer ? (
       <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={size} shape={card ? "card" : "round"} number={card ? p.scorer.number : null} />
     ) : p.noScorer ? (
-      <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={size} shape={card ? "card" : "round"} number={card ? 0 : null} />
+      <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={size} shape={card ? "card" : "round"} number={null} />
     ) : null;
 
   if (variant === "pc") {
