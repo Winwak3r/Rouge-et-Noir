@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BackButton } from "@/components/BackButton";
+import { ScrollTopOnLoad } from "@/components/ScrollTopOnLoad";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="min-h-screen overflow-x-clip bg-page font-sans text-neutral-900 antialiased">
         <Header />
         <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:pb-16">
+          <ScrollTopOnLoad />
           <BackButton />{children}</main>
         <Footer />
       </body>

@@ -76,20 +76,34 @@ function PickBonuses({ list, size }: { list: NonNullable<MatchHeader["myPick"]>[
 /** Rappel de mon pronostic. Ordinateur : bloc compact à côté du match ; mobile : ligne sous la date. */
 function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; open: boolean; variant: "pc" | "mobile" }) {
   const muted = open ? "text-white/80" : "text-neutral-500";
+  // « Aucun buteur rennais » : son badge, présenté comme une photo de joueur, numéro 0
+  const photo = (size: number, card: boolean) =>
+    p.scorer ? (
+      <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={size} shape={card ? "card" : "round"} number={card ? p.scorer.number : null} />
+    ) : p.noScorer ? (
+      <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={size} shape={card ? "card" : "round"} number={card ? 0 : null} />
+    ) : null;
+
   if (variant === "pc") {
-    // Ordinateur : tout sur une ligne — photo · MON PRONO · 2 - 2 · nom du buteur · spécialités
+    // Ordinateur, sur deux lignes : « MON PRONO : 2 - 2 », puis [photo] M. Nagida · spécialités (aligné sous le M)
     return (
-      <span className="flex shrink-0 items-center gap-3">
-        {p.scorer ? (
-          <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={40} shape="card" number={p.scorer.number} />
-        ) : p.noScorer ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src="/brand/aucun-buteur.png" alt="" className="shrink-0 rounded-full" style={{ width: 40, height: 40 }} />
-        ) : null}
-        <span className={`text-[10px] font-bold uppercase tracking-wide ${muted}`}>Mon prono</span>
-        <span className="font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
-        <span className={`max-w-[11rem] truncate text-sm ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
-        {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={30} />}
+      <span className="flex shrink-0 flex-col items-start gap-1">
+        <span className="flex items-baseline gap-2">
+          <span className={`text-[11px] font-bold uppercase tracking-wide ${open ? "text-white" : "text-noir"}`}>Mon prono :</span>
+          <span className="font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
+        </span>
+        <span className="flex items-center gap-2">
+          {photo(30, true)}
+          <span className={`max-w-[11rem] truncate text-sm ${muted}`}>{p.scorer ? p.scorer.short : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
+          {p.bonuses.length > 0 && (
+            <>
+              <span aria-hidden className={muted}>
+                ·
+              </span>
+              <PickBonuses list={p.bonuses} size={26} />
+            </>
+          )}
+        </span>
       </span>
     );
   }
@@ -99,12 +113,7 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
       <span className={`shrink-0 font-bold ${open ? "text-white" : "text-noir"}`}>Mon prono :</span>
       <strong className={`shrink-0 font-club text-sm font-semibold tabular-nums ${open ? "text-white" : "text-noir"}`}>{p.score}</strong>
       {(p.scorer || p.noScorer) && <span aria-hidden>·</span>}
-      {p.scorer ? (
-        <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={22} />
-      ) : p.noScorer ? (
-        // eslint-disable-next-line @next/next/no-img-element
-          <img src="/brand/aucun-buteur.png" alt="" className="shrink-0 rounded-full" style={{ width: 22, height: 22 }} />
-      ) : null}
+      {photo(22, false)}
       {p.scorer ? <span className="min-w-0 truncate">{p.scorer.short}</span> : p.noScorer ? <span className="truncate">Aucun buteur</span> : null}
       {p.bonuses.length > 0 && (
         <>

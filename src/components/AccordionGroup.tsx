@@ -20,6 +20,8 @@ export function AccordionGroup({ defaultOpenId, children }: { defaultOpenId?: st
       if (!m) return;
       setOpenId(m[1]);
       setTimeout(() => document.getElementById(`match-${m[1]}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      // Repère utilisé une seule fois : retiré de l'adresse, pour qu'un rafraîchissement reparte du haut de la page
+      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
     };
     fromHash();
     window.addEventListener("hashchange", fromHash);

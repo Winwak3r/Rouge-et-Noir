@@ -287,8 +287,7 @@ export function PredictionSheet(props: {
           <div className="space-y-2">
             {scorer === NO_SCORER && (
               <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-surface)] p-3 ring-1 ring-neutral-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/aucun-buteur.png" alt="" className="h-24 w-24 shrink-0 rounded-full" />
+                <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={96} shape="card" number={0} />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-500">Mon pari</p>
                   <p className="font-display text-2xl font-bold leading-tight">Aucun buteur rennais</p>
