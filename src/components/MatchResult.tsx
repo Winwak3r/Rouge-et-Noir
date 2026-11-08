@@ -92,16 +92,7 @@ export function MatchResult(props: {
 
   return (
     <div>
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
-        <span aria-hidden className="section-icon text-rouge">
-          {/* drapeau à damier : le résultat */}
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 22V4" />
-            <path d="M4 4h13l-2 4 2 4H4" />
-          </svg>
-        </span>
-        {props.title}
-      </h3>
+      <h3 className="mb-3 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">{props.title}</h3>
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
         <div className="min-w-0 text-right">
           <p className="truncate font-semibold">

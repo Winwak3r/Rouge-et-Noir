@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { after } from "next/server";
 import { cookies } from "next/headers";
@@ -485,40 +484,8 @@ export default async function HomePage() {
       />
     ) : null;
 
-    const svg = (d: ReactNode) => (
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        {d}
-      </svg>
-    );
-    const ICONS: Record<string, ReactNode> = {
-      // crayon : ma saisie
-      "Mon prono": svg(
-        <>
-          <path d="M12 20h9" />
-          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-        </>,
-      ),
-      // histogramme : les chiffres avant le match
-      "Avant match": svg(<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />),
-      // groupe : les pronostics de la ligue
-      "Pronostics et points": svg(
-        <>
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-        </>,
-      ),
-    };
-    const title = (t: string) => (
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
-        {ICONS[t] && (
-          <span aria-hidden className="section-icon text-rouge">
-            {ICONS[t]}
-          </span>
-        )}
-        {t}
-      </h3>
-    );
+    // Titres des rubriques d'un match : même style que les titres de pages (LIGUES…), en plus petit
+    const title = (t: string) => <h3 className="mb-3 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">{t}</h3>;
     const noLeagueNote =
       user && !scope ? (
         <p className="mt-2 text-xs text-neutral-600">

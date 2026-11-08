@@ -227,9 +227,12 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
             </span>
           )}
           <span className="hidden shrink-0 flex-col items-end gap-1 text-xs sm:flex">{badges(false)}</span>
-          <span aria-hidden className={`mt-1 transition-transform ${open ? "rotate-180" : ""}`}>
-            ▾
-          </span>
+          {/* Flèche seulement pour un accordéon (pas pour un match qui ouvre sa page) */}
+          {!href && (
+            <span aria-hidden className={`mt-1 transition-transform ${open ? "rotate-180" : ""}`}>
+              ▾
+            </span>
+          )}
         </span>
         {h.cancelled && (
           <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
