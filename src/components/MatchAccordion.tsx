@@ -82,7 +82,19 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
       <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={size} shape={card ? "card" : "round"} number={card ? p.scorer.number : null} />
     ) : p.noScorer ? (
       <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={size} shape={card ? "card" : "round"} number={null} />
-    ) : null;
+    ) : (
+      // Buteur pas encore choisi : vignette de la même forme qu'une photo de joueur, avec un « ? »
+      <span
+        role="img"
+        aria-label="Buteur pas encore choisi"
+        className={`grid shrink-0 place-items-center bg-neutral-200 font-display font-bold leading-none text-neutral-500 ring-1 ring-neutral-300 ${
+          card ? "rounded-xl" : "rounded-full"
+        }`}
+        style={{ width: size, height: size, fontSize: Math.round(size * 0.55) }}
+      >
+        ?
+      </span>
+    );
 
   if (variant === "pc") {
     // Ordinateur : photo (avec numéro) · MON PRONO / score / nom du buteur · spécialités
