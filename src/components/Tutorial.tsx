@@ -53,8 +53,8 @@ const STEPS: Step[] = [
     group: 6,
     page: "home",
     target: "standings",
-    title: "Les classements officiels",
-    text: "Les classements officiels des compétitions du Stade Rennais FC, et les classements des buteurs.",
+    title: "Les actus du SRFC",
+    text: "Toute l’actualité du Stade Rennais FC : les infos, les transferts, les classements officiels, l’effectif complet, et les liens vers le site et la boutique du club.",
   },
   {
     group: 7,

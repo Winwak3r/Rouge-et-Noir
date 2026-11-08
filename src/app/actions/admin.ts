@@ -504,7 +504,7 @@ export async function setClubLogosModeAction(_: AdminState, form: FormData): Pro
   const mode = str(form, "mode") === "generic" ? "generic" : "official";
   await prisma.appSetting.upsert({ where: { key: CLUB_LOGOS_SETTING }, create: { key: CLUB_LOGOS_SETTING, value: mode }, update: { value: mode } });
   await audit(admin.id, "CLUB_LOGOS_MODE", "AppSetting", CLUB_LOGOS_SETTING, undefined, { mode });
-  for (const p of ["/", "/admin/logos", "/classements-srfc"]) revalidatePath(p, "layout");
+  for (const p of ["/", "/admin/logos", "/actus"]) revalidatePath(p, "layout");
   return { message: mode === "generic" ? "Logos factices affichés pour les clubs." : "Logos officiels affichés pour les clubs." };
 }
 
@@ -518,7 +518,7 @@ export async function saveClubColorsAction(_: AdminState, form: FormData): Promi
   if (!ok(color1) || !ok(color2)) return { error: "Couleurs invalides." };
   await prisma.team.update({ where: { id: teamId }, data: { color1, color2 } });
   await audit(admin.id, "CLUB_COLORS", "Team", teamId, undefined, { color1, color2 });
-  for (const p of ["/", "/admin/logos", "/classements-srfc"]) revalidatePath(p, "layout");
+  for (const p of ["/", "/admin/logos", "/actus"]) revalidatePath(p, "layout");
   return { message: "Couleurs enregistrées." };
 }
 

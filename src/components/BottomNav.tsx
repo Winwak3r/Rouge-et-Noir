@@ -44,10 +44,10 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
       className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:hidden"
     >
       <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-start px-1">
-        {/* 1. SRFC : classements officiels du Stade Rennais */}
+        {/* 1. Actus : actualités du Stade Rennais (infos, transferts, classements, effectif) */}
         {item(
-          "/classements-srfc",
-          "SRFC",
+          "/actus",
+          "Actus",
           props.rennesLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={props.rennesLogo} alt="" className="h-6 w-6 object-contain" />
