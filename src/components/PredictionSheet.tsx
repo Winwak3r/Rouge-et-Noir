@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useActionState, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useActionState, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { savePredictionAction, type PredictionState } from "@/app/actions/predictions";
 import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib/scoring/bonus";
 import { BonusIcon } from "./BonusIcon";
@@ -44,15 +44,38 @@ export function PredictionSheet(props: {
   const [bonusKind, setBonusKind] = useState<BonusKind | "">(props.bonus?.current?.kind ?? "");
   const [second, setSecond] = useState(props.bonus?.current?.secondScorerId ?? "");
   const [tab, setTab] = useState<"pre" | "bonus" | "scorer">("pre");
-  // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits)
+  // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits).
+  // L'en-tête est en position fixe et une cale de hauteur constante réserve sa place : le réduire ne déplace pas
+  // le contenu, donc le défilement ne « rebondit » pas entre les deux états.
   const formRef = useRef<HTMLFormElement>(null);
+  const headRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(false);
+  const [headHeight, setHeadHeight] = useState(0);
+  useLayoutEffect(() => {
+    // mesurée en-tête déplié ; la cale ne fait que grandir (jamais de saut pendant une transition)
+    if (!compact && headRef.current) {
+      const h = headRef.current.offsetHeight;
+      setHeadHeight((prev) => Math.max(prev, h));
+    }
+  }, [compact, home, away]);
   useEffect(() => {
-    const scroller = formRef.current?.parentElement?.closest(".overflow-y-auto") ?? formRef.current?.parentElement;
+    const scroller = (formRef.current?.closest(".overflow-y-auto") as HTMLElement | null) ?? null;
     if (!scroller) return;
-    const onScroll = () => setCompact((c) => (c ? scroller.scrollTop > 24 : scroller.scrollTop > 56)); // hystérésis : pas de clignotement
+    scroller.style.overflowAnchor = "none";
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const y = scroller.scrollTop;
+        // hystérésis large : on réduit après 72 px, on ne redéplie qu'en revenant tout en haut
+        setCompact((c) => (c ? y > 8 : y > 72));
+      });
+    };
     scroller.addEventListener("scroll", onScroll, { passive: true });
-    return () => scroller.removeEventListener("scroll", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   // Enregistré : la fiche se ferme et la page se met à jour
@@ -143,7 +166,7 @@ export function PredictionSheet(props: {
       <input type="hidden" name="secondScorerId" value={bonusKind === "GALETTES_SAUCISSES" ? second : ""} />
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
-      <div className="sticky top-0 z-10 bg-[var(--header-bg)]">
+      <div ref={headRef} className="fixed inset-x-0 top-0 z-10 bg-[var(--header-bg)] shadow-sm">
       <div className="border-b border-neutral-200 px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
@@ -194,6 +217,8 @@ export function PredictionSheet(props: {
       </div>
       </div>
 
+      {/* Réserve la hauteur de l'en-tête déplié (constante) : le contenu ne bouge jamais */}
+      <div aria-hidden style={{ height: headHeight }} className="shrink-0" />
       <div className="flex-1 px-3 py-4">
         {tab === "pre" && <div>{props.prematch}</div>}
 
