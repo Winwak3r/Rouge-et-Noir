@@ -85,25 +85,16 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
     ) : null;
 
   if (variant === "pc") {
-    // Ordinateur, sur deux lignes : « MON PRONO : 2 - 2 », puis [photo] M. Nagida · spécialités (aligné sous le M)
+    // Ordinateur : photo (avec numéro) · MON PRONO / score / nom du buteur · spécialités
     return (
-      <span className="flex shrink-0 flex-col items-start gap-1">
-        <span className="flex items-baseline gap-2">
-          <span className={`text-[11px] font-bold uppercase tracking-wide ${open ? "text-white" : "text-noir"}`}>Mon prono :</span>
-          <span className="font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
+      <span className="flex w-[19rem] items-center gap-3">
+        {photo(40, true)}
+        <span className="min-w-0">
+          <span className={`block text-[10px] font-bold uppercase tracking-wide ${muted}`}>Mon prono</span>
+          <span className="block font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
+          <span className={`block max-w-[10rem] truncate text-xs ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
         </span>
-        <span className="flex items-center gap-2">
-          {photo(30, true)}
-          <span className={`max-w-[11rem] truncate text-sm ${muted}`}>{p.scorer ? p.scorer.short : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
-          {p.bonuses.length > 0 && (
-            <>
-              <span aria-hidden className={muted}>
-                ·
-              </span>
-              <PickBonuses list={p.bonuses} size={26} />
-            </>
-          )}
-        </span>
+        {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={30} />}
       </span>
     );
   }
@@ -216,7 +207,7 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
       >
         <span className={`flex w-full items-start gap-3 ${h.cancelled ? "opacity-35" : ""}`}>
           <span className={`mt-0.5 w-10 shrink-0 font-display text-2xl font-black ${open ? "text-white/60" : "match-code"}`}>{h.code}</span>
-          <span className={`min-w-0 flex-1 ${h.myPick ? "md:flex-initial" : ""}`}>
+          <span className="min-w-0 flex-1 md:w-[42%] md:flex-none">
             <span className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:hidden">{badges(true)}</span>
             <span className={`mb-1 flex items-center gap-1.5 text-sm ${open ? "text-white/85" : "text-neutral-600"}`}>
               <CompetitionBadge code={h.competition} logo={h.competitionLogo} className={open ? "ring-1 ring-white/60" : ""} />
@@ -239,11 +230,13 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
           </span>
           {h.myPick && (
             // à égale distance des infos du match et des statuts
-            <span className="hidden flex-1 justify-center self-center md:flex">
+            <span className="hidden min-w-0 flex-1 justify-center self-center md:flex">
               <MyPick p={h.myPick} open={open} variant="pc" />
             </span>
           )}
-          <span className="hidden shrink-0 flex-col items-end gap-1 text-xs sm:flex">{badges(false)}</span>
+          {/* espace réservé même sans pronostic : les colonnes restent alignées d'un match à l'autre */}
+          {!h.myPick && <span aria-hidden className="hidden flex-1 md:block" />}
+          <span className="hidden shrink-0 flex-col items-end gap-1 text-xs sm:flex md:w-40">{badges(false)}</span>
           {/* Flèche seulement pour un accordéon (pas pour un match qui ouvre sa page) */}
           {!href && (
             <span aria-hidden className={`mt-1 transition-transform ${open ? "rotate-180" : ""}`}>
