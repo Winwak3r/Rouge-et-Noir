@@ -31,7 +31,8 @@ export function PredictionSheet(props: {
   lineupPublished: boolean;
   savedScorerOut: string | null;
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
-  bonus?: { leagueId: string; leagueName: string; stock: BonusQuotas; current: { kind: BonusKind; secondScorerId: string | null } | null };
+  /** Mes ligues : un bonus peut s'appliquer à une ou plusieurs d'entre elles */
+  leagues: Array<{ id: string; name: string; stock: BonusQuotas; current: { kind: BonusKind; secondScorerId: string | null } | null }>;
   prematch: ReactNode;
 }) {
   const sheet = useContext(SheetContext);
@@ -41,8 +42,31 @@ export function PredictionSheet(props: {
   const [home, setHome] = useState(init ? String(props.rennesIsHome ? init.rennesGoals : init.opponentGoals) : "");
   const [away, setAway] = useState(init ? String(props.rennesIsHome ? init.opponentGoals : init.rennesGoals) : "");
   const [scorer, setScorer] = useState(init?.scorerId ?? (init?.noScorerPick ? NO_SCORER : ""));
-  const [bonusKind, setBonusKind] = useState<BonusKind | "">(props.bonus?.current?.kind ?? "");
-  const [second, setSecond] = useState(props.bonus?.current?.secondScorerId ?? "");
+  // Bonus de chaque ligue sur ce match (une spécialité au plus par ligue)
+  const [perLeague, setPerLeague] = useState<Record<string, BonusKind | "">>(() =>
+    Object.fromEntries(props.leagues.map((l) => [l.id, l.current?.kind ?? ""])),
+  );
+  const [second, setSecond] = useState(props.leagues.find((l) => l.current?.secondScorerId)?.current?.secondScorerId ?? "");
+  // Fenêtre « appliquer ce bonus à mes ligues »
+  const [popup, setPopup] = useState<BonusKind | null>(null);
+  const [draft, setDraft] = useState<Set<string>>(new Set());
+  const openPopup = (k: BonusKind) => {
+    setDraft(new Set(props.leagues.filter((l) => perLeague[l.id] === k).map((l) => l.id)));
+    setPopup(k);
+  };
+  const applyPopup = () => {
+    if (!popup) return;
+    setPerLeague((cur) => {
+      const next = { ...cur };
+      for (const l of props.leagues) {
+        if (draft.has(l.id)) next[l.id] = popup;
+        else if (next[l.id] === popup) next[l.id] = "";
+      }
+      return next;
+    });
+    setPopup(null);
+  };
+  const usesGalettes = Object.values(perLeague).includes("GALETTES_SAUCISSES");
   const [tab, setTab] = useState<"pre" | "bonus" | "scorer">("pre");
   // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits).
   // L'en-tête est en position fixe et une cale de hauteur constante réserve sa place : le réduire ne déplace pas
@@ -152,18 +176,20 @@ export function PredictionSheet(props: {
 
   const TABS = [
     ["pre", "Avant-match"],
-    ["scorer", "Mon buteur"],
+    ["scorer", "Le buteur"],
     ["bonus", "Les spécialités maison"],
   ] as const;
 
   return (
     <form ref={formRef} action={action} className="flex min-h-full flex-col">
       <input type="hidden" name="matchId" value={props.matchId} />
-      {props.bonus && <input type="hidden" name="bonusLeagueId" value={props.bonus.leagueId} />}
-      <input type="hidden" name="bonusKind" value={bonusKind} />
+      <input type="hidden" name="bonusLeagues" value={props.leagues.map((l) => l.id).join(",")} />
+      {props.leagues.map((l) => (
+        <input key={l.id} type="hidden" name={`bonus_${l.id}`} value={perLeague[l.id] ?? ""} />
+      ))}
       <input type="hidden" name="scorerId" value={scorer} />
       {/* Toujours envoyé, même si l'onglet n'est pas affiché */}
-      <input type="hidden" name="secondScorerId" value={bonusKind === "GALETTES_SAUCISSES" ? second : ""} />
+      <input type="hidden" name="secondScorerId" value={usesGalettes ? second : ""} />
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
       <div ref={headRef} className="fixed inset-x-0 top-0 z-10 bg-[var(--header-bg)] shadow-sm">
@@ -199,8 +225,8 @@ export function PredictionSheet(props: {
       </div>
 
       {/* Onglets */}
-      {/* Largeur de chaque onglet selon son libellé, police ajustée à l'écran : marge minimale sur les bords */}
-      <div role="tablist" className="flex border-b border-neutral-200">
+      {/* Trois onglets de même largeur, aux coins arrondis ; police adaptée à l'écran */}
+      <div role="tablist" className="grid grid-cols-3 gap-1 border-b border-neutral-200 bg-[var(--header-bg)] px-2 pb-2">
         {TABS.map(([k, label]) => (
           <button
             key={k}
@@ -208,8 +234,10 @@ export function PredictionSheet(props: {
             role="tab"
             aria-selected={tab === k}
             onClick={() => setTab(k)}
-            style={{ flexGrow: label.length, flexBasis: 0, fontSize: "clamp(11px, 3.45vw, 15px)" }}
-            className={`whitespace-nowrap px-1.5 py-3 font-bold leading-tight transition-colors ${tab === k ? "bg-rouge text-white" : "text-neutral-600"}`}
+            style={{ fontSize: "clamp(11px, 3.3vw, 14px)" }}
+            className={`flex min-h-11 items-center justify-center rounded-full px-2 py-1.5 text-center font-bold leading-tight transition-colors ${
+              tab === k ? "bg-rouge text-white shadow-sm" : "bg-neutral-100 text-neutral-600"
+            }`}
           >
             {label}
           </button>
@@ -223,43 +251,44 @@ export function PredictionSheet(props: {
         {tab === "pre" && <div>{props.prematch}</div>}
 
         {tab === "bonus" &&
-          (props.bonus ? (
+          (props.leagues.length ? (
             <div className="space-y-3">
-              <p className="text-sm text-neutral-600">
-                Facultatif · un seul par match · pour la ligue <strong className="text-noir">{props.bonus.leagueName}</strong>.
-              </p>
+              <p className="text-sm text-neutral-600">Facultatif · une spécialité par match et par ligue.</p>
               {BONUS_KINDS.map((k) => {
-                const left = props.bonus!.stock[k];
-                const on = bonusKind === k;
+                const applied = props.leagues.filter((l) => perLeague[l.id] === k);
                 const needsScorer = k !== "KOUIGN_AMANN" && (scorer === "" || scorer === NO_SCORER);
-                const disabled = !on && (left <= 0 || needsScorer);
                 return (
                   <button
                     key={k}
                     type="button"
-                    aria-pressed={on}
-                    disabled={disabled}
-                    onClick={() => setBonusKind(on ? "" : k)}
+                    disabled={needsScorer && applied.length === 0}
+                    onClick={() => openPopup(k)}
                     className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors disabled:opacity-40 ${
-                      on ? "border-rouge bg-rouge/10" : "border-neutral-200"
+                      applied.length ? "border-rouge bg-rouge/10" : "border-neutral-200"
                     }`}
                   >
                     <BonusIcon kind={k} size={48} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{BONUS_INFO[k].name}</span>
                       <span className="block text-xs text-neutral-600">{BONUS_INFO[k].effect}</span>
-                      {needsScorer && <span className="block text-xs text-orange-700">Choisis d’abord un buteur (onglet « Mon buteur »)</span>}
-                    </span>
-                    <span className={`grid h-7 min-w-7 place-items-center rounded-full px-1.5 text-sm font-bold ${left > 0 ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-500"}`}>
-                      {left}
+                      {needsScorer && <span className="block text-xs text-orange-700">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      {applied.length > 0 && (
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          {applied.map((l) => (
+                            <span key={l.id} className="rounded-full bg-rouge px-2 py-0.5 text-[11px] font-semibold text-white">
+                              ✓ {l.name}
+                            </span>
+                          ))}
+                        </span>
+                      )}
                     </span>
                   </button>
                 );
               })}
-              {bonusKind === "GALETTES_SAUCISSES" && (
+              {usesGalettes && (
                 <div>
                   <span id={`${props.matchId}-m-second`} className="label">
-                    Second buteur rennais
+                    Second buteur rennais (Galettes Saucisses)
                   </span>
                   <ScorerSelect
                     name="secondScorerView"
@@ -272,7 +301,6 @@ export function PredictionSheet(props: {
                   />
                 </div>
               )}
-              {bonusKind && <p className="text-sm italic text-neutral-600">« {BONUS_INFO[bonusKind].tagline} »</p>}
             </div>
           ) : (
             <p className="text-sm text-neutral-600">Rejoins ou crée une ligue pour jouer les Spécialités Maison.</p>
@@ -313,6 +341,75 @@ export function PredictionSheet(props: {
         )}
       </div>
 
+      {popup && (
+        <div className="fixed inset-0 z-30 flex items-end bg-black/50" onClick={() => setPopup(null)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={BONUS_INFO[popup].name}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full space-y-3 rounded-t-3xl bg-surface p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
+          >
+            <div className="flex items-center gap-3">
+              <BonusIcon kind={popup} size={48} />
+              <div>
+                <p className="font-bold">{BONUS_INFO[popup].name}</p>
+                <p className="text-xs text-neutral-600">{BONUS_INFO[popup].effect}</p>
+              </div>
+            </div>
+            <p className="text-xs italic text-neutral-500">« {BONUS_INFO[popup].tagline} »</p>
+            <p className="text-sm font-semibold">Dans quelles ligues ?</p>
+            <ul className="space-y-2">
+              {props.leagues.map((l) => {
+                const other = perLeague[l.id] && perLeague[l.id] !== popup ? (perLeague[l.id] as BonusKind) : null;
+                const empty = l.stock[popup] <= 0 && perLeague[l.id] !== popup;
+                const checked = draft.has(l.id);
+                return (
+                  <li key={l.id}>
+                    <label
+                      className={`flex items-center gap-3 rounded-xl border p-3 ${empty ? "cursor-not-allowed border-neutral-200 bg-neutral-100 opacity-60" : checked ? "border-rouge bg-rouge/10" : "border-neutral-200"}`}
+                    >
+                      <input
+                        type="checkbox"
+                        disabled={empty}
+                        checked={checked}
+                        onChange={(e) =>
+                          setDraft((d) => {
+                            const n = new Set(d);
+                            if (e.target.checked) n.add(l.id);
+                            else n.delete(l.id);
+                            return n;
+                          })
+                        }
+                        className="h-5 w-5 accent-[#e1001a]"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold">{l.name}</span>
+                        {empty ? (
+                          <span className="block text-xs font-semibold text-neutral-500">⛔ Plus de bonus disponible</span>
+                        ) : other && checked ? (
+                          <span className="block text-xs text-orange-700">Remplacera « {BONUS_INFO[other].name} »</span>
+                        ) : other ? (
+                          <span className="block text-xs text-neutral-500">Déjà : {BONUS_INFO[other].name}</span>
+                        ) : null}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setPopup(null)} className="rounded-xl border border-neutral-300 px-4 py-3 text-sm font-semibold">
+                Annuler
+              </button>
+              <button type="button" onClick={applyPopup} className="flex-1 rounded-xl bg-rouge py-3 text-sm font-bold text-white">
+                Appliquer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Barre d'enregistrement, toujours visible */}
       <div className="sticky bottom-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
         {state.error && (
@@ -331,7 +428,7 @@ export function PredictionSheet(props: {
                 setHome("");
                 setAway("");
                 setScorer("");
-                setBonusKind("");
+                setPerLeague({});
               }}
               className="rounded-xl border border-neutral-300 px-3 py-3 text-sm font-semibold"
             >

@@ -72,6 +72,17 @@ export default async function HomePage() {
   const currentSeasonId = matches[0]?.seasonId ?? null;
   const leagueBonuses: LeagueBonus[] = bonusLeague ? await loadLeagueBonuses(bonusLeague.id, matches.map((x) => x.id)) : [];
   const bonusStockAll: BonusQuotas | null = bonusLeague && currentSeasonId ? await bonusStock(user!.id, bonusLeague.id, currentSeasonId) : null;
+  // Fiche mobile : toutes mes ligues (un bonus peut s'y appliquer en une fois), leur stock et mes bonus sur les matchs affichés
+  const myLeagues =
+    user && currentSeasonId
+      ? await prisma.leagueMember.findMany({
+          where: { userId: user.id, isActive: true },
+          select: { league: { select: { id: true, name: true } } },
+          orderBy: { joinedAt: "asc" },
+        })
+      : [];
+  const myLeagueStocks = await Promise.all(myLeagues.map((m) => bonusStock(user!.id, m.league.id, currentSeasonId!)));
+  const myUses = user && myLeagues.length ? await prisma.bonusUse.findMany({ where: { userId: user.id, matchId: { in: matches.map((x) => x.id) } } }) : [];
 
   // Écussons : officiels ou factices selon le réglage de l'administration
   const logoMode = await clubLogosMode();
@@ -427,7 +438,17 @@ export default async function HomePage() {
           lineupPublished={Boolean(matchLineup)}
           savedScorerOut={savedOut}
           initial={my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null}
-          bonus={bonusProp}
+          leagues={myLeagues.map((ml, i) => {
+            const cur = myUses.find((u) => u.matchId === m.id && u.leagueId === ml.league.id);
+            const stock = myLeagueStocks[i];
+            return {
+              id: ml.league.id,
+              name: ml.league.name,
+              // stock sans compter le bonus déjà posé sur CE match
+              stock: cur ? { ...stock, [cur.kind]: stock[cur.kind] + 1 } : stock,
+              current: cur ? { kind: cur.kind, secondScorerId: cur.secondScorerId } : null,
+            };
+          })}
           prematch={
             opts.layout === "next" ? (
               <MatchStats

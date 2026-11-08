@@ -108,16 +108,16 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
     throw e;
   }
 
-  if (bonus.leagueId) {
-    const key = { userId_leagueId_matchId: { userId: user.id, leagueId: bonus.leagueId, matchId } };
-    if (bonus.kind) {
+  for (const b of bonus.choices) {
+    const key = { userId_leagueId_matchId: { userId: user.id, leagueId: b.leagueId, matchId } };
+    if (b.kind) {
       await prisma.bonusUse.upsert({
         where: key,
-        create: { userId: user.id, leagueId: bonus.leagueId, matchId, kind: bonus.kind, secondScorerId: bonus.secondScorerId },
-        update: { kind: bonus.kind, secondScorerId: bonus.secondScorerId, points: null },
+        create: { userId: user.id, leagueId: b.leagueId, matchId, kind: b.kind, secondScorerId: b.secondScorerId },
+        update: { kind: b.kind, secondScorerId: b.secondScorerId, points: null },
       });
     } else {
-      await prisma.bonusUse.deleteMany({ where: { userId: user.id, leagueId: bonus.leagueId, matchId } });
+      await prisma.bonusUse.deleteMany({ where: { userId: user.id, leagueId: b.leagueId, matchId } });
     }
   }
 
@@ -126,28 +126,52 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
 }
 
 
-/** Bonus choisi dans le formulaire : vérifié (ligue, stock, conditions). Rien à faire sans ligue. */
+type BonusChoice = { leagueId: string; kind: BonusKind | null; secondScorerId: string | null };
+
+/**
+ * Bonus choisis dans le formulaire, vérifiés (ligue, stock, conditions) AVANT tout enregistrement.
+ *  - ordinateur : un bonus pour la ligue affichée (bonusLeagueId + bonusKind) ;
+ *  - fiche mobile : un bonus par ligue cochée (bonusLeagues = ids séparés par des virgules, bonus_<id> = type ou vide).
+ */
 async function checkBonus(
   form: FormData,
   ctx: { userId: string; match: { id: string; seasonId: string }; scorerId: string | null; noScorerPick: boolean },
-): Promise<{ error: string } | { leagueId: string | null; kind: BonusKind | null; secondScorerId: string | null }> {
-  const leagueId = typeof form.get("bonusLeagueId") === "string" ? (form.get("bonusLeagueId") as string) : "";
-  if (!leagueId) return { leagueId: null, kind: null, secondScorerId: null };
-  const member = await prisma.leagueMember.findUnique({ where: { leagueId_userId: { leagueId, userId: ctx.userId } } });
-  if (!member?.isActive) return { leagueId: null, kind: null, secondScorerId: null };
-  const raw = String(form.get("bonusKind") ?? "");
-  if (!raw) return { leagueId, kind: null, secondScorerId: null };
-  if (!BONUS_KINDS.includes(raw as BonusKind)) return { error: "Bonus inconnu." };
-  const kind = raw as BonusKind;
+): Promise<{ error: string } | { choices: BonusChoice[] }> {
+  const wanted: Array<{ leagueId: string; raw: string }> = [];
+  const multi = String(form.get("bonusLeagues") ?? "");
+  if (multi) {
+    for (const id of multi.split(",").filter(Boolean)) wanted.push({ leagueId: id, raw: String(form.get(`bonus_${id}`) ?? "") });
+  } else {
+    const leagueId = String(form.get("bonusLeagueId") ?? "");
+    if (leagueId) wanted.push({ leagueId, raw: String(form.get("bonusKind") ?? "") });
+  }
+  if (wanted.length === 0) return { choices: [] };
+
   const secondRaw = String(form.get("secondScorerId") ?? "");
-  const secondScorerId = kind === "GALETTES_SAUCISSES" && secondRaw ? secondRaw : null;
-  const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick, secondScorerId });
-  if (err) return { error: err };
-  if (secondScorerId) {
-    const ok = await prisma.player.findFirst({ where: { id: secondScorerId, seasonId: ctx.match.seasonId, isActive: true }, select: { id: true } });
+  if (wanted.some((w) => w.raw === "GALETTES_SAUCISSES") && secondRaw) {
+    const ok = await prisma.player.findFirst({ where: { id: secondRaw, seasonId: ctx.match.seasonId, isActive: true }, select: { id: true } });
     if (!ok) return { error: "Le second buteur ne fait plus partie de l’effectif." };
   }
-  const stock = await bonusStock(ctx.userId, leagueId, ctx.match.seasonId, ctx.match.id);
-  if (stock[kind] <= 0) return { error: `Tu n’as plus de « ${BONUS_INFO[kind].name} » dans cette ligue cette saison.` };
-  return { leagueId, kind, secondScorerId };
+
+  const choices: BonusChoice[] = [];
+  for (const w of wanted) {
+    const member = await prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId: w.leagueId, userId: ctx.userId } },
+      include: { league: { select: { name: true } } },
+    });
+    if (!member?.isActive) continue; // ligue quittée ou désactivée : ignorée
+    if (!w.raw) {
+      choices.push({ leagueId: w.leagueId, kind: null, secondScorerId: null });
+      continue;
+    }
+    if (!BONUS_KINDS.includes(w.raw as BonusKind)) return { error: "Bonus inconnu." };
+    const kind = w.raw as BonusKind;
+    const secondScorerId = kind === "GALETTES_SAUCISSES" && secondRaw ? secondRaw : null;
+    const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick, secondScorerId });
+    if (err) return { error: err };
+    const stock = await bonusStock(ctx.userId, w.leagueId, ctx.match.seasonId, ctx.match.id);
+    if (stock[kind] <= 0) return { error: `Plus de « ${BONUS_INFO[kind].name} » dans la ligue ${member.league.name} cette saison.` };
+    choices.push({ leagueId: w.leagueId, kind, secondScorerId });
+  }
+  return { choices };
 }
