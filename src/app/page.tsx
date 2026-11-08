@@ -29,6 +29,7 @@ import { PlayerPhoto } from "@/components/PlayerPhoto";
 import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
+import { shortPlayerName } from "@/lib/player-name";
 import { Landing } from "@/components/landing/Landing";
 import { PredictionSheet } from "@/components/PredictionSheet";
 import { OutcomeIndices } from "@/components/OutcomeIndices";
@@ -77,7 +78,7 @@ export default async function HomePage() {
     user && currentSeasonId
       ? await prisma.leagueMember.findMany({
           where: { userId: user.id, isActive: true },
-          select: { league: { select: { id: true, name: true } } },
+          select: { league: { select: { id: true, name: true, imageUpdatedAt: true } } },
           orderBy: { joinedAt: "asc" },
         })
       : [];
@@ -204,7 +205,24 @@ export default async function HomePage() {
           : m.competition === "EUROPA_LEAGUE"
             ? (m.stage?.split(" ")[0] ?? "UEL")
             : "L1";
+    // Rappel de mon pronostic dans l'en-tête du match (score, buteur, spécialités jouées et leurs ligues)
+    const myPick: MatchHeader["myPick"] = my
+      ? {
+          score: m.rennesIsHome ? `${my.rennesGoals} - ${my.opponentGoals}` : `${my.opponentGoals} - ${my.rennesGoals}`,
+          scorer: my.scorer
+            ? { name: my.scorer.name, short: shortPlayerName(my.scorer.name), photo: playerPhotoUrl(my.scorer), number: my.scorer.shirtNumber }
+            : null,
+          noScorer: my.noScorerPick,
+          bonuses: myUses
+            .filter((u) => u.matchId === m.id)
+            .map((u) => {
+              const l = myLeagues.find((x) => x.league.id === u.leagueId)?.league;
+              return { kind: u.kind, leagueId: u.leagueId, leagueName: l?.name ?? "Ligue", leagueImageAt: l?.imageUpdatedAt?.getTime() ?? null };
+            }),
+        }
+      : null;
     const h: MatchHeader = {
+      myPick,
       id: m.id,
       code,
       competition: m.competition,

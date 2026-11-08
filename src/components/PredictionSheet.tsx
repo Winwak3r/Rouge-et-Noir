@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useActionState, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useActionState, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { savePredictionAction, type PredictionState } from "@/app/actions/predictions";
 import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib/scoring/bonus";
 import { BonusIcon } from "./BonusIcon";
@@ -71,19 +71,11 @@ export function PredictionSheet(props: {
   // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits).
   // L'en-tête est en position fixe et une cale de hauteur constante réserve sa place : le réduire ne déplace pas
   // le contenu, donc le défilement ne « rebondit » pas entre les deux états.
-  const formRef = useRef<HTMLFormElement>(null);
-  const headRef = useRef<HTMLDivElement>(null);
+  // La zone de contenu défile seule, sous l'en-tête : réduire l'en-tête ne déplace pas le contenu (pas de va-et-vient)
+  const bodyRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(false);
-  const [headHeight, setHeadHeight] = useState(0);
-  useLayoutEffect(() => {
-    // mesurée en-tête déplié ; la cale ne fait que grandir (jamais de saut pendant une transition)
-    if (!compact && headRef.current) {
-      const h = headRef.current.offsetHeight;
-      setHeadHeight((prev) => Math.max(prev, h));
-    }
-  }, [compact, home, away]);
   useEffect(() => {
-    const scroller = (formRef.current?.closest(".overflow-y-auto") as HTMLElement | null) ?? null;
+    const scroller = bodyRef.current;
     if (!scroller) return;
     scroller.style.overflowAnchor = "none";
     let frame = 0;
@@ -181,7 +173,7 @@ export function PredictionSheet(props: {
   ] as const;
 
   return (
-    <form ref={formRef} action={action} className="flex min-h-full flex-col">
+    <form action={action} className="relative flex h-full min-h-0 flex-col">
       <input type="hidden" name="matchId" value={props.matchId} />
       <input type="hidden" name="bonusLeagues" value={props.leagues.map((l) => l.id).join(",")} />
       {props.leagues.map((l) => (
@@ -192,8 +184,8 @@ export function PredictionSheet(props: {
       <input type="hidden" name="secondScorerId" value={usesGalettes ? second : ""} />
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
-      <div ref={headRef} className="fixed inset-x-0 top-0 z-10 bg-[var(--header-bg)] shadow-sm">
-      <div className="border-b border-neutral-200 px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+      <div className="z-10 shrink-0 bg-[var(--header-bg)] shadow-sm">
+      <div className="px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -225,8 +217,8 @@ export function PredictionSheet(props: {
       </div>
 
       {/* Onglets */}
-      {/* Trois onglets de même largeur, aux coins arrondis ; police adaptée à l'écran */}
-      <div role="tablist" className="grid grid-cols-3 gap-1 border-b border-neutral-200 bg-[var(--header-bg)] px-2 pb-2">
+      {/* Trois onglets de même largeur, sans arrondi, qui remplissent toute la bande ; police adaptée à l'écran */}
+      <div role="tablist" className="grid grid-cols-3 divide-x divide-neutral-200 border-y border-neutral-200">
         {TABS.map(([k, label]) => (
           <button
             key={k}
@@ -234,9 +226,9 @@ export function PredictionSheet(props: {
             role="tab"
             aria-selected={tab === k}
             onClick={() => setTab(k)}
-            style={{ fontSize: "clamp(11px, 3.3vw, 14px)" }}
-            className={`flex min-h-11 items-center justify-center rounded-full px-2 py-1.5 text-center font-bold leading-tight transition-colors ${
-              tab === k ? "bg-rouge text-white shadow-sm" : "bg-neutral-100 text-neutral-600"
+            style={{ fontSize: "clamp(11px, 3.3vw, 15px)" }}
+            className={`flex min-h-12 items-center justify-center px-2 py-1.5 text-center font-bold leading-tight transition-colors ${
+              tab === k ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
             {label}
@@ -245,9 +237,7 @@ export function PredictionSheet(props: {
       </div>
       </div>
 
-      {/* Réserve la hauteur de l'en-tête déplié (constante) : le contenu ne bouge jamais */}
-      <div aria-hidden style={{ height: headHeight }} className="shrink-0" />
-      <div className="flex-1 px-3 py-4">
+      <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-4 [overflow-anchor:none]">
         {tab === "pre" && <div>{props.prematch}</div>}
 
         {tab === "bonus" &&
@@ -342,7 +332,7 @@ export function PredictionSheet(props: {
       </div>
 
       {popup && (
-        <div className="fixed inset-0 z-30 flex items-end bg-black/50" onClick={() => setPopup(null)}>
+        <div className="absolute inset-0 z-30 flex items-end bg-black/50" onClick={() => setPopup(null)}>
           <div
             role="dialog"
             aria-modal="true"
@@ -411,7 +401,7 @@ export function PredictionSheet(props: {
       )}
 
       {/* Barre d'enregistrement, toujours visible */}
-      <div className="sticky bottom-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
+      <div className="shrink-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
         {state.error && (
           <p role="alert" className="mb-2 text-sm font-medium text-red-700">
             {state.error}

@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { SheetContext } from "./PredictionSheet";
+import { BonusIcon } from "./BonusIcon";
+import { LeagueAvatar } from "./LeagueAvatar";
+import { PlayerPhoto } from "./PlayerPhoto";
+import { BONUS_INFO, type BonusKind } from "@/lib/scoring/bonus";
 import type { CompetitionCode } from "@/lib/competitions";
 import type { Tone } from "@/lib/match-view";
 import { useAccordionGroup } from "./AccordionGroup";
@@ -41,6 +45,63 @@ export interface MatchHeader {
   playersCount: number;
   /** complete : tout validé · score : score validé, aucun buteur à choisir · scorer : buteurs disponibles, à choisir · incomplete : rien */
   mine: "complete" | "score" | "scorer" | "incomplete" | null;
+  /** Mon pronostic, rappelé dans l'en-tête : score, buteur (photo) et spécialités jouées (avec la ligue) */
+  myPick?: {
+    score: string;
+    scorer: { name: string; short: string; photo: string | null; number: number | null } | null;
+    noScorer: boolean;
+    bonuses: Array<{ kind: BonusKind; leagueId: string; leagueName: string; leagueImageAt: number | null }>;
+  } | null;
+}
+
+/** Spécialités jouées : l'icône du bonus, avec la photo de la ligue en médaillon. */
+function PickBonuses({ list, size }: { list: NonNullable<MatchHeader["myPick"]>["bonuses"]; size: number }) {
+  return (
+    <span className="flex items-center gap-1">
+      {list.map((b) => (
+        <span key={b.leagueId} className="relative" title={`${BONUS_INFO[b.kind].name} · ${b.leagueName}`}>
+          <BonusIcon kind={b.kind} size={size} />
+          <LeagueAvatar
+            leagueId={b.leagueId}
+            name={b.leagueName}
+            at={b.leagueImageAt}
+            size={Math.round(size * 0.5)}
+            className="absolute -bottom-1 -right-1 rounded-md ring-2 ring-[var(--color-surface)]"
+          />
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** Rappel de mon pronostic. Ordinateur : bloc compact à côté du match ; mobile : ligne sous la date. */
+function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; open: boolean; variant: "pc" | "mobile" }) {
+  const muted = open ? "text-white/80" : "text-neutral-500";
+  if (variant === "pc") {
+    return (
+      <span className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-1.5 ${open ? "bg-white/10" : "bg-[var(--color-surface)]/70 ring-1 ring-neutral-200"}`}>
+        {p.scorer ? (
+          <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={40} shape="card" number={p.scorer.number} />
+        ) : null}
+        <span className="min-w-0">
+          <span className={`block text-[10px] font-bold uppercase tracking-wide ${muted}`}>Mon prono</span>
+          <span className="block font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
+          <span className={`block max-w-[9rem] truncate text-xs ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
+        </span>
+        {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={30} />}
+      </span>
+    );
+  }
+  return (
+    <span className={`mt-1.5 flex items-center gap-2 text-xs ${muted}`}>
+      {p.scorer && <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={24} />}
+      <span className="min-w-0 truncate">
+        Mon prono : <strong className={`font-club text-sm font-semibold tabular-nums ${open ? "text-white" : "text-noir"}`}>{p.score}</strong>
+        {p.scorer ? ` · ${p.scorer.short}` : p.noScorer ? " · Aucun buteur" : ""}
+      </span>
+      {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={22} />}
+    </span>
+  );
 }
 
 /** Équipe : à domicile, le logo vient APRÈS le nom (symétrie avec l'équipe à l'extérieur, logo avant le nom). */
@@ -71,7 +132,7 @@ export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; childre
     };
   }, [sheetOpen]);
   const onHeaderClick = () => {
-    if (sheet && window.matchMedia("(max-width: 639px)").matches) setSheetOpen(true);
+    if (sheet) setSheetOpen(true);
     else group?.toggle(h.id);
   };
   const open = !h.cancelled && group?.openId === h.id;
@@ -156,7 +217,17 @@ export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; childre
               <Team t={h.away} open={open} />
             </span>
             <span className={`mt-1 block text-xs ${open ? "text-white/80" : "text-neutral-500"}`}>{h.dateLabel}</span>
+            {h.myPick && (
+              <span className="md:hidden">
+                <MyPick p={h.myPick} open={open} variant="mobile" />
+              </span>
+            )}
           </span>
+          {h.myPick && (
+            <span className="hidden self-center md:block">
+              <MyPick p={h.myPick} open={open} variant="pc" />
+            </span>
+          )}
           <span className="hidden shrink-0 flex-col items-end gap-1 text-xs sm:flex">{badges(false)}</span>
           <span aria-hidden className={`mt-1 transition-transform ${open ? "rotate-180" : ""}`}>
             ▾
@@ -180,8 +251,17 @@ export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; childre
       </div>
       {sheetOpen &&
         createPortal(
-          <div role="dialog" aria-modal="true" aria-label="Mon pronostic" className="fixed inset-0 z-[85] overflow-y-auto bg-page sm:hidden">
-            <SheetContext.Provider value={{ close: () => setSheetOpen(false) }}>{sheet}</SheetContext.Provider>
+          // Mobile : plein écran ; ordinateur : fenêtre centrée sur fond assombri
+          <div className="fixed inset-0 z-[85] bg-black/55 sm:flex sm:items-center sm:justify-center sm:p-6" onClick={() => setSheetOpen(false)}>
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mon pronostic"
+              onClick={(e) => e.stopPropagation()}
+              className="relative flex h-full w-full flex-col overflow-hidden bg-page sm:h-[min(92vh,880px)] sm:max-w-3xl sm:rounded-2xl sm:shadow-2xl"
+            >
+              <SheetContext.Provider value={{ close: () => setSheetOpen(false) }}>{sheet}</SheetContext.Provider>
+            </div>
           </div>,
           document.body,
         )}
