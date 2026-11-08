@@ -115,9 +115,15 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
     <span className={`mt-1.5 flex min-w-0 items-center gap-1.5 text-xs ${muted}`}>
       <span className={`shrink-0 font-bold ${open ? "text-white" : "text-noir"}`}>Mon prono :</span>
       <strong className={`shrink-0 font-club text-sm font-semibold tabular-nums ${open ? "text-white" : "text-noir"}`}>{p.score}</strong>
-      {(p.scorer || p.noScorer) && <span aria-hidden>·</span>}
+      <span aria-hidden>·</span>
       {photo(22, false)}
-      {p.scorer ? <span className="min-w-0 truncate">{p.scorer.short}</span> : p.noScorer ? <span className="truncate">Aucun buteur</span> : null}
+      {p.scorer ? (
+        <span className="min-w-0 truncate">{p.scorer.short}</span>
+      ) : p.noScorer ? (
+        <span className="truncate">Aucun buteur</span>
+      ) : (
+        <em className="truncate">Prono manquant</em>
+      )}
       {p.bonuses.length > 0 && (
         <>
           <span aria-hidden>·</span>
