@@ -7,10 +7,11 @@ import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib
 import { BonusIcon } from "./BonusIcon";
 import { NO_SCORER, ScorerSelect, type ScorerOption } from "./ScorerSelect";
 import { TeamLabel } from "./TeamLabel";
+import { PlayerPhoto } from "./PlayerPhoto";
 import { teamAbbr } from "@/lib/team-abbr";
 
 /** Fermeture de la fiche, fournie par l'accordéon qui l'ouvre. */
-export const SheetContext = createContext<{ close: () => void } | null>(null);
+export const SheetContext = createContext<{ close: () => void; done?: () => void } | null>(null);
 
 type Side = { name: string; logo: string | null; rennes: boolean };
 
@@ -32,7 +33,7 @@ export function PredictionSheet(props: {
   savedScorerOut: string | null;
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
   /** Mes ligues : un bonus peut s'appliquer à une ou plusieurs d'entre elles */
-  leagues: Array<{ id: string; name: string; stock: BonusQuotas; current: { kind: BonusKind; secondScorerId: string | null } | null }>;
+  leagues: Array<{ id: string; name: string; stock: BonusQuotas; current: { kind: BonusKind } | null }>;
   prematch: ReactNode;
 }) {
   const sheet = useContext(SheetContext);
@@ -46,7 +47,6 @@ export function PredictionSheet(props: {
   const [perLeague, setPerLeague] = useState<Record<string, BonusKind | "">>(() =>
     Object.fromEntries(props.leagues.map((l) => [l.id, l.current?.kind ?? ""])),
   );
-  const [second, setSecond] = useState(props.leagues.find((l) => l.current?.secondScorerId)?.current?.secondScorerId ?? "");
   // Fenêtre « appliquer ce bonus à mes ligues »
   const [popup, setPopup] = useState<BonusKind | null>(null);
   const [draft, setDraft] = useState<Set<string>>(new Set());
@@ -66,7 +66,7 @@ export function PredictionSheet(props: {
     });
     setPopup(null);
   };
-  const usesGalettes = Object.values(perLeague).includes("GALETTES_SAUCISSES");
+
   const [tab, setTab] = useState<"pre" | "bonus" | "scorer">("pre");
   // En-tête réduit dès qu'on fait défiler la fiche (logos, score et noms plus petits).
   // L'en-tête est en position fixe et une cale de hauteur constante réserve sa place : le réduire ne déplace pas
@@ -102,8 +102,11 @@ export function PredictionSheet(props: {
       return;
     }
     if (state.success) {
-      router.refresh();
-      sheet?.close();
+      if (sheet?.done) sheet.done();
+      else {
+        router.refresh();
+        sheet?.close();
+      }
     }
   }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -180,8 +183,7 @@ export function PredictionSheet(props: {
         <input key={l.id} type="hidden" name={`bonus_${l.id}`} value={perLeague[l.id] ?? ""} />
       ))}
       <input type="hidden" name="scorerId" value={scorer} />
-      {/* Toujours envoyé, même si l'onglet n'est pas affiché */}
-      <input type="hidden" name="secondScorerId" value={usesGalettes ? second : ""} />
+
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
       <div className="z-10 shrink-0 bg-[var(--header-bg)] shadow-sm">
@@ -246,7 +248,7 @@ export function PredictionSheet(props: {
               <p className="text-sm text-neutral-600">Facultatif · une spécialité par match et par ligue.</p>
               {BONUS_KINDS.map((k) => {
                 const applied = props.leagues.filter((l) => perLeague[l.id] === k);
-                const needsScorer = k !== "KOUIGN_AMANN" && (scorer === "" || scorer === NO_SCORER);
+                const needsScorer = k === "GALETTE_SAUCISSE" && (scorer === "" || scorer === NO_SCORER);
                 return (
                   <button
                     key={k}
@@ -275,22 +277,7 @@ export function PredictionSheet(props: {
                   </button>
                 );
               })}
-              {usesGalettes && (
-                <div>
-                  <span id={`${props.matchId}-m-second`} className="label">
-                    Second buteur rennais (Galettes Saucisses)
-                  </span>
-                  <ScorerSelect
-                    name="secondScorerView"
-                    value={second}
-                    onChange={setSecond}
-                    scorers={props.scorers.filter((p) => p.id !== scorer)}
-                    noScorerBonus={0}
-                    labelledBy={`${props.matchId}-m-second`}
-                    lineupPublished={props.lineupPublished}
-                  />
-                </div>
-              )}
+
             </div>
           ) : (
             <p className="text-sm text-neutral-600">Rejoins ou crée une ligue pour jouer les Spécialités Maison.</p>
@@ -298,6 +285,18 @@ export function PredictionSheet(props: {
 
         {tab === "scorer" && (
           <div className="space-y-2">
+            {chosen && (
+              <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-surface)] p-3 ring-1 ring-neutral-200">
+                <PlayerPhoto name={chosen.name} url={chosen.photo ?? null} size={96} shape="card" number={chosen.number ?? null} />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-500">Mon buteur</p>
+                  <p className="font-display text-2xl font-bold leading-tight">{chosen.name}</p>
+                  <p className="font-bold text-green-700">
+                    +{chosen.bonus} pt{chosen.bonus > 1 ? "s" : ""} s’il marque
+                  </p>
+                </div>
+              </div>
+            )}
             <span id={`${props.matchId}-m-scorer`} className="label">
               Buteur rennais
             </span>

@@ -107,7 +107,7 @@ export function Comparison({ rows, live = false }: { rows: CompRow[]; live?: boo
                   {r.bonus && (
                     <span
                       className="mr-2 inline-flex items-center gap-1 align-middle"
-                      title={`${BONUS_INFO[r.bonus.kind].name}${r.bonus.second ? ` (2e buteur : ${r.bonus.second})` : ""}${r.bonus.points != null ? ` : +${r.bonus.points} pt${r.bonus.points > 1 ? "s" : ""}` : ""}`}
+                      title={`${BONUS_INFO[r.bonus.kind].name}${r.bonus.points != null ? ` : +${r.bonus.points} pt${r.bonus.points > 1 ? "s" : ""}` : ""}`}
                     >
                       <BonusIcon kind={r.bonus.kind} size={20} />
                       {r.bonus.points != null && r.bonus.points > 0 && <span className="text-[11px] font-bold text-green-700">+{r.bonus.points}</span>}

@@ -11,7 +11,7 @@ import { syncSquadPhotos } from "./squad-photos-sync";
 import { bonusPoints } from "@/lib/scoring/bonus";
 import { notifyEves, notifyMatchProgress, notifyPrematch } from "@/lib/push/match-notify";
 import { getActiveRules, getRulesByVersion } from "@/lib/scoring/active-rules";
-import { lockTime, oddsToBonus, scoreParticipantForMatch } from "@/lib/scoring/engine";
+import { lockTime, scoreParticipantForMatch } from "@/lib/scoring/engine";
 import type { ScoreLine } from "@/lib/scoring/rules";
 
 const MIN = 60_000;
@@ -477,26 +477,10 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
   }
   // « Les Spécialités Maison » : points ajoutés par chaque bonus joué (dans sa ligue)
   const bonuses = await prisma.bonusUse.findMany({ where: { matchId } });
-  if (bonuses.length) {
-    const odds = await prisma.playerOdds.findMany({ where: { matchId } });
-    const oddsOf = new Map(odds.map((o) => [o.playerId, Number(o.odds)]));
-    const fallback = rules.scorerFallback.mode === "FIXED" ? rules.scorerFallback.fixedBonus : 0;
-    for (const b of bonuses) {
-      const c = computed.get(b.userId);
-      const secondOdds = b.secondScorerId ? oddsOf.get(b.secondScorerId) : undefined;
-      const points = c
-        ? bonusPoints({
-            kind: b.kind,
-            matchTotal: c.total,
-            scorerId: c.scorerId,
-            scorerPoints: c.scorerPoints,
-            secondScorerId: b.secondScorerId,
-            secondScorerBonus: secondOdds ? oddsToBonus(secondOdds, rules) : fallback,
-            rennesGoalScorerIds: scorerIds,
-          })
-        : 0;
-      ops.push(prisma.bonusUse.update({ where: { id: b.id }, data: { points } }));
-    }
+  for (const b of bonuses) {
+    const c = computed.get(b.userId);
+    const points = c ? bonusPoints({ kind: b.kind, matchTotal: c.total, scorerPoints: c.scorerPoints }) : 0;
+    ops.push(prisma.bonusUse.update({ where: { id: b.id }, data: { points } }));
   }
   ops.push(prisma.match.update({ where: { id: matchId }, data: { scoredAt: new Date(), rulesVersion: rules.version } }));
   await prisma.$transaction(ops);

@@ -12,6 +12,7 @@ export interface ScorerOption {
   bonus: number;
   role?: "starter" | "sub" | null; // feuille de match publiée : titulaire ou remplaçant
   photo?: string | null; // photo officielle du joueur
+  number?: number | null; // numéro de maillot
 }
 
 export const NO_SCORER = "aucun"; // même valeur que côté serveur

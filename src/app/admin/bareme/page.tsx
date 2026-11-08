@@ -1,3 +1,4 @@
+import { normalizeQuotas } from "@/lib/scoring/bonus";
 import { saveRulesAction } from "@/app/actions/admin";
 import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
@@ -67,9 +68,8 @@ export default async function RulesAdminPage() {
           </fieldset>
           <fieldset className="card space-y-2 p-4">
             <legend className="px-1 text-sm font-semibold">Les Spécialités Maison (par saison, dans chaque ligue)</legend>
-            <Num name="quotaKouign" label="Le Kouign-Amann" value={(r.bonusQuotas ?? { KOUIGN_AMANN: 1 }).KOUIGN_AMANN} />
-            <Num name="quotaGalettes" label="Les Galettes Saucisses" value={(r.bonusQuotas ?? { GALETTES_SAUCISSES: 2 }).GALETTES_SAUCISSES} />
-            <Num name="quotaCrepes" label="La Pile de Crêpes" value={(r.bonusQuotas ?? { PILE_CREPES: 2 }).PILE_CREPES} />
+            <Num name="quotaKouign" label="Le Kouign-Amann" value={normalizeQuotas(r.bonusQuotas).KOUIGN_AMANN} />
+            <Num name="quotaGalette" label="La Galette-Saucisse" value={normalizeQuotas(r.bonusQuotas).GALETTE_SAUCISSE} />
           </fieldset>
           <fieldset className="card space-y-2 p-4">
             <legend className="px-1 text-sm font-semibold">Bonus buteur</legend>

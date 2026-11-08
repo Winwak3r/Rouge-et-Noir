@@ -34,7 +34,7 @@ export function MyPrediction(props: {
     leagueId: string;
     leagueName: string;
     stock: BonusQuotas; // restant dans la ligue, sans compter le bonus déjà posé sur ce match
-    current: { kind: BonusKind; secondScorerId: string | null } | null;
+    current: { kind: BonusKind } | null;
   };
 }) {
   const [state, action, pending] = useActionState<PredictionState, FormData>(savePredictionAction, {});
@@ -47,7 +47,6 @@ export function MyPrediction(props: {
   });
   const [v, setV] = useState(fromProps);
   const [bonusKind, setBonusKind] = useState<BonusKind | "">(props.bonus?.current?.kind ?? "");
-  const [second, setSecond] = useState(props.bonus?.current?.secondScorerId ?? "");
   const initKey = JSON.stringify(init);
   useEffect(() => setV(fromProps()), [initKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -132,7 +131,7 @@ export function MyPrediction(props: {
       {extra}
     </p>
   );
-  const SHORT: Record<BonusKind, string> = { KOUIGN_AMANN: "Kouign-Amann", GALETTES_SAUCISSES: "Galettes Saucisses", PILE_CREPES: "Pile de Crêpes" };
+  const SHORT: Record<BonusKind, string> = { KOUIGN_AMANN: "Kouign-Amann", GALETTE_SAUCISSE: "Galette-Saucisse" };
 
   return (
     <form action={action} className="space-y-3">
@@ -207,7 +206,7 @@ export function MyPrediction(props: {
               {BONUS_KINDS.map((k) => {
                 const left = props.bonus!.stock[k];
                 const on = bonusKind === k;
-                const needsScorer = k !== "KOUIGN_AMANN" && (v.scorer === "" || v.scorer === NO_SCORER);
+                const needsScorer = k === "GALETTE_SAUCISSE" && (v.scorer === "" || v.scorer === NO_SCORER);
                 const disabled = !on && (left <= 0 || needsScorer);
                 return (
                   <button
@@ -242,28 +241,12 @@ export function MyPrediction(props: {
                 );
               })}
             </div>
-            {bonusKind === "GALETTES_SAUCISSES" && (
-              <div className="min-w-0 md:flex-1">
-                <span id={id("second-label")} className="sr-only">
-                  Second buteur rennais
-                </span>
-                <ScorerSelect
-                  name="secondScorerId"
-                  value={second}
-                  onChange={setSecond}
-                  scorers={props.scorers.filter((p) => p.id !== v.scorer)}
-                  noScorerBonus={0}
-                  labelledBy={id("second-label")}
-                  lineupPublished={props.lineupPublished}
-                />
-              </div>
-            )}
+
           </div>
           <p className="mt-1.5 text-xs text-neutral-500">
             {bonusKind ? (
               <>
                 <strong className="text-neutral-700">{BONUS_INFO[bonusKind].effect}.</strong>{" "}
-                {bonusKind === "GALETTES_SAUCISSES" && !second ? "Choisis ton second buteur. " : ""}
                 <em>« {BONUS_INFO[bonusKind].tagline} »</em>
               </>
             ) : (
@@ -288,7 +271,6 @@ export function MyPrediction(props: {
           onClick={() => {
             setV({ home: "", away: "", scorer: "" });
             setBonusKind("");
-            setSecond("");
           }}
           className="rounded border border-neutral-300 bg-surface px-3 py-1.5 text-sm font-semibold text-noir hover:bg-neutral-100 disabled:opacity-40"
         >

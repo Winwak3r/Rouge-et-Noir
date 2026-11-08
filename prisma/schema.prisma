@@ -369,7 +369,6 @@ model Player {
   lineups     MatchLineup[]
   predictions Prediction[]
   image       PlayerImage?
-  secondScorerBonuses BonusUse[] @relation("SecondScorer")
 
   @@unique([externalId, seasonId])
 }
@@ -577,8 +576,7 @@ model MatchEvent {
 
 enum BonusKind {
   KOUIGN_AMANN
-  GALETTES_SAUCISSES
-  PILE_CREPES
+  GALETTE_SAUCISSE
 }
 
 model BonusUse {
@@ -587,7 +585,6 @@ model BonusUse {
   leagueId       String
   matchId        String
   kind           BonusKind
-  secondScorerId String? // Galettes Saucisses : le second buteur
   points         Int? // points AJOUTÉS une fois le match noté
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -595,7 +592,6 @@ model BonusUse {
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   league       League  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
   match        Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  secondScorer Player? @relation("SecondScorer", fields: [secondScorerId], references: [id])
 
   @@unique([userId, leagueId, matchId]) // un seul bonus par match et par ligue
   @@index([leagueId])

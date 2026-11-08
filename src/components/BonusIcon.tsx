@@ -17,35 +17,19 @@ export function BonusIcon({ kind, size = 36, className = "" }: { kind: BonusKind
       </svg>
     );
   }
-  if (kind === "GALETTES_SAUCISSES") {
-    // Deux galettes roulées, chacune avec sa saucisse : ketchup et moutarde
-    const galette = (x: number, sauce: string) => (
-      <g transform={`translate(${x} 0)`}>
-        <rect x="0" y="16" width="14" height="24" rx="6" fill="#B9773A" />
-        <rect x="2" y="17" width="10" height="22" rx="5" fill="#CF8C4A" />
-        <rect x="3" y="7" width="8" height="14" rx="4" fill="#8E3B1E" />
-        <path d="M4 10l2 2-2 2 2 2-2 2" stroke={sauce} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-    );
-    return (
-      <svg {...common}>
-        <circle cx="24" cy="24" r="23" fill="#FDECE6" stroke="#D96B4A" strokeWidth="1.5" />
-        {galette(8, "#E1001A")}
-        {galette(26, "#F2C200")}
-      </svg>
-    );
-  }
-  // Pile de crêpes avec compteur « ×N »
+  // Galette-saucisse : la galette roulée autour de sa saucisse, un trait de moutarde et de ketchup
   return (
     <svg {...common}>
-      <circle cx="24" cy="24" r="23" fill="#FFF6E5" stroke="#E0A85A" strokeWidth="1.5" />
-      <ellipse cx="22" cy="37" rx="15" ry="4" fill="#E9E1D3" />
-      {[33, 29, 25, 21].map((y) => (
-        <ellipse key={y} cx="22" cy={y} rx="13" ry="3.6" fill="#EDB765" stroke="#C98A35" strokeWidth="0.8" />
-      ))}
-      <path d="M14 20c2 2 4 1 6 2" stroke="#7A4A12" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-      <circle cx="36" cy="13" r="8" fill="#E1001A" />
-      <text x="36" y="16.2" textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#fff" fontFamily="system-ui, sans-serif">×N</text>
+      <circle cx="24" cy="24" r="23" fill="#FDECE6" stroke="#D96B4A" strokeWidth="1.5" />
+      <g transform="rotate(-20 24 26)">
+        <rect x="15" y="14" width="18" height="28" rx="7" fill="#B9773A" />
+        <rect x="17.5" y="15.5" width="13" height="25" rx="6" fill="#CF8C4A" />
+        <rect x="19" y="5" width="10" height="17" rx="5" fill="#8E3B1E" />
+        <path d="M21 8l3 2.5-3 2.5 3 2.5-3 2.5" stroke="#F2C200" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M26 8.5l2 2-2 2 2 2" stroke="#E1001A" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      <rect x="29" y="31" width="16" height="11" rx="5.5" fill="#E1001A" />
+      <text x="37" y="39.3" textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#fff" fontFamily="system-ui, sans-serif">×2</text>
     </svg>
   );
 }

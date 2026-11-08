@@ -3,7 +3,7 @@ import { parseOddsInput, parseRulesForm } from "../rules-form";
 
 const valid = {
   exact: "4", goalDiff: "2", outcome: "1", wrong: "0", missing: "-1",
-  oddsDivisor: "2", minBonus: "1", maxBonus: "6", quotaKouign: "1", quotaGalettes: "2", quotaCrepes: "2", fixedBonus: "1", noScorerBonus: "2",
+  oddsDivisor: "2", minBonus: "1", maxBonus: "6", quotaKouign: "2", quotaGalette: "3", fixedBonus: "1", noScorerBonus: "2",
   knockout: "AFTER_EXTRA_TIME", fallbackMode: "FIXED",
 };
 

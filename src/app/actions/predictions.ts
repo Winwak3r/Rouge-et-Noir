@@ -113,8 +113,8 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
     if (b.kind) {
       await prisma.bonusUse.upsert({
         where: key,
-        create: { userId: user.id, leagueId: b.leagueId, matchId, kind: b.kind, secondScorerId: b.secondScorerId },
-        update: { kind: b.kind, secondScorerId: b.secondScorerId, points: null },
+        create: { userId: user.id, leagueId: b.leagueId, matchId, kind: b.kind },
+        update: { kind: b.kind, points: null },
       });
     } else {
       await prisma.bonusUse.deleteMany({ where: { userId: user.id, leagueId: b.leagueId, matchId } });
@@ -126,7 +126,7 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
 }
 
 
-type BonusChoice = { leagueId: string; kind: BonusKind | null; secondScorerId: string | null };
+type BonusChoice = { leagueId: string; kind: BonusKind | null };
 
 /**
  * Bonus choisis dans le formulaire, vérifiés (ligue, stock, conditions) AVANT tout enregistrement.
@@ -147,12 +147,6 @@ async function checkBonus(
   }
   if (wanted.length === 0) return { choices: [] };
 
-  const secondRaw = String(form.get("secondScorerId") ?? "");
-  if (wanted.some((w) => w.raw === "GALETTES_SAUCISSES") && secondRaw) {
-    const ok = await prisma.player.findFirst({ where: { id: secondRaw, seasonId: ctx.match.seasonId, isActive: true }, select: { id: true } });
-    if (!ok) return { error: "Le second buteur ne fait plus partie de l’effectif." };
-  }
-
   const choices: BonusChoice[] = [];
   for (const w of wanted) {
     const member = await prisma.leagueMember.findUnique({
@@ -161,17 +155,16 @@ async function checkBonus(
     });
     if (!member?.isActive) continue; // ligue quittée ou désactivée : ignorée
     if (!w.raw) {
-      choices.push({ leagueId: w.leagueId, kind: null, secondScorerId: null });
+      choices.push({ leagueId: w.leagueId, kind: null });
       continue;
     }
     if (!BONUS_KINDS.includes(w.raw as BonusKind)) return { error: "Bonus inconnu." };
     const kind = w.raw as BonusKind;
-    const secondScorerId = kind === "GALETTES_SAUCISSES" && secondRaw ? secondRaw : null;
-    const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick, secondScorerId });
+    const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick });
     if (err) return { error: err };
     const stock = await bonusStock(ctx.userId, w.leagueId, ctx.match.seasonId, ctx.match.id);
     if (stock[kind] <= 0) return { error: `Plus de « ${BONUS_INFO[kind].name} » dans la ligue ${member.league.name} cette saison.` };
-    choices.push({ leagueId: w.leagueId, kind, secondScorerId });
+    choices.push({ leagueId: w.leagueId, kind });
   }
   return { choices };
 }

@@ -15,7 +15,6 @@ export default async function AdminBonusPage() {
         user: { select: { pseudo: true } },
         league: { select: { name: true } },
         match: { select: { kickoffAt: true, homeTeam: { select: { name: true } }, awayTeam: { select: { name: true } } } },
-        secondScorer: { select: { name: true } },
       },
     }),
     prisma.leagueMember.findMany({
@@ -74,7 +73,6 @@ export default async function AdminBonusPage() {
                 <BonusIcon kind={u.kind} size={28} />
                 <span className="min-w-0 flex-1">
                   <strong>{u.user.pseudo}</strong> · {BONUS_INFO[u.kind].name}
-                  {u.secondScorer && <span className="text-neutral-500"> (2e buteur : {u.secondScorer.name})</span>}
                   <span className="block text-xs text-neutral-500">
                     {u.league.name} · {u.match.homeTeam.name} – {u.match.awayTeam.name} ({formatShortNumeric(u.match.kickoffAt)})
                     {u.points != null && <span className="font-semibold text-green-700"> · +{u.points} pt{u.points > 1 ? "s" : ""}</span>}

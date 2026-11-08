@@ -31,8 +31,6 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { shortPlayerName } from "@/lib/player-name";
 import { Landing } from "@/components/landing/Landing";
-import { PredictionSheet } from "@/components/PredictionSheet";
-import { OutcomeIndices } from "@/components/OutcomeIndices";
 import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, withBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
 import { bonusStock } from "@/lib/bonus-data";
@@ -82,7 +80,6 @@ export default async function HomePage() {
           orderBy: { joinedAt: "asc" },
         })
       : [];
-  const myLeagueStocks = await Promise.all(myLeagues.map((m) => bonusStock(user!.id, m.league.id, currentSeasonId!)));
   const myUses = user && myLeagues.length ? await prisma.bonusUse.findMany({ where: { userId: user.id, matchId: { in: matches.map((x) => x.id) } } }) : [];
 
   // Écussons : officiels ou factices selon le réglage de l'administration
@@ -386,7 +383,6 @@ export default async function HomePage() {
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Spécialité maison</p>
               <p className="whitespace-nowrap font-semibold">{BONUS_INFO[myBonusUse.kind].name}</p>
-              {myBonusUse.secondScorer && <p className="truncate text-xs text-neutral-600">2e buteur : {myBonusUse.secondScorer.name}</p>}
             </div>
           </div>
         )}
@@ -437,58 +433,10 @@ export default async function HomePage() {
                     leagueName: bonusLeague.name,
                     // stock sans compter le bonus déjà posé sur CE match
                     stock: myBonusUse ? { ...bonusStockAll, [myBonusUse.kind]: bonusStockAll[myBonusUse.kind] + 1 } : bonusStockAll,
-                    current: myBonusUse ? { kind: myBonusUse.kind, secondScorerId: myBonusUse.secondScorerId } : null,
+                    current: myBonusUse ? { kind: myBonusUse.kind } : null,
                   }
                 : undefined;
-    // Mobile : fiche plein écran pour un match à pronostiquer (score en en-tête, 3 onglets)
-    const sheetNode =
-      user && editable ? (
-        <PredictionSheet
-          matchId={m.id}
-          title={`${h.code} · ${formatShortNumeric(m.kickoffAt)} ${formatDateTime(m.kickoffAt).split(" à ")[1] ?? ""}`.trim()}
-          competitionLogo={logos[m.competition] ?? null}
-          home={{ name: m.homeTeam.name, logo: m.homeTeam.logoUrl, rennes: m.rennesIsHome }}
-          away={{ name: m.awayTeam.name, logo: m.awayTeam.logoUrl, rennes: !m.rennesIsHome }}
-          rennesIsHome={m.rennesIsHome}
-          maxGoals={maxGoals}
-          noScorerBonus={rules.noScorerBonus}
-          scorers={scorerOptions}
-          lineupPublished={Boolean(matchLineup)}
-          savedScorerOut={savedOut}
-          initial={my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null}
-          leagues={myLeagues.map((ml, i) => {
-            const cur = myUses.find((u) => u.matchId === m.id && u.leagueId === ml.league.id);
-            const stock = myLeagueStocks[i];
-            return {
-              id: ml.league.id,
-              name: ml.league.name,
-              // stock sans compter le bonus déjà posé sur CE match
-              stock: cur ? { ...stock, [cur.kind]: stock[cur.kind] + 1 } : stock,
-              current: cur ? { kind: cur.kind, secondScorerId: cur.secondScorerId } : null,
-            };
-          })}
-          prematch={
-            opts.layout === "next" ? (
-              <MatchStats
-                stacked
-                competition={m.competition}
-                home={{ id: m.homeTeam.externalId, name: m.homeTeam.name, logo: m.homeTeam.logoUrl }}
-                away={{ id: m.awayTeam.externalId, name: m.awayTeam.name, logo: m.awayTeam.logoUrl }}
-                odds={{ home: m.oddsHome, draw: m.oddsDraw, away: m.oddsAway }}
-              />
-            ) : (
-              <div className="space-y-2">
-                <OutcomeIndices
-                  odds={{ home: m.oddsHome, draw: m.oddsDraw, away: m.oddsAway }}
-                  home={{ name: m.homeTeam.name, rennes: m.rennesIsHome, logo: m.homeTeam.logoUrl }}
-                  away={{ name: m.awayTeam.name, rennes: !m.rennesIsHome, logo: m.awayTeam.logoUrl }}
-                />
-                <p className="text-xs text-neutral-500">Le comparatif et les confrontations directes s’affichent pour le prochain match.</p>
-              </div>
-            )
-          }
-        />
-      ) : undefined;
+
     const predictionNode = (
       user ? (
           <MyPrediction
@@ -521,7 +469,7 @@ export default async function HomePage() {
     const rowsWithBonus = rows.map((r) => {
       const b = matchBonuses.find((x) => x.userId === r.userId);
       // le bonus des autres n'est visible qu'après le coup d'envoi (le mien, toujours)
-      return b && (isPublic || r.mine) ? { ...r, bonus: { kind: b.kind, points: b.points, second: b.secondScorer?.name ?? null } } : r;
+      return b && (isPublic || r.mine) ? { ...r, bonus: { kind: b.kind, points: b.points } } : r;
     });
     const comparisonNode = user && rows.length > 0 ? <Comparison rows={rowsWithBonus} live={m.status === "LIVE" || m.status === "INTERRUPTED"} /> : null;
     const resultNode = score ? (
@@ -600,7 +548,7 @@ export default async function HomePage() {
     if (opts.layout === "next") {
       // Prochain match — en haut : Mon prono (gauche) · Avant match (droite) ; en bas : Pronostics et points
       return (
-        <MatchAccordion key={m.id} h={h} sheet={sheetNode}>
+        <MatchAccordion key={m.id} h={h} href={user && editable ? `/match/${m.id}` : undefined}>
           <div className="space-y-6">
             <section className="min-w-0">
               {title("Mon prono")}
@@ -641,7 +589,7 @@ export default async function HomePage() {
       // Calendrier, pronostics ouverts : même « Mon prono » que le prochain match (toute la largeur :
       // score et buteur sur une ligne sur PC), sans la rubrique « Avant match »
       return (
-        <MatchAccordion key={m.id} h={h} sheet={sheetNode}>
+        <MatchAccordion key={m.id} h={h} href={user && editable ? `/match/${m.id}` : undefined}>
           <section className="min-w-0">
             {title("Mon prono")}
             {predictionNode}
@@ -763,7 +711,6 @@ export default async function HomePage() {
 async function loadLeagueBonuses(leagueId: string, matchIds: string[]) {
   return prisma.bonusUse.findMany({
     where: { leagueId, matchId: { in: matchIds } },
-    include: { secondScorer: { select: { name: true } } },
   });
 }
 type LeagueBonus = Awaited<ReturnType<typeof loadLeagueBonuses>>[number];

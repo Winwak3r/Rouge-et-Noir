@@ -529,7 +529,7 @@ export async function grantBonusAction(_: AdminState, form: FormData): Promise<A
   const [userId, leagueId] = str(form, "member").split(":");
   const kind = str(form, "kind");
   const delta = str(form, "mode") === "remove" ? -1 : 1;
-  if (!["KOUIGN_AMANN", "GALETTES_SAUCISSES", "PILE_CREPES"].includes(kind)) return { error: "Bonus inconnu." };
+  if (!["KOUIGN_AMANN", "GALETTE_SAUCISSE"].includes(kind)) return { error: "Bonus inconnu." };
   const member = await prisma.leagueMember.findUnique({ where: { leagueId_userId: { leagueId, userId } }, include: { user: true, league: true } });
   if (!member) return { error: "Ce joueur n’est pas dans cette ligue." };
   await prisma.bonusGrant.create({ data: { userId, leagueId, kind: kind as "KOUIGN_AMANN", delta } });

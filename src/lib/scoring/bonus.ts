@@ -1,51 +1,38 @@
 // « Les Spécialités Maison » : bonus joués dans UNE ligue (fonctions pures, testées).
-//  - Le Kouign-Amann : les points du match sont doublés ;
-//  - Les Galettes Saucisses : un second buteur qui rapporte ses propres points ;
-//  - La Pile de Crêpes : les points du buteur sont comptés à chaque but qu'il marque (sans plafond).
+//  - Le Kouign-Amann : tous les points du match sont doublés (score ET buteur) ;
+//  - La Galette-Saucisse : les points du buteur sont doublés.
 
-export type BonusKind = "KOUIGN_AMANN" | "GALETTES_SAUCISSES" | "PILE_CREPES";
-export const BONUS_KINDS: BonusKind[] = ["KOUIGN_AMANN", "GALETTES_SAUCISSES", "PILE_CREPES"];
+export type BonusKind = "KOUIGN_AMANN" | "GALETTE_SAUCISSE";
+export const BONUS_KINDS: BonusKind[] = ["KOUIGN_AMANN", "GALETTE_SAUCISSE"];
 export type BonusQuotas = Record<BonusKind, number>;
-export const DEFAULT_BONUS_QUOTAS: BonusQuotas = { KOUIGN_AMANN: 1, GALETTES_SAUCISSES: 2, PILE_CREPES: 2 };
+export const DEFAULT_BONUS_QUOTAS: BonusQuotas = { KOUIGN_AMANN: 2, GALETTE_SAUCISSE: 3 };
 
 export const BONUS_INFO: Record<BonusKind, { name: string; effect: string; tagline: string }> = {
   KOUIGN_AMANN: {
     name: "Le Kouign-Amann",
-    effect: "Points du match doublés",
-    tagline: "Deux fois plus de beurre, deux fois plus de points. À déguster une seule fois dans la saison.",
+    effect: "Points du match doublés (score et buteur)",
+    tagline: "Kouign c’est la Reine des bonus. Vu les calories, c’est le pactole niveau points. X2 pour les points du score ET du buteur.",
   },
-  GALETTES_SAUCISSES: {
-    name: "Les Galettes Saucisses",
-    effect: "Un second buteur qui rapporte ses points",
-    tagline: "Ketchup pour la première, moutarde pour la seconde : au final c’est deux chances de régaler.",
-  },
-  PILE_CREPES: {
-    name: "La Pile de Crêpes",
-    effect: "Les points du buteur à chaque but",
-    tagline: "Chaque but de ton buteur ajoute une crêpe sur la pile… et les points qui vont avec. Doublé, triplé : sers-toi !",
+  GALETTE_SAUCISSE: {
+    name: "La Galette-Saucisse",
+    effect: "Points du buteur doublés",
+    tagline: "Moutarde, ketchup, mayo ? Fais le bon choix, car ton buteur préféré verra ses points doublés !",
   },
 };
 
+/** Nombre de bonus par saison : les anciens réglages (avant les deux spécialités) reprennent les valeurs par défaut. */
+export function normalizeQuotas(q: Partial<Record<string, number>> | null | undefined): BonusQuotas {
+  if (!q || typeof q.GALETTE_SAUCISSE !== "number") return { ...DEFAULT_BONUS_QUOTAS };
+  return { KOUIGN_AMANN: q.KOUIGN_AMANN ?? DEFAULT_BONUS_QUOTAS.KOUIGN_AMANN, GALETTE_SAUCISSE: q.GALETTE_SAUCISSE };
+}
+
 /** Points AJOUTÉS par le bonus au total du match (le pronostic lui-même est noté normalement). */
-export function bonusPoints(i: {
-  kind: BonusKind;
-  matchTotal: number; // points du pronostic sur ce match (score + buteur)
-  scorerId: string | null; // buteur choisi
-  scorerPoints: number; // points rapportés par ce buteur s'il a marqué (sinon 0)
-  secondScorerId?: string | null;
-  secondScorerBonus?: number | null; // points du second buteur s'il marque
-  rennesGoalScorerIds: readonly string[]; // un identifiant par but rennais (hors contre son camp)
-}): number {
+export function bonusPoints(i: { kind: BonusKind; matchTotal: number; scorerPoints: number }): number {
   switch (i.kind) {
     case "KOUIGN_AMANN":
       return Math.max(0, i.matchTotal); // 0 × 2 = 0 : le bonus est perdu
-    case "GALETTES_SAUCISSES":
-      return i.secondScorerId && i.rennesGoalScorerIds.includes(i.secondScorerId) ? (i.secondScorerBonus ?? 0) : 0;
-    case "PILE_CREPES": {
-      if (!i.scorerId || i.scorerPoints <= 0) return 0;
-      const goals = i.rennesGoalScorerIds.filter((x) => x === i.scorerId).length;
-      return goals > 1 ? i.scorerPoints * (goals - 1) : 0; // le 1er but est déjà compté par le pronostic
-    }
+    case "GALETTE_SAUCISSE":
+      return Math.max(0, i.scorerPoints); // buteur qui ne marque pas : 0
   }
 }
 
@@ -63,21 +50,9 @@ export function remainingBonuses(
 }
 
 /** Bonus jouable avec ce pronostic ? Renvoie un message d'erreur, ou null. */
-export function bonusChoiceError(i: {
-  kind: BonusKind;
-  hasScore: boolean;
-  scorerId: string | null;
-  noScorerPick: boolean;
-  secondScorerId?: string | null;
-}): string | null {
+export function bonusChoiceError(i: { kind: BonusKind; hasScore: boolean; scorerId: string | null; noScorerPick: boolean }): string | null {
   if (!i.hasScore) return "Enregistre d’abord un score pour jouer un bonus.";
-  if (i.kind === "GALETTES_SAUCISSES" || i.kind === "PILE_CREPES") {
-    if (i.noScorerPick || !i.scorerId) return `${BONUS_INFO[i.kind].name} : choisis d’abord un buteur rennais.`;
-  }
-  if (i.kind === "GALETTES_SAUCISSES") {
-    if (!i.secondScorerId) return "Les Galettes Saucisses : choisis ton second buteur.";
-    if (i.secondScorerId === i.scorerId) return "Les Galettes Saucisses : le second buteur doit être différent du premier.";
-  }
+  if (i.kind === "GALETTE_SAUCISSE" && (i.noScorerPick || !i.scorerId)) return "La Galette-Saucisse : choisis d’abord un buteur rennais.";
   return null;
 }
 

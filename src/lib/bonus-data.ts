@@ -1,10 +1,10 @@
 // Données des bonus côté serveur : stock restant, bonus d'un match, points ajoutés à une ligue.
 import { prisma } from "@/lib/db";
-import { DEFAULT_BONUS_QUOTAS, remainingBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
+import { normalizeQuotas, remainingBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
 import { getActiveRules } from "@/lib/scoring/active-rules";
 
 export async function bonusQuotas(): Promise<BonusQuotas> {
-  return (await getActiveRules()).bonusQuotas ?? DEFAULT_BONUS_QUOTAS;
+  return normalizeQuotas((await getActiveRules()).bonusQuotas);
 }
 
 /** Stock restant d'un joueur dans une ligue, pour la saison en cours (sans compter `exceptMatchId`). */

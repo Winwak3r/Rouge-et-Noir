@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { SheetContext } from "./PredictionSheet";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, type ReactNode } from "react";
 import { BonusIcon } from "./BonusIcon";
 import { LeagueAvatar } from "./LeagueAvatar";
 import { PlayerPhoto } from "./PlayerPhoto";
@@ -79,7 +78,7 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
   const muted = open ? "text-white/80" : "text-neutral-500";
   if (variant === "pc") {
     return (
-      <span className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-1.5 ${open ? "bg-white/10" : "bg-[var(--color-surface)]/70 ring-1 ring-neutral-200"}`}>
+      <span className="flex shrink-0 items-center gap-3">
         {p.scorer ? (
           <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={40} shape="card" number={p.scorer.number} />
         ) : null}
@@ -92,14 +91,20 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
       </span>
     );
   }
+  // Mobile : « Mon prono : 2 - 2 · (photo) M. Nagida · bonus »
   return (
-    <span className={`mt-1.5 flex items-center gap-2 text-xs ${muted}`}>
-      {p.scorer && <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={24} />}
-      <span className="min-w-0 truncate">
-        Mon prono : <strong className={`font-club text-sm font-semibold tabular-nums ${open ? "text-white" : "text-noir"}`}>{p.score}</strong>
-        {p.scorer ? ` · ${p.scorer.short}` : p.noScorer ? " · Aucun buteur" : ""}
-      </span>
-      {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={22} />}
+    <span className={`mt-1.5 flex min-w-0 items-center gap-1.5 text-xs ${muted}`}>
+      <span className={`shrink-0 font-bold ${open ? "text-white" : "text-noir"}`}>Mon prono :</span>
+      <strong className={`shrink-0 font-club text-sm font-semibold tabular-nums ${open ? "text-white" : "text-noir"}`}>{p.score}</strong>
+      {(p.scorer || p.noScorer) && <span aria-hidden>·</span>}
+      {p.scorer && <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={22} />}
+      {p.scorer ? <span className="min-w-0 truncate">{p.scorer.short}</span> : p.noScorer ? <span className="truncate">Aucun buteur</span> : null}
+      {p.bonuses.length > 0 && (
+        <>
+          <span aria-hidden>·</span>
+          <PickBonuses list={p.bonuses} size={20} />
+        </>
+      )}
     </span>
   );
 }
@@ -119,20 +124,12 @@ function Team({ t, open, home = false }: { t: MatchHeader["home"]; open: boolean
   );
 }
 
-export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; children: ReactNode; sheet?: ReactNode }) {
+export function MatchAccordion({ h, children, href }: { h: MatchHeader; children: ReactNode; href?: string }) {
   const group = useAccordionGroup();
-  // Mobile : un match à pronostiquer s'ouvre en fiche plein écran (au lieu de l'accordéon)
-  const [sheetOpen, setSheetOpen] = useState(false);
-  useEffect(() => {
-    if (!sheetOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [sheetOpen]);
+  const router = useRouter();
   const onHeaderClick = () => {
-    if (sheet) setSheetOpen(true);
+    // Match à pronostiquer : page dédiée ; sinon l'accordéon s'ouvre
+    if (href) router.push(href);
     else group?.toggle(h.id);
   };
   const open = !h.cancelled && group?.openId === h.id;
@@ -202,7 +199,7 @@ export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; childre
       >
         <span className={`flex w-full items-start gap-3 ${h.cancelled ? "opacity-35" : ""}`}>
           <span className={`mt-0.5 w-10 shrink-0 font-display text-2xl font-black ${open ? "text-white/60" : "match-code"}`}>{h.code}</span>
-          <span className="min-w-0 flex-1">
+          <span className={`min-w-0 flex-1 ${h.myPick ? "md:flex-initial" : ""}`}>
             <span className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:hidden">{badges(true)}</span>
             <span className={`mb-1 flex items-center gap-1.5 text-sm ${open ? "text-white/85" : "text-neutral-600"}`}>
               <CompetitionBadge code={h.competition} logo={h.competitionLogo} className={open ? "ring-1 ring-white/60" : ""} />
@@ -224,7 +221,8 @@ export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; childre
             )}
           </span>
           {h.myPick && (
-            <span className="hidden self-center md:block">
+            // à égale distance des infos du match et des statuts
+            <span className="hidden flex-1 justify-center self-center md:flex">
               <MyPick p={h.myPick} open={open} variant="pc" />
             </span>
           )}
@@ -249,22 +247,6 @@ export function MatchAccordion({ h, children, sheet }: { h: MatchHeader; childre
           </div>
         </div>
       </div>
-      {sheetOpen &&
-        createPortal(
-          // Mobile : plein écran ; ordinateur : fenêtre centrée sur fond assombri
-          <div className="fixed inset-0 z-[85] bg-black/55 sm:flex sm:items-center sm:justify-center sm:p-6" onClick={() => setSheetOpen(false)}>
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Mon pronostic"
-              onClick={(e) => e.stopPropagation()}
-              className="relative flex h-full w-full flex-col overflow-hidden bg-page sm:h-[min(92vh,880px)] sm:max-w-3xl sm:rounded-2xl sm:shadow-2xl"
-            >
-              <SheetContext.Provider value={{ close: () => setSheetOpen(false) }}>{sheet}</SheetContext.Provider>
-            </div>
-          </div>,
-          document.body,
-        )}
     </section>
   );
 }
