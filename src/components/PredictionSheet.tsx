@@ -285,6 +285,17 @@ export function PredictionSheet(props: {
 
         {tab === "scorer" && (
           <div className="space-y-2">
+            {scorer === NO_SCORER && (
+              <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-surface)] p-3 ring-1 ring-neutral-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/aucun-buteur.png" alt="" className="h-24 w-24 shrink-0 rounded-full" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-500">Mon pari</p>
+                  <p className="font-display text-2xl font-bold leading-tight">Aucun buteur rennais</p>
+                  <p className="font-bold text-green-700">+{props.noScorerBonus} pts si aucun Rennais ne marque</p>
+                </div>
+              </div>
+            )}
             {chosen && (
               <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-surface)] p-3 ring-1 ring-neutral-200">
                 <PlayerPhoto name={chosen.name} url={chosen.photo ?? null} size={96} shape="card" number={chosen.number ?? null} />

@@ -5,6 +5,16 @@
  */
 export function ScorerPlaceholder({ mode, size = 112, caption = true }: { mode: "unknown" | "none"; size?: number; caption?: boolean }) {
   const none = mode === "none";
+  // « Aucun buteur rennais » : le joueur rennais abattu, dans son badge
+  if (none) {
+    return (
+      <figure className="flex shrink-0 flex-col items-center gap-1 self-center" style={{ width: size }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/aucun-buteur.png" alt="Aucun buteur rennais" width={size} height={size} className="rounded-full" style={{ width: size, height: size }} />
+        {caption && <figcaption className="text-center text-[11px] font-semibold leading-tight text-neutral-600">Aucun buteur rennais</figcaption>}
+      </figure>
+    );
+  }
   return (
     <figure className="flex shrink-0 flex-col items-center gap-1 self-center" style={{ width: size }}>
       <div
