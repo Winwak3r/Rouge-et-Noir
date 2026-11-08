@@ -123,7 +123,7 @@ export function StandingsBoard({
                 role="tab"
                 aria-selected={v.key === view.key}
                 onClick={() => choose(v.key)}
-                className={`inline-flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-sm font-semibold transition-colors ${
+                className={`inline-flex items-center gap-2 rounded-md border py-1 pl-1 pr-3 text-sm font-semibold transition-colors ${
                   v.key === view.key ? "border-rouge bg-rouge text-white" : "border-neutral-300 bg-[var(--color-surface)] hover:border-neutral-500"
                 }`}
               >

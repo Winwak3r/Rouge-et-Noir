@@ -30,12 +30,12 @@ function NewsList({ items, empty }: { items: NewsItem[] | null; empty: string })
     <ul className="space-y-3">
       {items.map((n) => (
         <li key={n.link}>
-          <a href={n.link} target="_blank" rel="noopener noreferrer" className="card flex gap-3 p-3 transition-colors hover:border-neutral-400 sm:gap-4">
+          <a href={n.link} target="_blank" rel="noopener noreferrer" className="card flex flex-col gap-3 p-3 transition-colors hover:border-neutral-400 sm:flex-row sm:gap-4">
             {n.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={n.image} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-20 w-28 shrink-0 rounded-lg bg-neutral-100 object-cover sm:h-24 sm:w-36" />
+              <img src={n.image} alt="" loading="lazy" referrerPolicy="no-referrer" className="aspect-video w-full shrink-0 rounded-lg bg-neutral-100 object-cover sm:aspect-auto sm:h-24 sm:w-36" />
             ) : (
-              <span aria-hidden className="grid h-20 w-28 shrink-0 place-items-center rounded-lg bg-neutral-100 text-2xl sm:h-24 sm:w-36">
+              <span aria-hidden className="hidden h-24 w-36 shrink-0 place-items-center rounded-lg bg-neutral-100 text-2xl sm:grid">
                 📰
               </span>
             )}
