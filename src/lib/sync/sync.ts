@@ -140,7 +140,17 @@ export async function syncSquad(provider: FootballProvider): Promise<number> {
     await prisma.player.upsert({
       where: { externalId_seasonId: { externalId: p.externalId, seasonId: season.id } },
       create: { ...p, seasonId: season.id, isActive: true },
-      update: { name: p.name, position: p.position, shirtNumber: p.shirtNumber, photoUrl: p.photoUrl, isActive: true },
+      update: {
+        name: p.name,
+        position: p.position,
+        shirtNumber: p.shirtNumber,
+        photoUrl: p.photoUrl,
+        isActive: true,
+        // infos d'effectif : seulement quand ESPN les fournit (rien n'est effacé)
+        ...(p.birthDate ? { birthDate: p.birthDate } : {}),
+        ...(p.nationality ? { nationality: p.nationality } : {}),
+        ...(p.flagUrl ? { flagUrl: p.flagUrl } : {}),
+      },
     });
   }
   // Les joueurs partis restent en base (anciens pronostics) mais disparaissent des menus.

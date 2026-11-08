@@ -388,5 +388,8 @@ export function parseRoster(data: Json): ProviderPlayer[] {
       position: a.position?.abbreviation ?? a.position?.displayName ?? null,
       shirtNumber: int(a.jersey),
       photoUrl: a.headshot?.href ?? null,
+      birthDate: a.dateOfBirth && !Number.isNaN(new Date(a.dateOfBirth).getTime()) ? new Date(a.dateOfBirth) : null,
+      nationality: a.citizenship ?? a.citizenshipCountry?.name ?? null,
+      flagUrl: a.flag?.href ?? null,
     }));
 }

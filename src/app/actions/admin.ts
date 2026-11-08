@@ -549,3 +549,15 @@ export async function refundBonusAction(_: AdminState, form: FormData): Promise<
   refresh("/admin/bonus");
   return { message: `Bonus rendu à ${b.user.pseudo}.` };
 }
+
+/** Effectif : mention « formé au club » (centre de formation du Stade Rennais). */
+export async function toggleHomegrownAction(form: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const id = str(form, "playerId");
+  const p = await prisma.player.findUnique({ where: { id }, select: { homegrown: true } });
+  if (!p) return;
+  await prisma.player.update({ where: { id }, data: { homegrown: !p.homegrown } });
+  await audit(admin.id, "PLAYER_HOMEGROWN", "Player", id, { homegrown: p.homegrown }, { homegrown: !p.homegrown });
+  revalidatePath("/admin/joueurs");
+  revalidatePath("/actus");
+}

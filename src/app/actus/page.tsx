@@ -6,11 +6,14 @@ import { prisma } from "@/lib/db";
 import { formatShortNumeric } from "@/lib/dates";
 import { fetchNews, type NewsItem } from "@/lib/news";
 import { playerPhotoUrl } from "@/lib/player-photo";
+import { ageOn, nationalityFr } from "@/lib/nationality";
 import { fetchOfficialTransfers, transferTypeLabel, type TransferItem } from "@/lib/transfers";
 
 export const metadata: Metadata = { title: "Actualités du SRFC" };
 export const revalidate = 600;
 
+// Billetterie officielle du club (accès depuis le site du club)
+const TICKETS_URL = process.env.CLUB_TICKETS_URL || "https://www.staderennais.com";
 const T = "font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 const ago = (d: Date | null) => {
   if (!d) return "";
@@ -24,15 +27,26 @@ function NewsList({ items, empty }: { items: NewsItem[] | null; empty: string })
   if (!items) return <p className="card text-sm text-neutral-600">Fil indisponible pour le moment.</p>;
   if (items.length === 0) return <p className="card text-sm text-neutral-600">{empty}</p>;
   return (
-    <ul className="card divide-y divide-neutral-100 p-0">
+    <ul className="space-y-3">
       {items.map((n) => (
         <li key={n.link}>
-          <a href={n.link} target="_blank" rel="noopener noreferrer" className="block px-4 py-3 transition-colors hover:bg-neutral-50">
-            <span className="block font-semibold leading-snug">{n.title}</span>
-            <span className="mt-0.5 block text-xs text-neutral-500">
-              {n.source}
-              {n.source && n.date ? " · " : ""}
-              {ago(n.date)} ↗
+          <a href={n.link} target="_blank" rel="noopener noreferrer" className="card flex gap-3 p-3 transition-colors hover:border-neutral-400 sm:gap-4">
+            {n.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={n.image} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-20 w-28 shrink-0 rounded-lg bg-neutral-100 object-cover sm:h-24 sm:w-36" />
+            ) : (
+              <span aria-hidden className="grid h-20 w-28 shrink-0 place-items-center rounded-lg bg-neutral-100 text-2xl sm:h-24 sm:w-36">
+                📰
+              </span>
+            )}
+            <span className="min-w-0">
+              <span className="block font-semibold leading-snug">{n.title}</span>
+              {n.summary && <span className="mt-1 line-clamp-2 block text-sm text-neutral-600">{n.summary}</span>}
+              <span className="mt-1 block text-xs text-neutral-500">
+                {n.source}
+                {n.source && n.date ? " · " : ""}
+                {ago(n.date)} ↗
+              </span>
             </span>
           </a>
         </li>
@@ -41,7 +55,7 @@ function NewsList({ items, empty }: { items: NewsItem[] | null; empty: string })
   );
 }
 
-function Transfers({ official, rumours }: { official: TransferItem[] | null; rumours: NewsItem[] | null }) {
+function Transfers({ official }: { official: TransferItem[] | null }) {
   return (
     <div className="space-y-5">
       <section className="space-y-2">
@@ -77,10 +91,7 @@ function Transfers({ official, rumours }: { official: TransferItem[] | null; rum
           </ul>
         )}
       </section>
-      <section className="space-y-2">
-        <h2 className={T}>Mercato : dans la presse</h2>
-        <NewsList items={rumours} empty="Pas d’article sur le mercato rennais ces 30 derniers jours." />
-      </section>
+
     </div>
   );
 }
@@ -99,7 +110,20 @@ async function Squad() {
     prisma.player.findMany({
       where: { seasonId: season.id, isActive: true },
       orderBy: [{ shirtNumber: "asc" }, { name: "asc" }],
-      select: { id: true, name: true, position: true, shirtNumber: true, photoUrl: true, externalId: true, officialPhotoUrl: true, customPhotoAt: true },
+      select: {
+        id: true,
+        name: true,
+        position: true,
+        shirtNumber: true,
+        photoUrl: true,
+        externalId: true,
+        officialPhotoUrl: true,
+        customPhotoAt: true,
+        birthDate: true,
+        nationality: true,
+        flagUrl: true,
+        homegrown: true,
+      },
     }),
     prisma.matchGoal.groupBy({ by: ["playerId"], where: { forRennes: true, isOwnGoal: false, match: { seasonId: season.id } }, _count: { _all: true } }),
   ]);
@@ -117,10 +141,27 @@ async function Squad() {
               {list.map((p) => (
                 <li key={p.id} className="card flex items-center gap-3 p-3">
                   <PlayerPhoto name={p.name} url={playerPhotoUrl(p)} size={56} shape="card" number={p.shirtNumber} />
-                  <span className="min-w-0">
+                  <span className="min-w-0 space-y-0.5">
                     <span className="block truncate font-semibold leading-tight">{p.name}</span>
+                    <span className="flex flex-wrap items-center gap-x-2 text-xs text-neutral-600">
+                      {ageOn(p.birthDate) != null && <span>{ageOn(p.birthDate)} ans</span>}
+                      {p.nationality && (
+                        <span className="inline-flex items-center gap-1">
+                          {p.flagUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.flagUrl} alt="" className="h-3 w-4 rounded-[2px] object-cover" />
+                          )}
+                          {nationalityFr(p.nationality)}
+                        </span>
+                      )}
+                    </span>
+                    {p.homegrown && (
+                      <span className="inline-block rounded bg-rouge/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rouge">
+                        Formé au club
+                      </span>
+                    )}
                     {(goalsOf.get(p.id) ?? 0) > 0 && (
-                      <span className="text-xs text-neutral-500">
+                      <span className="block text-xs text-neutral-500">
                         ⚽ {goalsOf.get(p.id)} but{(goalsOf.get(p.id) ?? 0) > 1 ? "s" : ""} cette saison
                       </span>
                     )}
@@ -136,11 +177,7 @@ async function Squad() {
 
 export default async function ActusPage({ searchParams }: { searchParams: Promise<{ onglet?: string }> }) {
   const { onglet } = await searchParams;
-  const [news, rumours, official] = await Promise.all([
-    fetchNews("actus").catch(() => null),
-    fetchNews("transferts").catch(() => null),
-    fetchOfficialTransfers().catch(() => null),
-  ]);
+  const [news, official] = await Promise.all([fetchNews().catch(() => null), fetchOfficialTransfers().catch(() => null)]);
   return (
     <div className="space-y-6">
       <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Actualités du SRFC</h1>
@@ -148,13 +185,13 @@ export default async function ActusPage({ searchParams }: { searchParams: Promis
         initial={onglet}
         tabs={[
           { key: "actus", label: "Actus", content: <NewsList items={news} empty="Pas d’actualité sur le Stade Rennais cette semaine." /> },
-          { key: "transferts", label: "Transferts", content: <Transfers official={official} rumours={rumours} /> },
+          { key: "transferts", label: "Transferts", content: <Transfers official={official} /> },
           { key: "classements", label: "Classements", content: <OfficialStandings /> },
           { key: "effectif", label: "Effectif", content: <Squad /> },
         ]}
       />
       {/* Le club en ligne */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <a href="https://www.staderennais.com" target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 font-semibold hover:border-neutral-400">
           <span>
             Site officiel du club
@@ -169,9 +206,16 @@ export default async function ActusPage({ searchParams }: { searchParams: Promis
           </span>
           <span aria-hidden>↗</span>
         </a>
+        <a href={TICKETS_URL} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 font-semibold hover:border-neutral-400">
+          <span>
+            Billetterie
+            <span className="block text-xs font-normal text-neutral-500">Places pour les matchs au Roazhon Park</span>
+          </span>
+          <span aria-hidden>↗</span>
+        </a>
       </div>
       <p className="text-xs text-neutral-500">
-        Actualités : Google Actualités (les articles s’ouvrent sur le site de leur média). Transferts officiels : API-Football. Classements :
+        Actualités : Bing et Google Actualités (les articles s’ouvrent sur le site de leur média). Transferts officiels : API-Football. Classements :
         ESPN.
       </p>
     </div>

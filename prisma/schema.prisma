@@ -358,6 +358,11 @@ model Player {
   isActive    Boolean @default(true)
   // Fiche modifiée par l'admin : la synchro ne touche plus au nom, au poste, au numéro ni au statut.
   adminLocked Boolean @default(false)
+  // Effectif (page Actus) : date de naissance et nationalité (ESPN), « formé au club » (réglé par l'admin)
+  birthDate   DateTime?
+  nationality String?
+  flagUrl     String?
+  homegrown   Boolean   @default(false)
   // Photo officielle de la saison (API-Football), prioritaire sur celle d'ESPN
   officialPhotoUrl String?
   // Photo déposée par l'admin (prioritaire sur tout le reste)

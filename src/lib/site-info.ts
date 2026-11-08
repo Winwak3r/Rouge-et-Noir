@@ -9,7 +9,7 @@ export const LEGAL_TEXT =
 export const PARTNERS: ReadonlyArray<readonly [string, string]> = [
   ["Calendrier, résultats, compositions et classements", "ESPN"],
   ["Cotes des buteurs et du match", "Bet365, via ESPN"],
-  ["Actualités du club", "Google Actualités"],
+  ["Actualités du club", "Bing et Google Actualités"],
   ["Transferts officiels", "API-Football"],
   ["Photos des joueurs", "API-Football"],
   ["Hébergement", "Vercel"],

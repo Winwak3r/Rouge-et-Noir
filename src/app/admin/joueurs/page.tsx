@@ -4,6 +4,7 @@ import { lastPhotosSync } from "@/lib/sync/sync";
 import { ActionForm } from "@/components/ActionForm";
 import { PlayerPhoto } from "@/components/PlayerPhoto";
 import { PlayerPhotoEditor } from "@/components/PlayerPhotoEditor";
+import { toggleHomegrownAction } from "@/app/actions/admin";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { prisma } from "@/lib/db";
 
@@ -92,12 +93,22 @@ export default async function PlayersAdminPage() {
               {!p.isActive && <span className="rounded bg-neutral-200 px-1.5 text-xs">hors effectif</span>}
               {p.adminLocked && <span className="rounded bg-orange-100 px-1.5 text-xs text-orange-800">modifié par l’admin</span>}
               {p.externalId < 0 && <span className="rounded bg-neutral-100 px-1.5 text-xs">ajout manuel</span>}
+              {p.homegrown && <span className="rounded bg-rouge/10 px-1.5 text-xs font-semibold text-rouge">formé au club</span>}
             </summary>
             <div className="space-y-3 border-t border-neutral-200 p-3">
               <PlayerPhotoEditor playerId={p.id} name={p.name} url={playerPhotoUrl(p)} custom={Boolean(p.customPhotoAt)} />
               <ActionForm action={savePlayerAction} submits={[{ label: "Enregistrer" }]}>
                 <Fields p={p} />
               </ActionForm>
+              <form action={toggleHomegrownAction} className="flex items-center gap-2 text-sm">
+                <input type="hidden" name="playerId" value={p.id} />
+                <span>
+                  Formé au club : <strong>{p.homegrown ? "oui" : "non"}</strong>
+                </span>
+                <button type="submit" className="btn-secondary px-3 py-1 text-xs">
+                  {p.homegrown ? "Retirer la mention" : "Marquer « formé au club »"}
+                </button>
+              </form>
               {p.adminLocked && p.externalId > 0 && (
                 <form action={releasePlayerAction}>
                   <input type="hidden" name="playerId" value={p.id} />

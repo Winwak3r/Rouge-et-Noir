@@ -16,6 +16,23 @@ describe("Fil d'actualités (RSS)", () => {
   });
 });
 
+describe("Fil d'actualités : image et résumé (Bing)", () => {
+  const xml = `<rss xmlns:News="https://www.bing.com/news/search?q=&amp;format=rss"><channel>
+    <item><title>Rennes prépare le derby</title><link>http://www.bing.com/news/apiclick.aspx?ref=FexRss&amp;url=https%3a%2f%2fwww.ouest-france.fr%2fsport%2fa.html&amp;c=1</link>
+    <description>Les Rouge et Noir affrontent Lorient dimanche avec un groupe au complet.</description><pubDate>Sun, 08 Nov 2026 09:00:00 GMT</pubDate>
+    <News:Source>Ouest-France</News:Source><News:Image>https://www.bing.com/th?id=OVFT.abc&amp;pid=News</News:Image></item>
+  </channel></rss>`;
+  it("lien direct vers l'article, image et résumé", () => {
+    const [n] = parseRss(xml);
+    expect(n).toMatchObject({
+      link: "https://www.ouest-france.fr/sport/a.html",
+      source: "Ouest-France",
+      image: "https://www.bing.com/th?id=OVFT.abc&pid=News",
+      summary: "Les Rouge et Noir affrontent Lorient dimanche avec un groupe au complet.",
+    });
+  });
+});
+
 describe("Transferts officiels", () => {
   const json = {
     response: [

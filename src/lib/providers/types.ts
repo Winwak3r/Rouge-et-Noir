@@ -118,6 +118,9 @@ export interface ProviderPlayer {
   position: string | null;
   shirtNumber: number | null;
   photoUrl: string | null;
+  birthDate?: Date | null;
+  nationality?: string | null;
+  flagUrl?: string | null;
 }
 
 export interface FootballProvider {

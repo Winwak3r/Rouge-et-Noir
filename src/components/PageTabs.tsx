@@ -1,13 +1,28 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 /** Onglets de page, de même largeur, sans arrondi (comme sur la page d'un match). */
 export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: string; content: ReactNode }>; initial?: string }) {
   const [tab, setTab] = useState(tabs.some((t) => t.key === initial) ? initial! : tabs[0].key);
+  // Barre d'onglets figée juste sous l'en-tête du site (dont la hauteur varie selon l'écran)
+  const [top, setTop] = useState(0);
+  useEffect(() => {
+    const head = document.querySelector("header");
+    if (!head) return;
+    const measure = () => setTop(head.getBoundingClientRect().height);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(head);
+    return () => ro.disconnect();
+  }, []);
   return (
     <div className="space-y-4">
-      <div role="tablist" className="grid divide-x divide-neutral-200 border-y border-neutral-200" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+      <div
+        role="tablist"
+        className="sticky z-20 grid divide-x divide-neutral-200 border-y border-neutral-200 shadow-sm"
+        style={{ top, gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+      >
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -16,6 +31,7 @@ export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: 
             aria-selected={tab === t.key}
             onClick={() => {
               setTab(t.key);
+              window.scrollTo({ top: 0, behavior: "smooth" });
               window.history.replaceState(window.history.state, "", `?onglet=${t.key}`);
             }}
             style={{ fontSize: "clamp(11px, 3.3vw, 15px)" }}
