@@ -77,16 +77,13 @@ function PickBonuses({ list, size }: { list: NonNullable<MatchHeader["myPick"]>[
 function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; open: boolean; variant: "pc" | "mobile" }) {
   const muted = open ? "text-white/80" : "text-neutral-500";
   if (variant === "pc") {
+    // Ordinateur : tout sur une ligne — photo · MON PRONO · 2 - 2 · nom du buteur · spécialités
     return (
       <span className="flex shrink-0 items-center gap-3">
-        {p.scorer ? (
-          <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={40} shape="card" number={p.scorer.number} />
-        ) : null}
-        <span className="min-w-0">
-          <span className={`block text-[10px] font-bold uppercase tracking-wide ${muted}`}>Mon prono</span>
-          <span className="block font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
-          <span className={`block max-w-[9rem] truncate text-xs ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
-        </span>
+        {p.scorer && <PlayerPhoto name={p.scorer.name} url={p.scorer.photo} size={40} shape="card" number={p.scorer.number} />}
+        <span className={`text-[10px] font-bold uppercase tracking-wide ${muted}`}>Mon prono</span>
+        <span className="font-club text-xl font-semibold leading-none tabular-nums">{p.score}</span>
+        <span className={`max-w-[11rem] truncate text-sm ${muted}`}>{p.scorer ? p.scorer.name : p.noScorer ? "Aucun buteur rennais" : "Sans buteur"}</span>
         {p.bonuses.length > 0 && <PickBonuses list={p.bonuses} size={30} />}
       </span>
     );
@@ -132,7 +129,8 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
     if (href) router.push(href);
     else group?.toggle(h.id);
   };
-  const open = !h.cancelled && group?.openId === h.id;
+  // Un match à pronostiquer ouvre sa page dédiée : son accordéon ne s'ouvre jamais (même via #match-… dans l'adresse)
+  const open = !h.cancelled && !href && group?.openId === h.id;
   const ref = useRef<HTMLElement>(null);
   const wasOpen = useRef(open);
   // À l'ouverture par un clic, on recadre sur le match (pas au chargement de la page).
@@ -243,6 +241,7 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
         )}
       </button>
       {/* Ouverture : la hauteur se déploie, puis les rubriques apparaissent l'une après l'autre (dévoilement progressif) */}
+      {!href && (
       <div className={`grid transition-all duration-300 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`} inert={!open}>
         <div className="overflow-hidden">
           <div className={`space-y-6 border-t border-neutral-200 p-4 ${open ? "disclose" : "opacity-0"}`}>
@@ -250,6 +249,7 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
           </div>
         </div>
       </div>
+      )}
     </section>
   );
 }
