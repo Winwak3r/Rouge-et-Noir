@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Actualités du SRFC" };
 export const revalidate = 600;
 
 // Billetterie officielle du club (accès depuis le site du club)
-const TICKETS_URL = process.env.CLUB_TICKETS_URL || "https://www.staderennais.com";
+const TICKETS_URL = process.env.CLUB_TICKETS_URL || "https://billetterie.staderennais.com/fr/";
 const T = "font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 const ago = (d: Date | null) => {
   if (!d) return "";
@@ -142,7 +142,8 @@ async function Squad() {
                 <li key={p.id} className="card flex items-center gap-3 p-3">
                   <PlayerPhoto name={p.name} url={playerPhotoUrl(p)} size={56} shape="card" number={p.shirtNumber} />
                   <span className="min-w-0 space-y-0.5">
-                    <span className="block truncate font-semibold leading-tight">{p.name}</span>
+                    {/* nom plus petit, sur deux lignes au besoin : jamais coupé */}
+                    <span className="block text-[13px] font-semibold leading-tight [overflow-wrap:anywhere] sm:text-sm">{p.name}</span>
                     <span className="flex flex-wrap items-center gap-x-2 text-xs text-neutral-600">
                       {ageOn(p.birthDate) != null && <span>{ageOn(p.birthDate)} ans</span>}
                       {p.nationality && (
