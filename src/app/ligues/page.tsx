@@ -139,7 +139,14 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
       )}
       {active.length === 0 && <p className="card text-sm text-neutral-600">Tu n’es dans aucune ligue pour l’instant : voici le classement Général R&amp;N.</p>}
 
-      <LeagueHub views={board.views} initial={board.initial} me={board.me?.id ?? null} logos={board.logos} panels={panels} />
+      <LeagueHub
+        views={board.views}
+        initial={board.initial}
+        me={board.me?.id ?? null}
+        logos={board.logos}
+        panels={panels}
+        adminKeys={active.filter((m) => m.role === "ADMIN").map((m) => m.leagueId)}
+      />
 
       <p className="text-sm text-neutral-600">
         {leagues.length}/{MAX_LEAGUES} ligues.{" "}

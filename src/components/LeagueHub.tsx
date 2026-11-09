@@ -17,6 +17,8 @@ export function LeagueHub(props: {
   me: string | null;
   logos: Partial<Record<CompetitionCode, string>>;
   panels: Record<string, ReactNode>;
+  /** Ligues dont je suis administrateur */
+  adminKeys?: string[];
 }) {
   const [sel, setSel] = useState(props.views.some((v) => v.key === props.initial) ? props.initial : props.views[0]?.key);
   const [top, setTop] = useState(0);
@@ -51,16 +53,36 @@ export function LeagueHub(props: {
     ro.observe(head);
     return () => ro.disconnect();
   }, []);
-  // La ligne est « collée » dès que le repère placé juste au-dessus passe sous l'en-tête
+  // La ligne est « collée » dès que le repère placé juste au-dessus passe sous l'en-tête. Marge de 24 px pour se
+  // décoller : la barre change de hauteur en se collant (noms masqués, flèche…) sans provoquer de va-et-vient.
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < top + 1), {
-      rootMargin: `-${Math.round(top)}px 0px 0px 0px`,
-    });
-    io.observe(el);
-    return () => io.disconnect();
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const y = el.getBoundingClientRect().top;
+        setStuck((c) => (c ? y < top + 24 : y < top));
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [top]);
+  // Pas de recalage automatique du défilement quand la barre change de hauteur
+  useEffect(() => {
+    const prev = document.documentElement.style.overflowAnchor;
+    document.documentElement.style.overflowAnchor = "none";
+    return () => {
+      document.documentElement.style.overflowAnchor = prev;
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -114,6 +136,16 @@ export function LeagueHub(props: {
                   <LeagueAvatar leagueId={v.key} name={v.name} at={v.imageAt} size={28} className="rounded-md" />
                 )}
                 <span className={stuck ? "hidden sm:inline" : ""}>{v.name}</span>
+                {props.adminKeys?.includes(v.key) && (
+                  <span
+                    title="Tu es administrateur de cette ligue"
+                    className={`rounded px-1 py-px text-[9px] font-bold uppercase tracking-wide ${on ? "bg-white text-rouge" : "bg-rouge text-white"} ${
+                      stuck ? "hidden sm:inline" : ""
+                    }`}
+                  >
+                    Admin
+                  </span>
+                )}
               </button>
             );
           })}
