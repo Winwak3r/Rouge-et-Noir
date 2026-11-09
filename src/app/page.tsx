@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { after } from "next/server";
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { AccordionGroup } from "@/components/AccordionGroup";
 import { AnnouncementWindow } from "@/components/AnnouncementWindow";
 import { LiveRefresh } from "@/components/LiveRefresh";
@@ -30,9 +30,8 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { shortPlayerName } from "@/lib/player-name";
 import { Landing } from "@/components/landing/Landing";
-import { toggleHomeV2Action } from "@/app/actions/home-preview";
-import { HOME_V2_COOKIE } from "@/lib/home-preview";
 import { LeagueComparison } from "@/components/LeagueComparison";
+import { HomeStickyMatch } from "@/components/HomeStickyMatch";
 import { PastMatches } from "@/components/PastMatches";
 import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, withBonuses, type BonusQuotas } from "@/lib/scoring/bonus";
@@ -49,8 +48,6 @@ const ORDER: CompetitionCode[] = ["LIGUE_1", "EUROPA_LEAGUE", "COUPE_DE_FRANCE"]
 export default async function HomePage() {
   const now = new Date();
   const user = await getCurrentUser();
-  // Aperçu de la page d'accueil remodelée : administrateur seulement (bouton dans l'administration)
-  const homeV2 = user?.role === "ADMIN" && (await cookies()).get(HOME_V2_COOKIE)?.value === "1";
   // Visiteur sans compte : page d'accueil de présentation, sans accès au site
   if (!user) return <Landing />;
   // Ligue affichée : classement et pronostics des autres limités à ses joueurs (sinon tous les joueurs)
@@ -193,6 +190,7 @@ export default async function HomePage() {
   const top = live ?? justFinished;
   const next = matches.find((m) => m.status === "SCHEDULED" && m.kickoffAt > now) ?? null;
 
+  const headersById = new Map<string, MatchHeader>();
   const renderMatch = (m: (typeof matches)[number], opts: { layout?: "next" | "top" | "list" } = {}) => {
     const c = COMPETITIONS[m.competition];
     const phase = matchPhase(m, now);
@@ -270,6 +268,7 @@ export default async function HomePage() {
                 : "score"
           : null,
     };
+    headersById.set(m.id, h);
 
     if (h.cancelled) {
       return (
@@ -666,54 +665,51 @@ export default async function HomePage() {
           </div>
         )}
 
-        {homeV2 ? (
-          // Aperçu (admin) : les deux matchs à la une, en quinconce
-          <>
-            <form action={toggleHomeV2Action} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-rouge/50 bg-rouge/5 px-3 py-2 text-xs">
-              <span>
-                <strong>Aperçu</strong> de la page d’accueil remodelée : visible par toi seul.
-              </span>
-              <button className="font-semibold text-rouge underline-offset-2 hover:underline">Revenir à la version actuelle</button>
-            </form>
-            <div className="relative space-y-3 sm:space-y-0">
-              {top && (
-                <section className="space-y-2 sm:w-[74%]" data-tour={live ? "top-match" : undefined}>
-                  <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-noir">
-                    {live && <span className="h-2 w-2 animate-pulse rounded-full bg-rouge" aria-hidden />}
-                    {live ? "En direct" : "Dernier match"}
-                  </h2>
-                  {renderMatch(top, { layout: "top" })}
-                </section>
-              )}
-              {next && (
-                // Décalé à droite et légèrement remonté : les deux blocs se lisent en quinconce
-                <section className={`space-y-2 sm:ml-auto sm:w-[74%] ${top ? "sm:-mt-6" : ""}`} data-tour="next-match">
-                  <h2 className="text-xs font-bold uppercase tracking-wide text-noir sm:text-right">Prochain match</h2>
-                  {renderMatch(next, { layout: "next" })}
-                </section>
-              )}
-              {!top && !next && <p className="card text-sm text-neutral-700">Le calendrier est en attente de nouvelles rencontres.</p>}
-            </div>
-          </>
-        ) : (
-          <>
         {top && (
-          <section className="space-y-3" data-tour={live ? "top-match" : undefined}>
+          <section id="home-top-match" className="space-y-3" data-tour={live ? "top-match" : undefined}>
             <h2 className="text-xs font-bold uppercase tracking-wide text-noir">{live ? "Match en cours" : "Match terminé"}</h2>
             {renderMatch(top, { layout: "top" })}
           </section>
         )}
 
         {next ? (
-          <section className="space-y-3" data-tour="next-match">
+          <section id="home-next-match" className="space-y-3" data-tour="next-match">
             <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
             {renderMatch(next, { layout: "next" })}
           </section>
         ) : (
           !top && <p className="card text-sm text-neutral-700">Le calendrier est en attente de nouvelles rencontres.</p>
         )}
-          </>
-        )}
+
+        {(() => {
+          // Barre fixe au défilement : le match à la une (en direct ou terminé), sinon le prochain match
+          const featured = top ?? next;
+          const fh = featured ? headersById.get(featured.id) : undefined;
+          if (!featured || !fh) return null;
+          const isLive = Boolean(live && featured.id === live.id);
+          const status = isLive
+            ? "En direct"
+            : featured.status === "FINISHED"
+              ? featured.resultConfirmedAt
+                ? "Résultat définitif"
+                : "Résultat provisoire"
+              : canEditPrediction(featured, now)
+                ? "Pronostics ouverts"
+                : "Pronostics fermés";
+          return (
+            <HomeStickyMatch
+              watchId={top ? "home-top-match" : "home-next-match"}
+              title={isLive ? "Match en direct" : featured.status === "FINISHED" ? "Match terminé" : "Prochain match"}
+              code={fh.code}
+              competitionLogo={fh.competitionLogo}
+              home={fh.home}
+              away={fh.away}
+              score={fh.score ? `${fh.score.home} - ${fh.score.away}` : null}
+              status={status}
+              live={isLive}
+            />
+          );
+        })()}
 
         <section className="space-y-3" data-tour="calendar">
           <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Calendrier 2026/2027</h2>

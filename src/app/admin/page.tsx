@@ -1,6 +1,3 @@
-import { cookies } from "next/headers";
-import { toggleHomeV2Action } from "@/app/actions/home-preview";
-import { HOME_V2_COOKIE } from "@/lib/home-preview";
 import type { Metadata } from "next";
 import { syncNowAction } from "@/app/actions/admin";
 import { ActionForm } from "@/components/ActionForm";
@@ -13,7 +10,6 @@ export const metadata: Metadata = { title: "Administration" };
 export const maxDuration = 60;
 
 export default async function AdminHome() {
-  const homeV2 = (await cookies()).get(HOME_V2_COOKIE)?.value === "1";
   const [users, matches, confirmed, players, subs, logs, audits] = await Promise.all([
     prisma.user.count({ where: { isActive: true } }),
     prisma.match.count(),
@@ -64,16 +60,6 @@ export default async function AdminHome() {
           rows={audits.map((a) => [formatStamp(a.createdAt), a.admin?.pseudo ?? "(compte supprimé)", a.action, `${a.entity} ${a.entityId.slice(0, 18)}`, a.reason ?? "–"])}
         />
       </section>
-      <section className="card space-y-2">
-          <h2 className="font-display text-xl font-bold uppercase tracking-wide">Page d’accueil remodelée (aperçu)</h2>
-          <p className="text-sm text-neutral-600">
-            Les deux matchs à la une (en direct ou dernier match, puis prochain match) présentés en quinconce. Seul toi vois cet aperçu ;
-            les joueurs gardent la page actuelle.
-          </p>
-          <form action={toggleHomeV2Action}>
-            <button className="btn-primary">{homeV2 ? "Revenir à la page d’accueil actuelle" : "Voir la page d’accueil remodelée"}</button>
-          </form>
-        </section>
     </div>
   );
 }

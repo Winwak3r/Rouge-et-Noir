@@ -80,18 +80,56 @@ export function parseRss(xml: string, max = 20): NewsItem[] {
   return items.sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0)).slice(0, max);
 }
 
-const BING = "https://www.bing.com/news/search?q=%22Stade+Rennais%22&format=rss&setlang=fr&cc=fr";
-const GOOGLE = `https://news.google.com/rss/search?q=${encodeURIComponent('"Stade Rennais" when:7d')}&hl=fr&gl=FR&ceid=FR:fr`;
+// Sources retenues : presse locale et site officiel du club (fiables, peu nombreuses)
+export const NEWS_SITES = ["staderennais.com", "ouest-france.fr", "letelegramme.fr", "rennes.maville.com", "actu.fr", "20minutes.fr"];
+const SITE_Q = `"Stade Rennais" (${NEWS_SITES.map((d) => `site:${d}`).join(" OR ")})`;
+const BING = `https://www.bing.com/news/search?q=${encodeURIComponent(SITE_Q)}&format=rss&setlang=fr&cc=fr`;
+const GOOGLE = `https://news.google.com/rss/search?q=${encodeURIComponent(`${SITE_Q} when:14d`)}&hl=fr&gl=FR&ceid=FR:fr`;
+
+/** Article d'une des sources retenues ? (Google renvoie un lien intermédiaire : on se fie alors au nom du média) */
+export function isTrustedSource(item: Pick<NewsItem, "link" | "source">): boolean {
+  let host = "";
+  try {
+    host = new URL(item.link).hostname.replace(/^www\./, "");
+  } catch {
+    return false;
+  }
+  if (NEWS_SITES.some((d) => host === d || host.endsWith(`.${d}`))) return true;
+  return /ouest-france|t[ée]l[ée]gramme|stade rennais|maville|actu\.fr|20 ?minutes/i.test(item.source ?? "");
+}
+
+/** Image d'aperçu de l'article (balise og:image de la page du média), mise en cache un jour. */
+export function ogImage(html: string): string | null {
+  const m =
+    /<meta[^>]+property=["']og:image(?::url)?["'][^>]+content=["']([^"']+)["']/i.exec(html) ??
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image(?::url)?["']/i.exec(html) ??
+    /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i.exec(html);
+  return m ? decode(m[1]) : null;
+}
+
+async function pageImage(url: string): Promise<string | null> {
+  if (/news\.google\.com/.test(url)) return null;
+  try {
+    const res = await fetch(url, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(5000), headers: { "User-Agent": "Mozilla/5.0" } });
+    if (!res.ok) return null;
+    const html = (await res.text()).slice(0, 300_000); // l'en-tête de la page suffit
+    return ogImage(html);
+  } catch {
+    return null;
+  }
+}
 
 async function read(url: string): Promise<NewsItem[]> {
   const res = await fetch(url, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000), headers: { "User-Agent": "Mozilla/5.0" } });
   if (!res.ok) throw new Error(`Actualités : HTTP ${res.status}`);
-  return parseRss(await res.text());
+  return parseRss(await res.text()).filter(isTrustedSource);
 }
 
-/** Actualités du Stade Rennais (cache 30 min) : Bing (images et résumés), sinon Google Actualités. */
+/** Actualités du Stade Rennais (cache 30 min), avec l'image d'aperçu de chaque article. */
 export async function fetchNews(): Promise<NewsItem[]> {
   const bing = await read(BING).catch(() => []);
-  if (bing.length >= 3) return bing;
-  return read(GOOGLE);
+  const items = (bing.length >= 3 ? bing : await read(GOOGLE)).slice(0, 15);
+  // Image d'aperçu prise sur la page de l'article (plus fiable que les vignettes des agrégateurs)
+  const images = await Promise.all(items.map((n) => pageImage(n.link)));
+  return items.map((n, i) => ({ ...n, image: images[i] ?? n.image }));
 }

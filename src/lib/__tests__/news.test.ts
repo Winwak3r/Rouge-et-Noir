@@ -1,6 +1,6 @@
 // Données FICTIVES aux formats Google Actualités et API-Football.
 import { describe, expect, it } from "vitest";
-import { parseRss } from "../news";
+import { isTrustedSource, ogImage, parseRss } from "../news";
 import { parseTransfers, transferTypeLabel } from "../transfers";
 
 describe("Fil d'actualités (RSS)", () => {
@@ -51,5 +51,19 @@ describe("Transferts officiels", () => {
     expect(t.map((x) => `${x.player} ${x.direction} ${x.otherTeam.name}`)).toEqual(["K. Jota out Lorient", "B. Dia in Salernitana"]);
     expect(transferTypeLabel("Loan")).toBe("Prêt");
     expect(transferTypeLabel("Free")).toBe("Libre");
+  });
+});
+
+describe("Actualités : sources fiables et image d'aperçu", () => {
+  it("presse locale et site du club retenus, le reste écarté", () => {
+    expect(isTrustedSource({ link: "https://www.ouest-france.fr/sport/a.html", source: null })).toBe(true);
+    expect(isTrustedSource({ link: "https://www.staderennais.com/actualites/x", source: null })).toBe(true);
+    expect(isTrustedSource({ link: "https://news.google.com/rss/articles/abc", source: "Le Télégramme" })).toBe(true);
+    expect(isTrustedSource({ link: "https://www.site-de-rumeurs.com/a", source: "Rumeurs Foot" })).toBe(false);
+  });
+  it("image og:image lue dans la page de l'article", () => {
+    expect(ogImage('<head><meta property="og:image" content="https://img.ouest-france.fr/a.jpg"></head>')).toBe("https://img.ouest-france.fr/a.jpg");
+    expect(ogImage('<meta content="https://x.fr/b.jpg" property="og:image" />')).toBe("https://x.fr/b.jpg");
+    expect(ogImage("<head></head>")).toBeNull();
   });
 });
