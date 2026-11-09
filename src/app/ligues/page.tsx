@@ -13,6 +13,7 @@ import { prisma } from "@/lib/db";
 import { bonusStock } from "@/lib/bonus-data";
 import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Ligues" };
 export const dynamic = "force-dynamic";
@@ -31,7 +32,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Ligues</h1>
+      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Ligues</PageTitle>
       <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Mes ligues</h2>
         <span

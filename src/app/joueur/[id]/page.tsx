@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
 import { LeagueAvatar } from "@/components/LeagueAvatar";
 import { activeLeagueScope } from "@/lib/leagues";
+import { PageTitle } from "@/components/PageTitle";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
         <div className="flex items-center gap-4">
           <Avatar userId={u.id} pseudo={u.pseudo} at={u.avatarUpdatedAt?.getTime() ?? null} size={56} />
           <div>
-            <h1 className="page-title">{u.pseudo}</h1>
+            <PageTitle className="page-title">{u.pseudo}</PageTitle>
             <p className="mt-1 text-sm text-neutral-600">Joueur depuis le {formatDate(u.createdAt)}</p>
           </div>
         </div>

@@ -4,7 +4,6 @@ import { Barlow_Condensed, Inter, Oswald } from "next/font/google";
 import { cookies } from "next/headers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { BackButton } from "@/components/BackButton";
 import { ScrollTopOnLoad } from "@/components/ScrollTopOnLoad";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import "./globals.css";
@@ -39,7 +38,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <Header />
         <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:pb-16">
           <ScrollTopOnLoad />
-          <BackButton />{children}</main>
+{children}</main>
         <Footer />
       </body>
     </html>

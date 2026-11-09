@@ -4,6 +4,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
 import { formatStamp } from "@/lib/dates";
 import { getActiveRules } from "@/lib/scoring/active-rules";
+import { PageTitle } from "@/components/PageTitle";
 
 function Num(props: { name: string; label: string; value: number | string; hint?: string; decimal?: boolean }) {
   return (
@@ -31,7 +32,7 @@ export default async function RulesAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Barème (version {r.version})</h1>
+        <PageTitle className="page-title">Barème (version {r.version})</PageTitle>
         <p className="mt-1 text-sm text-neutral-600">
           Chaque enregistrement crée une nouvelle version. Par défaut, elle ne s’applique qu’aux matchs à venir : les matchs déjà
           notés gardent leur barème. Tu peux aussi recalculer toute la saison (journalisé, le classement peut changer).

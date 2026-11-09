@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { formatDateTime, formatStamp } from "@/lib/dates";
 import { getActiveRules } from "@/lib/scoring/active-rules";
 import { canEditPrediction, oddsToBonus } from "@/lib/scoring/engine";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function OddsAdminPage({ searchParams }: { searchParams: Promise<{ match?: string }> }) {
   const now = new Date();
@@ -28,7 +29,7 @@ export default async function OddsAdminPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Cotes des buteurs</h1>
+        <PageTitle className="page-title">Cotes des buteurs</PageTitle>
         <p className="mt-1 text-sm text-neutral-600">
           Les cotes Bet365 sont récupérées automatiquement environ 48 h avant chaque match. Tu peux saisir ou corriger une cote
           (par exemple pour un joueur sans cote) : elle n’est plus remplacée par la synchro. Toutes les cotes sont figées au

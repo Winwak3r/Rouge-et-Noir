@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/forms";
 import { getCurrentUser } from "@/lib/auth/session";
 import { safeNext } from "@/lib/validation";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Connexion" };
 
@@ -11,7 +12,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   if (await getCurrentUser()) redirect(safeNext(next));
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="page-title mb-6">Connexion</h1>
+      <PageTitle className="page-title mb-6">Connexion</PageTitle>
       {verification === "invalide" && (
         <p className="mb-4 rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">
           Ce lien de confirmation n’est plus valable (déjà utilisé ou expiré). Connecte-toi : un nouveau lien te sera proposé si besoin.

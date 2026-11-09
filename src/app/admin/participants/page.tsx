@@ -2,6 +2,7 @@ import { ParticipantsList } from "@/components/ParticipantsList";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatDate, formatShortNumeric } from "@/lib/dates";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function ParticipantsPage() {
   const admin = await requireAdmin();
@@ -21,7 +22,7 @@ export default async function ParticipantsPage() {
   });
   return (
     <div className="space-y-4">
-      <h1 className="page-title">Participants</h1>
+      <PageTitle className="page-title">Participants</PageTitle>
       <ParticipantsList
         adminId={admin.id}
         users={users.map((u) => ({

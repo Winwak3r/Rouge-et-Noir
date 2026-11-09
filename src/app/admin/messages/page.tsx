@@ -6,6 +6,7 @@ import { canEditPrediction } from "@/lib/scoring/engine";
 import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
 import { vapidFromEnv } from "@/lib/push/webpush";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function MessagesAdminPage() {
   const now = new Date();
@@ -28,7 +29,7 @@ export default async function MessagesAdminPage() {
 
   return (
     <div className="space-y-10">
-      <h1 className="page-title">Messages et rappels</h1>
+      <PageTitle className="page-title">Messages et rappels</PageTitle>
 
       <section className="space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Notification à tous les joueurs</h2>

@@ -16,6 +16,7 @@ import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
 import { bonusStock } from "@/lib/bonus-data";
 import { prisma } from "@/lib/db";
 import { activeLeagueScope } from "@/lib/leagues";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Mon compte" };
 export const dynamic = "force-dynamic";
@@ -34,7 +35,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <div className="flex items-center gap-4">
           <Avatar userId={user.id} pseudo={user.pseudo} at={user.avatarUpdatedAt?.getTime() ?? null} size={56} />
           <div>
-          <h1 className="page-title">{user.pseudo}</h1>
+          <PageTitle className="page-title">{user.pseudo}</PageTitle>
           <p className="mt-1 text-sm text-neutral-600">
             {user.email} · inscrit depuis le {formatDate(user.createdAt)}
             {user.role === "ADMIN" && " · administrateur"}

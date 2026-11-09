@@ -4,6 +4,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
 import { formatStamp } from "@/lib/dates";
 import { vapidFromEnv } from "@/lib/push/webpush";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Administration" };
 export const maxDuration = 60;
@@ -21,7 +22,7 @@ export default async function AdminHome() {
 
   return (
     <div className="space-y-10">
-      <h1 className="page-title">Vue d’ensemble</h1>
+      <PageTitle className="page-title">Vue d’ensemble</PageTitle>
       <section className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         <Stat label="Participants actifs" value={users} />
         <Stat label="Matchs en base" value={matches} />

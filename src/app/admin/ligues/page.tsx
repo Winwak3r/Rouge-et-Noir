@@ -1,6 +1,7 @@
 import { LeaguesAdminList } from "@/components/LeaguesAdminList";
 import { prisma } from "@/lib/db";
 import { formatDate, formatShortNumeric } from "@/lib/dates";
+import { PageTitle } from "@/components/PageTitle";
 
 /** Toutes les ligues du site : nom, image, joueurs, créateur et administrateurs, liste des participants. */
 export default async function AdminLeaguesPage() {
@@ -21,7 +22,7 @@ export default async function AdminLeaguesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Ligues ({leagues.length})</h1>
+        <PageTitle className="page-title">Ligues ({leagues.length})</PageTitle>
         <p className="mt-1 text-sm text-neutral-600">{withoutLeague} joueur(s) actif(s) ne sont dans aucune ligue.</p>
       </div>
       <LeaguesAdminList

@@ -21,7 +21,7 @@ export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: 
       <div
         role="tablist"
         className="sticky z-20 grid divide-x divide-neutral-200 border-y border-neutral-200 shadow-sm"
-        style={{ top, gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        style={{ top: `calc(${top}px + var(--page-bar-h, 0px))`, transition: "top 300ms", gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
       >
         {tabs.map((t) => (
           <button

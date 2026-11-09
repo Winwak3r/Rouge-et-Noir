@@ -7,6 +7,7 @@ import { PlayerPhotoEditor } from "@/components/PlayerPhotoEditor";
 import { toggleHomegrownAction } from "@/app/actions/admin";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { prisma } from "@/lib/db";
+import { PageTitle } from "@/components/PageTitle";
 
 const POSITIONS = [
   ["F", "Attaquant"],
@@ -55,7 +56,7 @@ export default async function PlayersAdminPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="page-title">Joueurs</h1>
+        <PageTitle className="page-title">Joueurs</PageTitle>
         <p className="mt-1 text-sm text-neutral-600">
           L’effectif est mis à jour chaque jour depuis ESPN, et les photos officielles depuis API-Football. Une photo déposée ici
           remplace la photo officielle. Une fiche modifiée ici (nom, poste, numéro, présence) n’est plus

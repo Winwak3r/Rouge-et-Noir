@@ -3,6 +3,7 @@ import { getActiveRules } from "@/lib/scoring/active-rules";
 import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, BONUS_KINDS, normalizeQuotas } from "@/lib/scoring/bonus";
 import { oddsToBonus } from "@/lib/scoring/engine";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Règles du jeu" };
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ export default async function RulesPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <h1 className="page-title">Règles du jeu</h1>
+      <PageTitle className="page-title">Règles du jeu</PageTitle>
 
       <section className="card space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le score</h2>

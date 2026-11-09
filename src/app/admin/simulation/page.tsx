@@ -5,6 +5,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { prisma } from "@/lib/db";
 import { COMPETITIONS } from "@/lib/competitions";
 import { formatDateTime } from "@/lib/dates";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function SimulationPage({ searchParams }: { searchParams: Promise<{ match?: string }> }) {
   const q = await searchParams;
@@ -22,7 +23,7 @@ export default async function SimulationPage({ searchParams }: { searchParams: P
 
   return (
     <div className="space-y-6">
-      <h1 className="page-title">Simulation de match (test)</h1>
+      <PageTitle className="page-title">Simulation de match (test)</PageTitle>
       <div className="space-y-2 rounded-lg border border-orange-300 bg-orange-100 p-3 text-sm text-orange-800">
         <p>
           <strong>À lire avant de simuler.</strong> La simulation donne un résultat fictif à un match pas encore joué (score

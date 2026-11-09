@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { activeLeagueScope, generalPlayers } from "@/lib/leagues";
 import { getLeagueLogos } from "@/lib/league-logos";
 import { withBonuses } from "@/lib/scoring/bonus";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Classements" };
 export const dynamic = "force-dynamic";
@@ -84,7 +85,7 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Classements</h1>
+        <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Classements</PageTitle>
         {!scope && me && (
           <p className="mt-2 text-sm text-neutral-600">
             Tu n’es dans aucune ligue : voici le classement Général R&N.{" "}

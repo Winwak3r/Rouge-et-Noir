@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/forms";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Nouveau mot de passe" };
 
@@ -8,7 +9,7 @@ export default async function ResetPage({ searchParams }: { searchParams: Promis
   const { token } = await searchParams;
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="page-title mb-6">Nouveau mot de passe</h1>
+      <PageTitle className="page-title mb-6">Nouveau mot de passe</PageTitle>
       <div className="card">
         {token ? (
           <ResetPasswordForm token={token} />

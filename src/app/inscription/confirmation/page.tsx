@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ResendVerificationForm, SpamNotice } from "@/components/forms";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Confirme ton adresse e-mail" };
 
@@ -7,7 +8,7 @@ export default async function RegisterDonePage({ searchParams }: { searchParams:
   const { email } = await searchParams;
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="page-title mb-6">Plus qu’une étape</h1>
+      <PageTitle className="page-title mb-6">Plus qu’une étape</PageTitle>
       <div className="card space-y-4 text-sm">
         <p>
           Ton compte est créé. Pour l’activer, clique sur le lien envoyé à <strong>{email ?? "ton adresse e-mail"}</strong>. Tu

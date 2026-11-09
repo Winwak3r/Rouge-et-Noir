@@ -10,6 +10,7 @@ import { requireUser } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
 import { appUrl } from "@/lib/email";
 import { getLeagueLogos } from "@/lib/league-logos";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Gérer ma ligue" };
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function ManageLeaguePage({ searchParams }: { searchParams:
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="page-title">Gérer ma ligue</h1>
+        <PageTitle className="page-title">Gérer ma ligue</PageTitle>
         {adminOf.length > 1 && (
           <nav className="flex flex-wrap gap-2" aria-label="Choix de la ligue">
             {adminOf.map((m) => (

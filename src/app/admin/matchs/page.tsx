@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { COMPETITIONS } from "@/lib/competitions";
 import { formatDateTime, formatShortDate, formatTime, toParisLocalInput } from "@/lib/dates";
 import { PHASE, matchPhase } from "@/lib/match-view";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function MatchesAdminPage() {
   const now = new Date();
@@ -17,7 +18,7 @@ export default async function MatchesAdminPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="page-title">Matchs et dates limites</h1>
+        <PageTitle className="page-title">Matchs et dates limites</PageTitle>
         <p className="mt-1 text-sm text-neutral-600">
           Par défaut, les pronostics ferment au coup d’envoi. Tu peux les fermer plus tôt (jamais plus tard). Si le match est
           reporté par la synchro, la date limite est automatiquement retirée. Chaque changement est journalisé.

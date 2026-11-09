@@ -8,6 +8,7 @@ import { fetchNews, type NewsItem } from "@/lib/news";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { ageOn, nationalityFr } from "@/lib/nationality";
 import { fetchOfficialTransfers, transferTypeLabel, type TransferItem } from "@/lib/transfers";
+import { PageTitle } from "@/components/PageTitle";
 
 export const metadata: Metadata = { title: "Actualités du SRFC" };
 export const revalidate = 600;
@@ -181,7 +182,7 @@ export default async function ActusPage({ searchParams }: { searchParams: Promis
   const [news, official] = await Promise.all([fetchNews().catch(() => null), fetchOfficialTransfers().catch(() => null)]);
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Actualités du SRFC</h1>
+      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Actualités du SRFC</PageTitle>
       <PageTabs
         initial={onglet}
         tabs={[

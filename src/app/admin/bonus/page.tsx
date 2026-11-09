@@ -4,6 +4,7 @@ import { BonusIcon } from "@/components/BonusIcon";
 import { prisma } from "@/lib/db";
 import { formatShortNumeric } from "@/lib/dates";
 import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
+import { PageTitle } from "@/components/PageTitle";
 
 /** « Les Spécialités Maison » : bonus joués (et rendus), ajouts aux joueurs. */
 export default async function AdminBonusPage() {
@@ -26,7 +27,7 @@ export default async function AdminBonusPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="page-title">Les Spécialités Maison</h1>
+      <PageTitle className="page-title">Les Spécialités Maison</PageTitle>
 
       <section className="card space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Ajouter ou retirer un bonus</h2>

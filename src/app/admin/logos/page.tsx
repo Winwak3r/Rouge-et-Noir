@@ -7,6 +7,7 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { prisma } from "@/lib/db";
 import { COMPETITIONS, type CompetitionCode } from "@/lib/competitions";
 import { getLeagueLogos } from "@/lib/league-logos";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function LogosPage() {
   const [logos, custom] = await Promise.all([getLeagueLogos(), prisma.competitionLogo.findMany({ select: { code: true } })]);
@@ -15,7 +16,7 @@ export default async function LogosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Logos des compétitions</h1>
+        <PageTitle className="page-title">Logos des compétitions</PageTitle>
         <p className="mt-1 text-sm text-neutral-600">
           Par défaut, les logos viennent d’ESPN et ne sont pas toujours à jour. Dépose ici le logo officiel de la saison (PNG à fond
           transparent idéalement) : il remplace celui d’ESPN partout sur le site (calendrier, accordéons, classements). N’utilise que
