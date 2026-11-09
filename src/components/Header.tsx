@@ -116,18 +116,10 @@ export async function Header() {
         {/* Compte à gauche, logo au centre, Règles et Classement à droite (mobile et ordinateur) */}
         <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:gap-x-4">
           <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
-            {/* Mobile : « + Créer/Rejoindre » en vert en haut à gauche */}
-            {user && (
-              <Link href="/ligues/nouvelle" aria-label="Créer ou rejoindre une ligue" className="hbtn-green sm:hidden">
-                <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                Créer/Rejoindre
-              </Link>
-            )}
+
             {user ? (
               // Ordinateur : « Mon compte » (rouge, avec la photo) puis « Ligues »
-              <div className="hidden gap-1.5 sm:grid sm:grid-cols-[auto_auto]">
+              <div className="hidden items-center gap-2 sm:flex">
                 <Link href="/compte" data-tour="user-menu" className="hbtn-pseudo">
                   <Avatar userId={user.id} pseudo={user.pseudo} at={user.avatarUpdatedAt?.getTime() ?? null} size={22} className="ring-white/60" />
                   Mon compte
@@ -141,12 +133,6 @@ export async function Header() {
                   </svg>
                   </span>
                   Mes Ligues
-                </Link>
-                <Link href="/ligues/nouvelle" data-tour="join" className="hbtn-green col-span-2">
-                  <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  Créer / Rejoindre une ligue
                 </Link>
               </div>
             ) : (

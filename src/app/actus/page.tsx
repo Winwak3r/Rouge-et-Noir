@@ -224,7 +224,7 @@ export default async function ActusPage({ searchParams }: { searchParams: Promis
         tabs={[
           { key: "actus", label: "Actus", content: <NewsList items={news} empty="Pas d’actualité sur le Stade Rennais cette semaine." /> },
           { key: "classements", label: "Classements", content: <OfficialStandings /> },
-          { key: "transferts", label: "Transfert", content: <Transfers official={official} /> },
+          { key: "transferts", label: "Transferts", content: <Transfers official={official} /> },
           { key: "plus", label: "Voir plus…", content: <MoreLinks /> },
           // Atteint depuis « Voir plus… » (absent de la barre d'onglets)
           {

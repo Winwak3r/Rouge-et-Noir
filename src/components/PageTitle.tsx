@@ -15,10 +15,13 @@ export function PageTitle({
   children,
   className = "page-title",
   compactBar = true,
+  aside,
 }: {
   children: ReactNode;
   className?: string;
   compactBar?: boolean;
+  /** Élément affiché à droite du titre (ex. un bouton) */
+  aside?: ReactNode;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -87,9 +90,12 @@ export function PageTitle({
             Retour
           </button>
         )}
-        <h1 ref={ref} className={`${className} transition-opacity duration-300 ${compact && compactBar ? "opacity-0" : "opacity-100"}`}>
-          {children}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 ref={ref} className={`${className} transition-opacity duration-300 ${compact && compactBar ? "opacity-0" : "opacity-100"}`}>
+            {children}
+          </h1>
+          {aside}
+        </div>
       </div>
 
       {/* Barre compacte : flèche plus grosse et titre réduit, sous l'en-tête du site */}

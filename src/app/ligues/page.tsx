@@ -87,12 +87,16 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
           {stock && (
             <section className="card space-y-2">
               <h2 className={H}>Mes spécialités maison</h2>
-              <ul className="space-y-1.5">
+              <ul className="grid gap-2 sm:grid-cols-2">
                 {BONUS_KINDS.map((k) => (
-                  <li key={k} className="flex items-center gap-2 text-sm">
-                    <BonusIcon kind={k} size={30} />
-                    <span className="flex-1">{BONUS_INFO[k].name}</span>
-                    <span className={`font-bold tabular-nums ${stock[k] > 0 ? "text-green-700" : "text-neutral-400"}`}>{stock[k]} restant{stock[k] > 1 ? "s" : ""}</span>
+                  <li key={k} className="flex items-center gap-2.5 rounded-xl bg-[#111111] p-3 text-sm text-white">
+                    <BonusIcon kind={k} size={36} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold leading-tight">{BONUS_INFO[k].name}</span>
+                      <span className={`text-xs font-bold tabular-nums ${stock[k] > 0 ? "text-green-400" : "text-neutral-400"}`}>
+                        {stock[k]} restant{stock[k] > 1 ? "s" : ""}
+                      </span>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -128,7 +132,18 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-6">
-      <PageTitle compactBar={false} className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">
+      <PageTitle
+        compactBar={false}
+        className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl"
+        aside={
+          <Link href="/ligues/nouvelle" className="hbtn-green">
+            <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Créer / Rejoindre
+          </Link>
+        }
+      >
         Mes Ligues
       </PageTitle>
       {q.rejoint && <p className="rounded-lg bg-green-100 px-3 py-2 text-sm text-green-800">Bienvenue dans la ligue « {q.rejoint} » !</p>}
@@ -148,17 +163,6 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
         panels={panels}
         adminKeys={active.filter((m) => m.role === "ADMIN").map((m) => m.leagueId)}
       />
-
-      <p className="text-sm text-neutral-600">
-        {leagues.length}/{MAX_LEAGUES} ligues.{" "}
-        {canAdd ? (
-          <Link href="/ligues/nouvelle" className="font-semibold text-rouge hover:underline">
-            Créer ou rejoindre une ligue
-          </Link>
-        ) : (
-          "Maximum atteint : quittes-en une pour en rejoindre ou en créer une autre."
-        )}
-      </p>
     </div>
   );
 }
