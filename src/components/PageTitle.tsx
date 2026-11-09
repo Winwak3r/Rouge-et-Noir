@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 /**
  * Titre de page, avec la flèche de retour.
@@ -16,6 +17,10 @@ export function PageTitle({ children, className = "page-title" }: { children: Re
   const ref = useRef<HTMLHeadingElement>(null);
   const [compact, setCompact] = useState(false);
   const [top, setTop] = useState(0);
+  // La barre est rendue directement dans <body> : l'animation d'arrivée des pages ferait sinon de la page
+  // le cadre de référence de la position fixe, et la barre défilerait avec le contenu.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const back = () => {
     const fromSite = document.referrer.startsWith(window.location.origin);
@@ -80,6 +85,8 @@ export function PageTitle({ children, className = "page-title" }: { children: Re
       </div>
 
       {/* Barre compacte : flèche plus grosse et titre réduit, sous l'en-tête du site */}
+      {mounted &&
+        createPortal(
       <div
         aria-hidden={!compact}
         className={`fixed inset-x-0 z-[25] border-b border-neutral-200 bg-[var(--header-bg)] shadow-sm transition-all duration-300 ${
@@ -95,7 +102,9 @@ export function PageTitle({ children, className = "page-title" }: { children: Re
           )}
           <p className={`${className} !mb-0 truncate !text-xl sm:!text-2xl`}>{children}</p>
         </div>
-      </div>
+      </div>,
+          document.body,
+        )}
     </>
   );
 }
