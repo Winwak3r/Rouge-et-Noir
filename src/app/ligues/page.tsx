@@ -151,20 +151,14 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
 
       <p className="text-sm text-neutral-600">
         {leagues.length}/{MAX_LEAGUES} ligues.{" "}
-        {canAdd ? "Tu peux encore en rejoindre ou en créer." : "Maximum atteint : quittes-en une pour en rejoindre ou en créer une autre."}
+        {canAdd ? (
+          <Link href="/ligues/nouvelle" className="font-semibold text-rouge hover:underline">
+            Créer ou rejoindre une ligue
+          </Link>
+        ) : (
+          "Maximum atteint : quittes-en une pour en rejoindre ou en créer une autre."
+        )}
       </p>
-      {canAdd && (
-        <div className="grid gap-4 md:grid-cols-2">
-          <section className="card space-y-2">
-            <h2 className={H}>Rejoindre une ligue</h2>
-            <JoinLeagueForm />
-          </section>
-          <section id="creer" className="card scroll-mt-40 space-y-2">
-            <h2 className={H}>Créer une ligue</h2>
-            <CreateLeagueForm logos={board.logos} />
-          </section>
-        </div>
-      )}
     </div>
   );
 }

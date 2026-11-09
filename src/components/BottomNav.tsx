@@ -77,7 +77,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
           onClick={() => setNavDirection(path, "/")}
           data-tour="calendar"
           aria-current={on("/") ? "page" : undefined}
-          aria-label="Calendrier"
+          aria-label="Matchs & Pronos"
           className="flex flex-col items-center"
         >
           <span
@@ -91,20 +91,20 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
               <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" strokeWidth="2.6" />
             </svg>
           </span>
-          <span className={`mt-0.5 text-[10px] font-semibold ${on("/") ? "text-rouge" : "text-neutral-600"}`}>Calendrier</span>
+          <span className={`mt-0.5 text-[10px] font-semibold ${on("/") ? "text-rouge" : "text-neutral-600"}`}>Matchs &amp; Pronos</span>
         </Link>
 
-        {/* 4. Règles du jeu */}
+        {/* 4. Créer ou rejoindre une ligue */}
         {item(
-          "/regles",
-          "Règles",
+          "/ligues/nouvelle",
+          "Créer / Rejoindre",
           icon(
             <>
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v8M8 12h8" />
             </>,
           ),
-          "rules",
+          "join",
         )}
 
         {/* 5. Mon compte */}

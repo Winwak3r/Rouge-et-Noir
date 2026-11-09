@@ -4,9 +4,9 @@
 /** Position des onglets de la barre du bas (le choix de la ligue n'est pas une page). */
 export function tabIndex(path: string): number {
   if (path.startsWith("/actus") || path.startsWith("/classements-srfc")) return 0; // Actus (à gauche)
+  if (path.startsWith("/ligues/nouvelle")) return 3; // Créer / Rejoindre
   if (path.startsWith("/ligue")) return 1; // /ligues et /ligue
   if (path === "/") return 2; // calendrier (centre)
-  if (path.startsWith("/regles")) return 3;
   if (path.startsWith("/compte")) return 4;
   return -1;
 }
