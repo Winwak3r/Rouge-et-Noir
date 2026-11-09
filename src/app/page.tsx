@@ -30,6 +30,8 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { shortPlayerName } from "@/lib/player-name";
 import { Landing } from "@/components/landing/Landing";
+import { toggleHomeV2Action } from "@/app/actions/home-preview";
+import { HOME_V2_COOKIE } from "@/lib/home-preview";
 import { LeagueComparison } from "@/components/LeagueComparison";
 import { PastMatches } from "@/components/PastMatches";
 import { BonusIcon } from "@/components/BonusIcon";
@@ -47,6 +49,8 @@ const ORDER: CompetitionCode[] = ["LIGUE_1", "EUROPA_LEAGUE", "COUPE_DE_FRANCE"]
 export default async function HomePage() {
   const now = new Date();
   const user = await getCurrentUser();
+  // Aperçu de la page d'accueil remodelée : administrateur seulement (bouton dans l'administration)
+  const homeV2 = user?.role === "ADMIN" && (await cookies()).get(HOME_V2_COOKIE)?.value === "1";
   // Visiteur sans compte : page d'accueil de présentation, sans accès au site
   if (!user) return <Landing />;
   // Ligue affichée : classement et pronostics des autres limités à ses joueurs (sinon tous les joueurs)
@@ -662,6 +666,37 @@ export default async function HomePage() {
           </div>
         )}
 
+        {homeV2 ? (
+          // Aperçu (admin) : les deux matchs à la une, en quinconce
+          <>
+            <form action={toggleHomeV2Action} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-rouge/50 bg-rouge/5 px-3 py-2 text-xs">
+              <span>
+                <strong>Aperçu</strong> de la page d’accueil remodelée : visible par toi seul.
+              </span>
+              <button className="font-semibold text-rouge underline-offset-2 hover:underline">Revenir à la version actuelle</button>
+            </form>
+            <div className="relative space-y-3 sm:space-y-0">
+              {top && (
+                <section className="space-y-2 sm:w-[74%]" data-tour={live ? "top-match" : undefined}>
+                  <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-noir">
+                    {live && <span className="h-2 w-2 animate-pulse rounded-full bg-rouge" aria-hidden />}
+                    {live ? "En direct" : "Dernier match"}
+                  </h2>
+                  {renderMatch(top, { layout: "top" })}
+                </section>
+              )}
+              {next && (
+                // Décalé à droite et légèrement remonté : les deux blocs se lisent en quinconce
+                <section className={`space-y-2 sm:ml-auto sm:w-[74%] ${top ? "sm:-mt-6" : ""}`} data-tour="next-match">
+                  <h2 className="text-xs font-bold uppercase tracking-wide text-noir sm:text-right">Prochain match</h2>
+                  {renderMatch(next, { layout: "next" })}
+                </section>
+              )}
+              {!top && !next && <p className="card text-sm text-neutral-700">Le calendrier est en attente de nouvelles rencontres.</p>}
+            </div>
+          </>
+        ) : (
+          <>
         {top && (
           <section className="space-y-3" data-tour={live ? "top-match" : undefined}>
             <h2 className="text-xs font-bold uppercase tracking-wide text-noir">{live ? "Match en cours" : "Match terminé"}</h2>
@@ -676,6 +711,8 @@ export default async function HomePage() {
           </section>
         ) : (
           !top && <p className="card text-sm text-neutral-700">Le calendrier est en attente de nouvelles rencontres.</p>
+        )}
+          </>
         )}
 
         <section className="space-y-3" data-tour="calendar">
