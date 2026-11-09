@@ -265,6 +265,7 @@ export function PredictionSheet(props: {
             <div className="space-y-3">
               <h4 className="font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Les bonus</h4>
               <p className="text-sm text-neutral-600">Facultatif · une spécialité par match et par ligue.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
               {BONUS_KINDS.map((k) => {
                 const applied = props.leagues.filter((l) => perLeague[l.id] === k);
                 const needsScorer = k === "GALETTE_SAUCISSE" && (scorer === "" || scorer === NO_SCORER);
@@ -274,15 +275,15 @@ export function PredictionSheet(props: {
                     type="button"
                     disabled={needsScorer && applied.length === 0}
                     onClick={() => openPopup(k)}
-                    className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors enabled:hover:border-rouge enabled:hover:bg-rouge/5 disabled:opacity-40 ${
-                      applied.length ? "border-rouge bg-rouge/10" : "border-neutral-200"
+                    className={`flex h-full w-full items-center gap-3 rounded-2xl border-2 bg-[#111111] p-3 text-left text-white transition-colors enabled:hover:border-rouge disabled:opacity-40 ${
+                      applied.length ? "border-rouge" : "border-[#111111]"
                     }`}
                   >
                     <BonusIcon kind={k} size={48} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{BONUS_INFO[k].name}</span>
-                      <span className="block text-xs text-neutral-600">{BONUS_INFO[k].effect}</span>
-                      {needsScorer && <span className="block text-xs text-orange-700">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      <span className="block text-xs text-neutral-300">{BONUS_INFO[k].effect}</span>
+                      {needsScorer && <span className="block text-xs text-orange-300">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
                       {applied.length > 0 && (
                         <span className="mt-1 flex flex-wrap gap-1">
                           {applied.map((l) => (
@@ -296,6 +297,7 @@ export function PredictionSheet(props: {
                   </button>
                 );
               })}
+              </div>
 
             </div>
           ) : (
