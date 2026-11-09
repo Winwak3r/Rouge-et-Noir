@@ -106,6 +106,10 @@
   .hicon {
     @apply grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-[#111111] ring-1 ring-neutral-300 sm:h-6 sm:w-6;
   }
+  /* Bouton vert « Créer / Rejoindre une ligue » */
+  .hbtn-green {
+    @apply inline-flex h-7 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded bg-green-600 px-2 text-[11px] font-semibold text-white transition-colors hover:bg-green-700 focus-visible:outline-2 focus-visible:outline-noir sm:h-8 sm:px-2.5 sm:text-[13px];
+  }
   .hbtn-pseudo {
     @apply inline-flex h-7 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded bg-rouge px-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-rouge-fonce focus-visible:outline-2 focus-visible:outline-noir sm:h-8 sm:px-2.5 sm:text-[13px];
   }

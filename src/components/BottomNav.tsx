@@ -47,7 +47,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
         {/* 1. Actus : actualités du Stade Rennais (infos, transferts, classements, effectif) */}
         {item(
           "/actus",
-          "Infos",
+          "La Zone",
           props.rennesLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={props.rennesLogo} alt="" className="h-6 w-6 object-contain" />
@@ -94,17 +94,17 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
           <span className={`mt-0.5 text-[10px] font-semibold ${on("/") ? "text-rouge" : "text-neutral-600"}`}>Pronos</span>
         </Link>
 
-        {/* 4. Créer ou rejoindre une ligue */}
+        {/* 4. Règles du jeu */}
         {item(
-          "/ligues/nouvelle",
-          "Créer/Rejoindre",
+          "/regles",
+          "Règles",
           icon(
             <>
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 8v8M8 12h8" />
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </>,
           ),
-          "join",
+          "rules",
         )}
 
         {/* 5. Mon compte */}

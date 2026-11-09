@@ -36,7 +36,7 @@ export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: 
               window.scrollTo({ top: 0, behavior: "smooth" });
               window.history.replaceState(window.history.state, "", `?onglet=${t.key}`);
             }}
-            style={{ fontSize: "clamp(11px, 3.3vw, 15px)" }}
+            style={{ fontSize: "clamp(10px, 2.9vw, 13px)" }}
             className={`flex min-h-12 items-center justify-center px-2 py-1.5 text-center font-bold leading-tight transition-colors ${
               tab === t.key ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
