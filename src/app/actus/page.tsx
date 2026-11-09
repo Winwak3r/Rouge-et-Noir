@@ -10,11 +10,15 @@ import { ageOn, nationalityFr } from "@/lib/nationality";
 import { fetchOfficialTransfers, transferTypeLabel, type TransferItem } from "@/lib/transfers";
 import { PageTitle } from "@/components/PageTitle";
 
-export const metadata: Metadata = { title: "Actualités du SRFC" };
+export const metadata: Metadata = { title: "La zone mixte" };
 export const revalidate = 600;
 
 // Billetterie officielle du club (accès depuis le site du club)
 const TICKETS_URL = process.env.CLUB_TICKETS_URL || "https://billetterie.staderennais.com/fr/";
+const SHOP_URL = process.env.CLUB_SHOP_URL || "https://boutique.staderennais.com";
+// Pages du site officiel (adresses exactes réglables sans toucher au code)
+const WOMEN_URL = process.env.CLUB_WOMEN_URL || "https://www.staderennais.com";
+const BOUGE_URL = process.env.CLUB_BOUGE_URL || "https://www.staderennais.com";
 const T = "font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 const ago = (d: Date | null) => {
   if (!d) return "";
@@ -177,45 +181,67 @@ async function Squad() {
   );
 }
 
+/** « Voir plus… » : blocs en grille 2 × 2. */
+function MoreLinks() {
+  const items: Array<{ title: string; text: string; href: string; external: boolean; icon: string }> = [
+    { title: "Effectif pro", text: "Joueurs, âges, nationalités, formés au club", href: "/actus?onglet=effectif", external: false, icon: "👕" },
+    { title: "Féminines", text: "L’équipe féminine, sur le site officiel", href: WOMEN_URL, external: true, icon: "⚽" },
+    { title: "Bouge !", text: "Le programme sport-santé du Stade Rennais", href: BOUGE_URL, external: true, icon: "🏃" },
+    { title: "Boutique officielle", text: "Maillots et produits officiels", href: SHOP_URL, external: true, icon: "🛍️" },
+    { title: "Billetterie", text: "Places pour les matchs au Roazhon Park", href: TICKETS_URL, external: true, icon: "🎟️" },
+  ];
+  return (
+    <ul className="grid grid-cols-2 gap-3">
+      {items.map((it) => (
+        <li key={it.title}>
+          <a
+            href={it.href}
+            {...(it.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            className="card flex h-full flex-col gap-1 p-4 transition-colors hover:border-rouge"
+          >
+            <span aria-hidden className="text-2xl">
+              {it.icon}
+            </span>
+            <span className="font-display text-lg font-bold uppercase tracking-wide text-rouge">
+              {it.title} {it.external && <span aria-hidden className="text-sm">↗</span>}
+            </span>
+            <span className="text-xs text-neutral-600">{it.text}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default async function ActusPage({ searchParams }: { searchParams: Promise<{ onglet?: string }> }) {
   const { onglet } = await searchParams;
   const [news, official] = await Promise.all([fetchNews().catch(() => null), fetchOfficialTransfers().catch(() => null)]);
   return (
     <div className="space-y-6">
-      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Actualités du SRFC</PageTitle>
+      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">La zone mixte</PageTitle>
       <PageTabs
         initial={onglet}
         tabs={[
           { key: "actus", label: "Actus", content: <NewsList items={news} empty="Pas d’actualité sur le Stade Rennais cette semaine." /> },
-          { key: "transferts", label: "Transferts", content: <Transfers official={official} /> },
           { key: "classements", label: "Classements", content: <OfficialStandings /> },
-          { key: "effectif", label: "Effectif", content: <Squad /> },
+          { key: "transferts", label: "Transfert", content: <Transfers official={official} /> },
+          { key: "plus", label: "Voir plus…", content: <MoreLinks /> },
+          // Atteint depuis « Voir plus… » (absent de la barre d'onglets)
+          {
+            key: "effectif",
+            label: "Effectif pro",
+            hidden: true,
+            content: (
+              <div className="space-y-3">
+                <a href="/actus?onglet=plus" className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-600 hover:text-rouge">
+                  ‹ Voir plus…
+                </a>
+                <Squad />
+              </div>
+            ),
+          },
         ]}
       />
-      {/* Le club en ligne */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <a href="https://www.staderennais.com" target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 font-semibold hover:border-neutral-400">
-          <span>
-            Site officiel du club
-            <span className="block text-xs font-normal text-neutral-500">staderennais.com</span>
-          </span>
-          <span aria-hidden>↗</span>
-        </a>
-        <a href="https://boutique.staderennais.com" target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 font-semibold hover:border-neutral-400">
-          <span>
-            Boutique officielle
-            <span className="block text-xs font-normal text-neutral-500">boutique.staderennais.com</span>
-          </span>
-          <span aria-hidden>↗</span>
-        </a>
-        <a href={TICKETS_URL} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 font-semibold hover:border-neutral-400">
-          <span>
-            Billetterie
-            <span className="block text-xs font-normal text-neutral-500">Places pour les matchs au Roazhon Park</span>
-          </span>
-          <span aria-hidden>↗</span>
-        </a>
-      </div>
       <p className="text-xs text-neutral-500">
         Actualités : Bing et Google Actualités (les articles s’ouvrent sur le site de leur média). Transferts officiels : API-Football. Classements :
         ESPN.

@@ -47,7 +47,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
         {/* 1. Actus : actualités du Stade Rennais (infos, transferts, classements, effectif) */}
         {item(
           "/actus",
-          "Actus",
+          "Infos",
           props.rennesLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={props.rennesLogo} alt="" className="h-6 w-6 object-contain" />
@@ -77,7 +77,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
           onClick={() => setNavDirection(path, "/")}
           data-tour="calendar"
           aria-current={on("/") ? "page" : undefined}
-          aria-label="Matchs & Pronos"
+          aria-label="Pronos"
           className="flex flex-col items-center"
         >
           <span
@@ -91,13 +91,13 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
               <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" strokeWidth="2.6" />
             </svg>
           </span>
-          <span className={`mt-0.5 text-[10px] font-semibold ${on("/") ? "text-rouge" : "text-neutral-600"}`}>Matchs &amp; Pronos</span>
+          <span className={`mt-0.5 text-[10px] font-semibold ${on("/") ? "text-rouge" : "text-neutral-600"}`}>Pronos</span>
         </Link>
 
         {/* 4. Créer ou rejoindre une ligue */}
         {item(
           "/ligues/nouvelle",
-          "Créer / Rejoindre",
+          "Créer/Rejoindre",
           icon(
             <>
               <circle cx="12" cy="12" r="9" />

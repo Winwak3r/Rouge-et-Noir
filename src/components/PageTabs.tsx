@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 
 /** Onglets de page, de même largeur, sans arrondi (comme sur la page d'un match). */
-export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: string; content: ReactNode }>; initial?: string }) {
+export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: string; content: ReactNode; hidden?: boolean }>; initial?: string }) {
   const [tab, setTab] = useState(tabs.some((t) => t.key === initial) ? initial! : tabs[0].key);
   // Barre d'onglets figée juste sous l'en-tête du site (dont la hauteur varie selon l'écran)
   const [top, setTop] = useState(0);
@@ -21,9 +21,11 @@ export function PageTabs({ tabs, initial }: { tabs: Array<{ key: string; label: 
       <div
         role="tablist"
         className="sticky z-20 grid divide-x divide-neutral-200 border-y border-neutral-200 shadow-sm"
-        style={{ top: `calc(${top}px + var(--page-bar-h, 0px))`, transition: "top 300ms", gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        style={{ top: `calc(${top}px + var(--page-bar-h, 0px))`, transition: "top 300ms", gridTemplateColumns: `repeat(${tabs.filter((t) => !t.hidden).length}, minmax(0, 1fr))` }}
       >
-        {tabs.map((t) => (
+        {tabs
+          .filter((t) => !t.hidden)
+          .map((t) => (
           <button
             key={t.key}
             type="button"

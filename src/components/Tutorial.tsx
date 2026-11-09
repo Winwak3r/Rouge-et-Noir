@@ -51,8 +51,8 @@ const STEPS: Step[] = [
     group: 5,
     page: "home",
     target: "standings",
-    title: "Les actus du SRFC",
-    text: "Toute l’actualité du Stade Rennais FC : les infos, les transferts, les classements officiels, l’effectif complet, et les liens vers le site et la boutique du club.",
+    title: "La zone mixte",
+    text: "Toute l’actualité du Stade Rennais FC : les infos, les classements officiels, les transferts, et plus encore (effectif, féminines, Bouge !, boutique et billetterie).",
   },
   {
     group: 6,

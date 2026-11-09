@@ -175,7 +175,7 @@ export async function Header() {
               </span>
               <span className="max-[359px]:hidden">Règles</span>
             </Link>
-            <Link href="/actus" aria-label="Actualités du Stade Rennais" data-tour="standings" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
+            <Link href="/actus" aria-label="La zone mixte : actualités du Stade Rennais" data-tour="standings" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon bg-white">
                 {rennesLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -190,7 +190,7 @@ export async function Header() {
                 <rect x="2" y="11" width="6" height="10" rx="1" />
                 <rect x="16" y="14" width="6" height="7" rx="1" />
               </svg>
-              <span className="hidden sm:inline">Actus SRFC</span>
+              <span className="hidden sm:inline">Zone mixte</span>
             </Link>
             <ThemeSwitch className="hidden sm:inline-flex" />
           </nav>
