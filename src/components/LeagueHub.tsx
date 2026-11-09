@@ -67,7 +67,7 @@ export function LeagueHub(props: {
       <div ref={sentinel} aria-hidden className="h-px" />
       <div
         ref={barRef}
-        className={`sticky z-20 left-1/2 w-screen -translate-x-1/2 transition-colors duration-300 ${
+        className={`sticky z-20 mx-[calc(50%-50vw)] transition-colors duration-300 ${
           stuck ? "border-b border-neutral-200 bg-[var(--header-bg)] shadow-sm" : ""
         }`}
         style={{ top }}
