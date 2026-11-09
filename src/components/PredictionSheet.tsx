@@ -32,6 +32,8 @@ export function PredictionSheet(props: {
   lineupPublished: boolean;
   savedScorerOut: string | null;
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
+  /** Nombre de chaque spécialité par saison (dans chaque ligue) */
+  quotas: BonusQuotas;
   /** Mes ligues : un bonus peut s'appliquer à une ou plusieurs d'entre elles */
   leagues: Array<{ id: string; name: string; stock: BonusQuotas; current: { kind: BonusKind } | null }>;
   prematch: ReactNode;
@@ -131,7 +133,7 @@ export function PredictionSheet(props: {
   }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scoreBox = (value: string, set: (v: string) => void, name: string, label: string) => (
-    <label className="relative">
+    <label className="relative block">
       <span className="sr-only">Buts {label}</span>
       <select
         name={name}
@@ -149,6 +151,16 @@ export function PredictionSheet(props: {
           </option>
         ))}
       </select>
+      {name === "rennesGoals" && (chosen || scorer === NO_SCORER) && (
+        <span className="pointer-events-none absolute -bottom-2 -right-2">
+          <PlayerPhoto
+            name={chosen ? chosen.name : "Aucun buteur rennais"}
+            url={chosen ? (chosen.photo ?? null) : "/brand/aucun-buteur.png"}
+            size={compact ? 20 : 28}
+            className="ring-2 ring-[var(--header-bg)]"
+          />
+        </span>
+      )}
     </label>
   );
   const team = (t: Side, side: "home" | "away") => {
@@ -282,7 +294,7 @@ export function PredictionSheet(props: {
                     <BonusIcon kind={k} size={48} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{BONUS_INFO[k].name}</span>
-                      <span className="block text-xs text-neutral-300">{BONUS_INFO[k].effect}</span>
+                      <span className="block text-xs text-white/80">{BONUS_INFO[k].effect}</span>
                       {needsScorer && <span className="block text-xs text-orange-300">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
                       {applied.length > 0 && (
                         <span className="mt-1 flex flex-wrap gap-1">
@@ -412,7 +424,15 @@ export function PredictionSheet(props: {
                         className="h-5 w-5 accent-[#e1001a]"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate font-semibold">{l.name}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="truncate font-semibold">{l.name}</span>
+                          <span
+                            title="Spécialités restantes cette saison dans cette ligue"
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${l.stock[popup] > 0 ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-500"}`}
+                          >
+                            {l.stock[popup]}/{props.quotas[popup]}
+                          </span>
+                        </span>
                         {empty ? (
                           <span className="block text-xs font-semibold text-neutral-500">⛔ Plus de bonus disponible</span>
                         ) : other && checked ? (

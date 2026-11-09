@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { TeamLabel } from "./TeamLabel";
+import { teamAbbr } from "@/lib/team-abbr";
 
 type Side = { name: string; logo: string | null; rennes: boolean };
 
@@ -86,11 +86,11 @@ export function HomeStickyMatch(props: {
         </span>
         {/* Le match */}
         <span className="flex min-w-0 flex-1 items-center justify-center gap-1.5 font-semibold">
-          <TeamLabel name={props.home.name} rennes={props.home.rennes} className="truncate" />
+          <span className="font-display text-base font-bold uppercase tracking-wide">{teamAbbr(props.home.name)}</span>
           {logo(props.home)}
           <span className="shrink-0 px-1 font-club text-base font-semibold tabular-nums">{props.score ?? "–"}</span>
           {logo(props.away)}
-          <TeamLabel name={props.away.name} rennes={props.away.rennes} className="truncate" />
+          <span className="font-display text-base font-bold uppercase tracking-wide">{teamAbbr(props.away.name)}</span>
         </span>
         {/* Statut */}
         <span

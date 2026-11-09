@@ -199,6 +199,17 @@ export function LeagueHub(props: {
                 <div role="tablist" aria-label="Ligue affichée" className="ml-1 flex min-w-0 gap-1.5 overflow-x-auto sm:gap-2">
                   {leagueButtons(true)}
                 </div>
+                <a
+                  href="/ligues/nouvelle"
+                  aria-label="Créer ou rejoindre une ligue"
+                  title="Créer ou rejoindre une ligue"
+                  tabIndex={showBar ? 0 : -1}
+                  className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-full bg-green-600 text-white shadow-sm transition-colors hover:bg-green-700"
+                >
+                  <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </a>
               </div>
             </div>
             {sel !== "general" && (

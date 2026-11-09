@@ -1,6 +1,6 @@
 // Données de la page d'un match à pronostiquer (/match/[id]) : formulaire, ligues et bonus, composition.
 import { prisma } from "@/lib/db";
-import { bonusStock } from "@/lib/bonus-data";
+import { bonusQuotas, bonusStock } from "@/lib/bonus-data";
 import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { formatDateTime, formatShortNumeric } from "@/lib/dates";
@@ -62,9 +62,10 @@ export async function loadMatchSheet(matchId: string, userId: string) {
         .map((p) => ({ id: p.id, name: p.name, position: p.position, photo: playerPhotoUrl(p), number: p.shirtNumber, starter: lineupOf.get(p.id)! }))
     : [];
 
-  const [stocks, uses] = await Promise.all([
+  const [stocks, uses, quotas] = await Promise.all([
     Promise.all(memberships.map((m) => bonusStock(userId, m.league.id, match.seasonId))),
     prisma.bonusUse.findMany({ where: { userId, matchId } }),
+    bonusQuotas(),
   ]);
   const code =
     match.competition === "COUPE_DE_FRANCE"
@@ -90,6 +91,7 @@ export async function loadMatchSheet(matchId: string, userId: string) {
       lineupPublished: Boolean(lineupOf),
       savedScorerOut: lineupOf && my?.scorerId && !lineupOf.has(my.scorerId) ? (my.scorer?.name ?? "Ton buteur") : null,
       initial: my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null,
+      quotas,
       leagues: memberships.map((m, i) => {
         const cur = uses.find((u) => u.leagueId === m.league.id);
         const stock = stocks[i];
