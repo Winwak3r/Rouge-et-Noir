@@ -60,6 +60,7 @@ export function StandingsBoard({
   logos,
   forcedKey,
   hideSelector = false,
+  hideHeading = false,
 }: {
   views: BoardView[];
   initial: string;
@@ -68,6 +69,8 @@ export function StandingsBoard({
   /** Vue imposée par la page (sélecteur externe) */
   forcedKey?: string;
   hideSelector?: boolean;
+  /** Masquer l'image et le nom de la ligue au-dessus du tableau */
+  hideHeading?: boolean;
 }) {
   const [key, setKey] = useState(initial);
   // Compétitions cochées, par vue (toutes celles de la vue au départ)
@@ -155,10 +158,12 @@ export function StandingsBoard({
       )}
       <div className="overflow-hidden">
         <div key={`${view.key}-${changes.current}`} className={`space-y-3 ${direction === "right" ? "slide-from-right" : direction === "left" ? "slide-from-left" : ""}`}>
-          <h2 className="flex items-center gap-3 font-display text-2xl font-bold uppercase tracking-wide">
-            {icon(view, 36)}
-            {view.name}
-          </h2>
+          {!hideHeading && (
+            <h2 className="flex items-center gap-3 font-display text-2xl font-bold uppercase tracking-wide">
+              {icon(view, 36)}
+              {view.name}
+            </h2>
+          )}
           {/* Compétitions jouées : cocher / décocher pour recalculer le classement */}
           {/* Mobile : les cases sous l'intitulé ; ordinateur : sur la même ligne */}
           <fieldset className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">

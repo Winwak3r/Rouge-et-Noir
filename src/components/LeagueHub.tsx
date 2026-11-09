@@ -137,7 +137,6 @@ export function LeagueHub(props: {
     <div className="space-y-4">
       {/* Ligne des ligues (dans la page) */}
       <div ref={barMark} className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-sm font-semibold text-neutral-600">Mes Ligues :</span>
         <div role="tablist" aria-label="Ligue affichée" className="flex flex-wrap gap-2">
           {leagueButtons(false)}
         </div>
@@ -147,7 +146,10 @@ export function LeagueHub(props: {
         // Général R&N : l'information au-dessus, le classement en pleine largeur
         <div className="space-y-4">
           {props.panels.general}
-          <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector me={props.me} logos={props.logos} />
+          <div>
+            <h2 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Classement</h2>
+            <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -157,9 +159,13 @@ export function LeagueHub(props: {
           </div>
           {/* Ordinateur : infos à gauche (plus étroit), classement à droite (plus large) ; mobile : l'un ou l'autre */}
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-            <div className={`min-w-0 ${mTab === "info" ? "" : "hidden lg:block"}`}>{props.panels[sel]}</div>
+            <div className={`min-w-0 ${mTab === "info" ? "" : "hidden lg:block"}`}>
+              <h2 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Infos de la ligue</h2>
+              {props.panels[sel]}
+            </div>
             <div className={`min-w-0 ${mTab === "rank" ? "" : "hidden lg:block"}`}>
-              <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector me={props.me} logos={props.logos} />
+              <h2 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Classement</h2>
+              <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />
             </div>
           </div>
         </div>

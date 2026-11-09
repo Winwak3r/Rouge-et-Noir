@@ -54,7 +54,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
             <div className="flex items-start gap-3">
               <LeagueAvatar leagueId={l.id} name={l.name} at={l.imageUpdatedAt?.getTime() ?? null} size={64} />
               <div className="min-w-0 space-y-1">
-                <p className="text-lg font-bold leading-tight">{l.name}</p>
+                <p className="text-lg font-bold uppercase leading-tight tracking-wide">{l.name}</p>
                 {l.description && <p className="text-sm text-neutral-600">{l.description}</p>}
                 <p className="text-xs text-neutral-500">
                   {l._count.members} joueur{l._count.members > 1 ? "s" : ""} · {admin ? "Administrateur" : "Membre"}
