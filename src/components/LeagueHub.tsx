@@ -85,12 +85,13 @@ export function LeagueHub(props: {
         </div>
       </div>
 
-      {/* Ordinateur : deux blocs côte à côte (50 / 50) ; mobile : l'un sous l'autre */}
-      <div className="grid items-start gap-4 lg:grid-cols-2">
+      {/* Ligue : infos à gauche (plus étroit), classement à droite (plus large). Général R&N : info au-dessus,
+          classement en pleine largeur. Mobile : l'un sous l'autre. */}
+      <div className={`grid items-start gap-4 ${sel === "general" ? "" : "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"}`}>
+        <div className="min-w-0">{props.panels[sel]}</div>
         <div className="min-w-0">
           <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector me={props.me} logos={props.logos} />
         </div>
-        <div className="min-w-0">{props.panels[sel]}</div>
       </div>
     </div>
   );
