@@ -21,9 +21,20 @@ export function LeagueHub(props: {
   const [sel, setSel] = useState(props.views.some((v) => v.key === props.initial) ? props.initial : props.views[0]?.key);
   const [top, setTop] = useState(0);
   const [stuck, setStuck] = useState(false);
-  // Volet « Infos de la ligue » : replié par défaut
-  const [infoOpen, setInfoOpen] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
+  // Mobile : « Classement » ou « Infos de ligue » (deux boutons épinglés sous la barre des ligues)
+  const [mTab, setMTab] = useState<"rank" | "info">("rank");
+  const barRef = useRef<HTMLDivElement>(null);
+  const [barH, setBarH] = useState(0);
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) return;
+    const measure = () => setBarH(el.getBoundingClientRect().height);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const router = useRouter();
   const back = () => {
     const fromSite = document.referrer.startsWith(window.location.origin);
@@ -55,6 +66,7 @@ export function LeagueHub(props: {
     <div className="space-y-4">
       <div ref={sentinel} aria-hidden className="h-px" />
       <div
+        ref={barRef}
         className={`sticky z-20 left-1/2 w-screen -translate-x-1/2 transition-colors duration-300 ${
           stuck ? "border-b border-neutral-200 bg-[var(--header-bg)] shadow-sm" : ""
         }`}
@@ -89,17 +101,19 @@ export function LeagueHub(props: {
                 role="tab"
                 aria-selected={on}
                 onClick={() => setSel(v.key)}
-                className={`inline-flex items-center gap-2 rounded-md border py-1 pl-1 pr-3 text-sm font-semibold transition-colors ${
+                title={v.name}
+                aria-label={v.name}
+                className={`inline-flex items-center gap-2 rounded-md border py-1 pl-1 text-sm font-semibold transition-colors ${stuck ? "pr-1 sm:pr-3" : "pr-3"} ${
                   on ? "border-rouge bg-rouge text-white" : "border-neutral-300 bg-[var(--color-surface)] hover:border-neutral-500"
                 }`}
               >
                 {v.key === "general" ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src="/icon-192.png" alt="" className="h-7 w-7 rounded" />
+                  <img src="/icon-192.png" alt="" className="h-7 w-7 rounded-md" />
                 ) : (
-                  <LeagueAvatar leagueId={v.key} name={v.name} at={v.imageAt} size={28} />
+                  <LeagueAvatar leagueId={v.key} name={v.name} at={v.imageAt} size={28} className="rounded-md" />
                 )}
-                {v.name}
+                <span className={stuck ? "hidden sm:inline" : ""}>{v.name}</span>
               </button>
             );
           })}
@@ -114,46 +128,37 @@ export function LeagueHub(props: {
           <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector me={props.me} logos={props.logos} />
         </div>
       ) : (
-        <div
-          className={`grid items-start gap-4 transition-[grid-template-columns] duration-300 ${
-            infoOpen ? "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]" : "lg:grid-cols-[3rem_minmax(0,1fr)]"
-          }`}
-        >
-          {infoOpen ? (
-            <div className="min-w-0 space-y-2">
+        // Ligue : infos à gauche (plus étroit), classement à droite (plus large) ; mobile : l'un ou l'autre
+        <div className="space-y-3">
+          <div
+            role="tablist"
+            className="sticky z-[19] -mx-4 grid grid-cols-2 divide-x divide-neutral-200 border-y border-neutral-200 lg:hidden"
+            style={{ top: top + barH }}
+          >
+            {(
+              [
+                ["rank", "Classement"],
+                ["info", "Infos de ligue"],
+              ] as const
+            ).map(([k, label]) => (
               <button
+                key={k}
                 type="button"
-                onClick={() => setInfoOpen(false)}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-600 hover:text-rouge"
+                role="tab"
+                aria-selected={mTab === k}
+                onClick={() => setMTab(k)}
+                className={`py-2.5 text-sm font-bold transition-colors ${mTab === k ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-600"}`}
               >
-                <span aria-hidden>‹</span> Replier les infos de la ligue
+                {label}
               </button>
-              {props.panels[sel]}
-            </div>
-          ) : (
-            // Volet rangé : onglet vertical sur ordinateur, bouton sur mobile
-            <button
-              type="button"
-              onClick={() => setInfoOpen(true)}
-              aria-expanded={false}
-              title="Afficher les infos de la ligue"
-              className="group flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 bg-[var(--color-surface)] px-3 py-2.5 text-sm font-semibold text-neutral-600 transition-colors hover:border-rouge hover:text-rouge lg:min-h-72 lg:flex-col lg:px-0 lg:py-4"
-            >
-              <span aria-hidden className="grid h-7 w-7 place-items-center rounded-full bg-rouge text-white transition-transform group-hover:translate-x-0.5">
-                ›
-              </span>
-              <span className="lg:[writing-mode:vertical-rl] lg:rotate-180">Infos, gestion et invitations de la ligue</span>
-            </button>
-          )}
-          <div className="min-w-0 space-y-2">
-            {!infoOpen && (
-              <p className="hidden items-center gap-1.5 text-xs text-neutral-500 lg:flex">
-                <span aria-hidden className="animate-pulse text-rouge">←</span>
-                Clique sur le volet à gauche pour voir les infos de la ligue, la gérer, tes spécialités restantes et l’invitation.
-              </p>
-            )}
+            ))}
+          </div>
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className={`min-w-0 ${mTab === "info" ? "" : "hidden lg:block"}`}>{props.panels[sel]}</div>
+          <div className={`min-w-0 ${mTab === "rank" ? "" : "hidden lg:block"}`}>
             <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector me={props.me} logos={props.logos} />
           </div>
+        </div>
         </div>
       )}
     </div>
