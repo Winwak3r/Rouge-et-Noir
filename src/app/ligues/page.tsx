@@ -1,146 +1,161 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
+import QRCode from "qrcode";
 import { setDefaultLeagueAction } from "@/app/actions/leagues";
-import { LeagueAvatar } from "@/components/LeagueAvatar";
-import { CompetitionBadge } from "@/components/CompetitionBadge";
-import { COMPETITIONS } from "@/lib/competitions";
-import { CreateLeagueForm, JoinLeagueForm, LeaveLeagueForm } from "@/components/LeagueForms";
-import { requireUser } from "@/lib/auth/session";
-import { myLeagues } from "@/lib/leagues";
-import { getLeagueLogos } from "@/lib/league-logos";
-import { MAX_LEAGUES, canJoinAnother } from "@/lib/league-rules";
-import { prisma } from "@/lib/db";
-import { bonusStock } from "@/lib/bonus-data";
 import { BonusIcon } from "@/components/BonusIcon";
-import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
+import { CompetitionBadge } from "@/components/CompetitionBadge";
+import { InviteBox } from "@/components/LeagueAdminForms";
+import { LeagueAvatar } from "@/components/LeagueAvatar";
+import { CreateLeagueForm, JoinLeagueForm, LeaveLeagueForm } from "@/components/LeagueForms";
+import { LeagueHub } from "@/components/LeagueHub";
 import { PageTitle } from "@/components/PageTitle";
+import { requireUser } from "@/lib/auth/session";
+import { bonusStock } from "@/lib/bonus-data";
+import { loadBoard } from "@/lib/board-data";
+import { prisma } from "@/lib/db";
+import { appUrl } from "@/lib/email";
+import { MAX_LEAGUES, canJoinAnother } from "@/lib/league-rules";
+import { myLeagues } from "@/lib/leagues";
+import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
 
-export const metadata: Metadata = { title: "Ligues" };
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Mes Ligues" };
 
-export default async function MyLeaguesPage({ searchParams }: { searchParams: Promise<{ rejoint?: string; invitation?: string }> }) {
+const H = "font-display text-lg font-bold uppercase tracking-wide text-rouge";
+
+/** « Mes Ligues » : classement de la ligue choisie + ses infos, gestion, spécialités restantes et invitation. */
+export default async function MyLeaguesPage({ searchParams }: { searchParams: Promise<{ rejoint?: string; invitation?: string; vue?: string }> }) {
   const user = await requireUser();
   const q = await searchParams;
-  const [leagues, logos, season] = await Promise.all([
+  const [leagues, board, season] = await Promise.all([
     myLeagues(user.id),
-    getLeagueLogos(),
+    loadBoard(q.vue),
     prisma.season.findFirst({ where: { isCurrent: true }, select: { id: true } }),
   ]);
-  // « Les Spécialités Maison » restantes cette saison, dans chaque ligue
-  const stocks = season ? await Promise.all(leagues.map((m) => bonusStock(user.id, m.leagueId, season.id))) : [];
+  const active = leagues.filter((m) => m.isActive);
   const canAdd = canJoinAnother(leagues.length);
+
+  // Panneau d'infos de chaque ligue (à droite du classement)
+  const panels: Record<string, ReactNode> = {};
+  await Promise.all(
+    active.map(async (m) => {
+      const l = m.league;
+      const admin = m.role === "ADMIN";
+      const url = appUrl(`/rejoindre/${l.inviteCode}`);
+      const [stock, qrSvg, qrPng] = await Promise.all([
+        season ? bonusStock(user.id, l.id, season.id) : null,
+        admin ? QRCode.toString(url, { type: "svg", margin: 1, errorCorrectionLevel: "M" }) : "",
+        admin ? QRCode.toDataURL(url, { width: 600, margin: 2, errorCorrectionLevel: "M" }) : "",
+      ]);
+      const isDefault = user.activeLeagueId === l.id;
+      panels[l.id] = (
+        <div className="space-y-4">
+          <section className="card space-y-3">
+            <div className="flex items-start gap-3">
+              <LeagueAvatar leagueId={l.id} name={l.name} at={l.imageUpdatedAt?.getTime() ?? null} size={64} />
+              <div className="min-w-0 space-y-1">
+                <p className="text-lg font-bold leading-tight">{l.name}</p>
+                {l.description && <p className="text-sm text-neutral-600">{l.description}</p>}
+                <p className="text-xs text-neutral-500">
+                  {l._count.members} joueur{l._count.members > 1 ? "s" : ""} · {admin ? "Administrateur" : "Membre"}
+                  {isDefault ? " · Ligue par défaut" : ""}
+                </p>
+                <span className="flex gap-1">
+                  {l.competitions.map((c) => (
+                    <CompetitionBadge key={c} code={c} logo={board.logos[c]} />
+                  ))}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {admin && (
+                <Link href={`/ligue?id=${l.id}`} className="btn-primary px-3 py-1.5 text-sm">
+                  Gérer ma ligue
+                </Link>
+              )}
+              {!isDefault && (
+                <form action={setDefaultLeagueAction}>
+                  <input type="hidden" name="leagueId" value={l.id} />
+                  <button className="btn-secondary px-3 py-1.5 text-sm">Définir par défaut</button>
+                </form>
+              )}
+              <LeaveLeagueForm leagueId={l.id} name={l.name} />
+            </div>
+          </section>
+
+          {stock && (
+            <section className="card space-y-2">
+              <h2 className={H}>Mes spécialités maison</h2>
+              <ul className="space-y-1.5">
+                {BONUS_KINDS.map((k) => (
+                  <li key={k} className="flex items-center gap-2 text-sm">
+                    <BonusIcon kind={k} size={30} />
+                    <span className="flex-1">{BONUS_INFO[k].name}</span>
+                    <span className={`font-bold tabular-nums ${stock[k] > 0 ? "text-green-700" : "text-neutral-400"}`}>{stock[k]} restant{stock[k] > 1 ? "s" : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="card space-y-2">
+            <h2 className={H}>Inviter des joueurs</h2>
+            {admin ? (
+              <InviteBox key={l.id} leagueId={l.id} url={url} code={l.inviteCode} qrSvg={qrSvg} qrPng={qrPng} />
+            ) : (
+              <div className="space-y-1 text-sm">
+                <p>
+                  Code d’invitation : <strong className="font-mono tracking-wider">{l.inviteCode}</strong>
+                </p>
+                <p className="break-all text-xs text-neutral-600">{url}</p>
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }),
+  );
+  panels.general = (
+    <section className="card space-y-2">
+      <p className="text-lg font-bold">Général R&amp;N</p>
+      <p className="text-sm text-neutral-600">
+        Tous les joueurs inscrits dans une ligue et ayant pronostiqué au moins un match, sur toute la saison. Les spécialités maison n’y
+        comptent pas.
+      </p>
+    </section>
+  );
 
   return (
     <div className="space-y-6">
-      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Ligues</PageTitle>
-      <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Mes ligues</h2>
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-sm font-bold tabular-nums ${leagues.length >= MAX_LEAGUES ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-700"}`}
-          title={`${MAX_LEAGUES} ligues au maximum`}
-        >
-          {leagues.length}/{MAX_LEAGUES}
-        </span>
-      </div>
-      <p className="text-sm text-neutral-600">
-        Tu peux participer à {MAX_LEAGUES} ligues au maximum, créées ou rejointes. La ligue « Par défaut » est celle affichée à chaque
-        connexion ; tu peux en consulter une autre à tout moment avec{" "}
-        <span className="sm:hidden">le bouton en bas à gauche de l’écran.</span>
-        <span className="hidden sm:inline">la liste « Ligue » en haut à gauche, sous ton pseudo.</span>
-      </p>
+      <PageTitle compactBar={false} className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">
+        Mes Ligues
+      </PageTitle>
       {q.rejoint && <p className="rounded-lg bg-green-100 px-3 py-2 text-sm text-green-800">Bienvenue dans la ligue « {q.rejoint} » !</p>}
-      {q.invitation === "invalide" && <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">Ce lien d’invitation n’est plus valable. Demande un nouveau lien à l’administrateur de la ligue.</p>}
-      {q.invitation === "suspendu" && <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">Ton accès à cette ligue a été suspendu par son administrateur.</p>}
-
-      {leagues.length === 0 ? (
-        <p className="card text-sm text-neutral-600">Tu n’es dans aucune ligue pour l’instant.</p>
-      ) : (
-        <ul className="space-y-2">
-          {leagues.map((m, i) => {
-            const stock = stocks[i];
-            const active = (user.activeLeagueId ?? leagues.find((x) => x.isActive)?.leagueId) === m.leagueId;
-            return (
-              <li key={m.leagueId} className={`card space-y-3 p-4 sm:flex sm:items-center sm:gap-3 sm:space-y-0 ${active ? "ring-2 ring-rouge" : ""}`}>
-                {/* Ligne 1 : logo et nom */}
-                <div className="flex min-w-0 items-center gap-3 sm:flex-1">
-                  <LeagueAvatar leagueId={m.leagueId} name={m.league.name} at={m.league.imageUpdatedAt?.getTime() ?? null} size={44} />
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{m.league.name}</p>
-                    {m.league.description && <p className="truncate text-xs italic text-neutral-600">{m.league.description}</p>}
-                    {/* Ligne 2 : joueurs et rôle */}
-                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500">
-                      <span>
-                        {m.league._count.members} joueur{m.league._count.members > 1 ? "s" : ""}
-                        {m.role === "ADMIN" && " · Administrateur"}
-                        {!m.isActive && " · accès suspendu"}
-                      </span>
-                      {/* Compétitions jouées dans la ligue */}
-                      <span className="inline-flex items-center gap-1" aria-label={`Compétitions : ${m.league.competitions.map((c) => COMPETITIONS[c].label).join(", ")}`}>
-                        {m.league.competitions.map((c) => (
-                          <span key={c} title={COMPETITIONS[c].label}>
-                            <CompetitionBadge code={c} logo={logos[c]} />
-                          </span>
-                        ))}
-                      </span>
-                    </p>
-                    {stock && (
-                      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-600" aria-label="Bonus restants cette saison">
-                        {BONUS_KINDS.map((k) => (
-                          <span key={k} className="inline-flex items-center gap-1" title={`${BONUS_INFO[k].name} : ${stock[k]} restant(s) cette saison`}>
-                            <BonusIcon kind={k} size={22} />
-                            <span className={`font-bold tabular-nums ${stock[k] > 0 ? "text-green-700" : "text-neutral-400"}`}>{stock[k]}</span>
-                            <span>{BONUS_INFO[k].name.replace(/^(Le|La) /, "")}</span>
-                          </span>
-                        ))}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {/* Ligne 3 : les boutons */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {active ? (
-                    <span className="rounded bg-rouge px-2 py-0.5 text-xs font-semibold text-white" title="Ligue affichée à chaque connexion">
-                      Par défaut
-                    </span>
-                  ) : (
-                    m.isActive && (
-                      <form action={setDefaultLeagueAction}>
-                        <input type="hidden" name="leagueId" value={m.leagueId} />
-                        <button className="btn-secondary px-3 py-1 text-xs">Définir par défaut</button>
-                      </form>
-                    )
-                  )}
-                  {m.role === "ADMIN" && m.isActive && (
-                    <Link href={`/ligue?id=${m.leagueId}`} className="btn-secondary px-3 py-1 text-xs">
-                      Gérer
-                    </Link>
-                  )}
-                  <LeaveLeagueForm leagueId={m.leagueId} name={m.league.name} />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+      {q.invitation === "invalide" && (
+        <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">Ce lien d’invitation n’est plus valable. Demande un nouveau lien à l’administrateur de la ligue.</p>
       )}
-
-      {!canAdd && (
-        <p className="rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-700">
-          Tu participes à {MAX_LEAGUES} ligues, le maximum : quittes-en une pour en rejoindre ou en créer une autre.
-        </p>
+      {q.invitation === "suspendu" && (
+        <p className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800">Ton accès à cette ligue a été suspendu par son administrateur.</p>
       )}
+      {active.length === 0 && <p className="card text-sm text-neutral-600">Tu n’es dans aucune ligue pour l’instant : voici le classement Général R&amp;N.</p>}
 
+      <LeagueHub views={board.views} initial={board.initial} me={board.me?.id ?? null} logos={board.logos} panels={panels} />
+
+      <p className="text-sm text-neutral-600">
+        {leagues.length}/{MAX_LEAGUES} ligues.{" "}
+        {canAdd ? "Tu peux encore en rejoindre ou en créer." : "Maximum atteint : quittes-en une pour en rejoindre ou en créer une autre."}
+      </p>
       {canAdd && (
-        <section className="card max-w-md space-y-2">
-          <h2 className="font-display text-xl font-bold uppercase tracking-wide">Rejoindre une ligue</h2>
-          <JoinLeagueForm />
-        </section>
-      )}
-
-      {canAdd && (
-        <section id="creer" className="card max-w-md scroll-mt-40 space-y-2">
-          <h2 className="font-display text-xl font-bold uppercase tracking-wide">Créer une ligue</h2>
-          <CreateLeagueForm logos={logos} />
-        </section>
+        <div className="grid gap-4 md:grid-cols-2">
+          <section className="card space-y-2">
+            <h2 className={H}>Rejoindre une ligue</h2>
+            <JoinLeagueForm />
+          </section>
+          <section id="creer" className="card scroll-mt-40 space-y-2">
+            <h2 className={H}>Créer une ligue</h2>
+            <CreateLeagueForm logos={board.logos} />
+          </section>
+        </div>
       )}
     </div>
   );

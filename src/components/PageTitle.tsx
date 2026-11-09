@@ -11,7 +11,15 @@ import { createPortal } from "react-dom";
  *    (sans le mot « Retour ») et le titre en plus petit, même police et même couleur.
  * La barre est posée par-dessus la page : elle ne déplace pas le contenu (pas de va-et-vient au défilement).
  */
-export function PageTitle({ children, className = "page-title" }: { children: ReactNode; className?: string }) {
+export function PageTitle({
+  children,
+  className = "page-title",
+  compactBar = true,
+}: {
+  children: ReactNode;
+  className?: string;
+  compactBar?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const ref = useRef<HTMLHeadingElement>(null);
@@ -79,13 +87,14 @@ export function PageTitle({ children, className = "page-title" }: { children: Re
             Retour
           </button>
         )}
-        <h1 ref={ref} className={`${className} transition-opacity duration-300 ${compact ? "opacity-0" : "opacity-100"}`}>
+        <h1 ref={ref} className={`${className} transition-opacity duration-300 ${compact && compactBar ? "opacity-0" : "opacity-100"}`}>
           {children}
         </h1>
       </div>
 
       {/* Barre compacte : flèche plus grosse et titre réduit, sous l'en-tête du site */}
       {mounted &&
+        compactBar &&
         createPortal(
       <div
         aria-hidden={!compact}

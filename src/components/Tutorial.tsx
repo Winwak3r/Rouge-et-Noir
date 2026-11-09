@@ -17,7 +17,7 @@ interface Step {
   scale?: boolean;
 }
 
-const GROUPS = 7;
+const GROUPS = 6;
 const STEPS: Step[] = [
   {
     group: 1,
@@ -33,31 +33,29 @@ const STEPS: Step[] = [
     title: "Les pronostics",
     text: "Ouvre un match du calendrier pour connaître les stats de la rencontre, pronostiquer le score, et un buteur rennais : plus il est improbable, plus il rapporte ! Si tu es gourmand, tu peux aussi goûter aux spécialités maison ! 😋",
   },
-  { group: 3, page: "home", target: "leagues", title: "Les ligues", text: "Crée une ligue, rejoins-en une avec un code et gère les tiennes." },
   {
-    group: 4,
+    group: 3,
     page: "home",
-    target: "rank",
-    mobileTarget: "rank-mobile",
-    title: "Les classements",
-    text: "Consulte le classement complet de la ligue sélectionnée.",
+    target: "leagues",
+    title: "Mes Ligues",
+    text: "Le classement de chacune de tes ligues, leurs infos et tes spécialités maison restantes. Crée une ligue, rejoins-en une avec un code, gère les tiennes et invite tes amis.",
   },
   {
-    group: 5,
+    group: 4,
     page: "home",
     target: "user-menu",
     title: "Ton compte",
     text: "Photo de profil, mot de passe, notifications, déconnexion… Tu peux tout gérer depuis cet espace.",
   },
   {
-    group: 6,
+    group: 5,
     page: "home",
     target: "standings",
     title: "Les actus du SRFC",
     text: "Toute l’actualité du Stade Rennais FC : les infos, les transferts, les classements officiels, l’effectif complet, et les liens vers le site et la boutique du club.",
   },
   {
-    group: 7,
+    group: 6,
     page: "home",
     target: "rules",
     title: "Les règles du jeu",

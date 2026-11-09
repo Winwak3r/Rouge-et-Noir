@@ -116,17 +116,7 @@ export async function Header() {
         {/* Compte à gauche, logo au centre, Règles et Classement à droite (mobile et ordinateur) */}
         <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:gap-x-4">
           <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
-            {user && (
-              <Link href="/regles" aria-label="Règles" data-tour="rules" className="hbtn sm:hidden">
-                <span className="hicon">
-                <svg aria-hidden viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                </svg>
-              </span>
-                Règles
-              </Link>
-            )}
+            
             {user ? (
               // Ordinateur : « Mon compte » (rouge, avec la photo) puis « Ligues »
               <div className="hidden items-center gap-2 sm:flex">
@@ -142,16 +132,7 @@ export async function Header() {
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                   </span>
-                  Ligues
-                </Link>
-                <Link href="/classement" data-tour="rank" className="hbtn">
-                  <span className="hicon">
-                    <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
-                      <path d="M17 6h3v1a4 4 0 0 1-3 3.87M7 6H4v1a4 4 0 0 0 3 3.87" />
-                    </svg>
-                  </span>
-                  Classements
+                  Mes Ligues
                 </Link>
               </div>
             ) : (

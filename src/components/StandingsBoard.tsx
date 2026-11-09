@@ -58,11 +58,16 @@ export function StandingsBoard({
   initial,
   me,
   logos,
+  forcedKey,
+  hideSelector = false,
 }: {
   views: BoardView[];
   initial: string;
   me: string | null;
   logos: Partial<Record<CompetitionCode, string>>;
+  /** Vue imposée par la page (sélecteur externe) */
+  forcedKey?: string;
+  hideSelector?: boolean;
 }) {
   const [key, setKey] = useState(initial);
   // Compétitions cochées, par vue (toutes celles de la vue au départ)
@@ -92,6 +97,10 @@ export function StandingsBoard({
     changes.current++;
     setKey(id);
   };
+  // Sélecteur externe (page Mes Ligues) : on suit la ligue choisie
+  useEffect(() => {
+    if (forcedKey) choose(forcedKey);
+  }, [forcedKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const view = views.find((v) => v.key === key) ?? views[0];
   const selected = picked[view.key] ?? view.competitions;
   const rows = useMemo(() => computeRows(view, selected), [view, selected]);
@@ -113,7 +122,7 @@ export function StandingsBoard({
   return (
     <div className="space-y-4">
       {/* Choix du classement à afficher : boutons sur ordinateur, liste déroulante sur mobile */}
-      {views.length > 1 && (
+      {views.length > 1 && !hideSelector && (
         <>
           <div role="tablist" aria-label="Classement à afficher" className="hidden flex-wrap gap-2 sm:flex">
             {views.map((v) => (

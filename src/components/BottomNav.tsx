@@ -57,10 +57,10 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
           "standings",
         )}
 
-        {/* 2. Ligues (rejoindre, créer, gérer) */}
+        {/* 2. Mes Ligues (classements, infos, gestion, invitations) */}
         {item(
           "/ligues",
-          "Ligues",
+          "Mes Ligues",
           icon(
             <>
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -94,17 +94,17 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
           <span className={`mt-0.5 text-[10px] font-semibold ${on("/") ? "text-rouge" : "text-neutral-600"}`}>Calendrier</span>
         </Link>
 
-        {/* 4. Classement des ligues du joueur */}
+        {/* 4. Règles du jeu */}
         {item(
-          "/classement",
-          "Classements",
+          "/regles",
+          "Règles",
           icon(
             <>
-              <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
-              <path d="M17 6h3v1a4 4 0 0 1-3 3.87M7 6H4v1a4 4 0 0 0 3 3.87" />
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </>,
           ),
-          "rank-mobile",
+          "rules",
         )}
 
         {/* 5. Mon compte */}
