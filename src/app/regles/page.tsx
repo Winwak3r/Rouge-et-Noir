@@ -22,7 +22,7 @@ export default async function RulesPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <PageTitle className="page-title">Règles du jeu</PageTitle>
+      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Règles du jeu</PageTitle>
 
       <section className="card space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le score</h2>

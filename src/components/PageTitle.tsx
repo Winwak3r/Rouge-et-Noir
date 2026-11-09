@@ -100,6 +100,7 @@ export function PageTitle({ children, className = "page-title" }: { children: Re
               {arrow(24)}
             </button>
           )}
+          {pathname !== "/" && <span aria-hidden className="h-6 w-px shrink-0 bg-neutral-300" />}
           <p className={`${className} !mb-0 truncate !text-xl sm:!text-2xl`}>{children}</p>
         </div>
       </div>,

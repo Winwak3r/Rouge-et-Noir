@@ -200,12 +200,13 @@ export async function Header() {
               </svg>
               <span className="hidden sm:inline">Actus SRFC</span>
             </Link>
+            <ThemeSwitch className="hidden sm:inline-flex" />
           </nav>
             <span className="hidden text-right text-[10px] leading-tight text-neutral-500 sm:inline sm:text-xs">
               Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
             </span>
-            {/* Interrupteur du thème sous la dernière synchro, tout à droite (mobile et ordinateur) */}
-            <ThemeSwitch className="inline-flex" />
+            {/* Mobile : interrupteur du thème en haut à droite (sur ordinateur, il est sur la ligne des boutons) */}
+            <ThemeSwitch className="inline-flex sm:hidden" />
           </div>
         </div>
       </div>
