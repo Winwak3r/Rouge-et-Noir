@@ -86,7 +86,7 @@ export function LeagueHub(props: {
           title={v.name}
           aria-label={v.name}
           onClick={() => setSel(v.key)}
-          className={`relative inline-flex shrink-0 items-center gap-2 rounded-md border py-1 pl-1 text-sm font-semibold transition-colors ${compact ? "pr-1 sm:pr-3" : "pr-3"} ${
+          className={`relative inline-flex shrink-0 items-center gap-2 rounded-md border py-1 pl-1 text-sm font-semibold transition-colors ${compact ? "pr-1 sm:pr-3" : "min-w-0 justify-center pr-3 sm:justify-start"} ${
             on ? "border-rouge bg-rouge text-white" : "border-neutral-300 bg-[var(--color-surface)] hover:border-neutral-500"
           }`}
         >
@@ -96,7 +96,7 @@ export function LeagueHub(props: {
           ) : (
             <LeagueAvatar leagueId={v.key} name={v.name} at={v.imageAt} size={28} className="rounded-md" />
           )}
-          <span className={compact ? "hidden sm:inline" : ""}>{v.name}</span>
+          <span className={compact ? "hidden sm:inline" : "truncate"}>{v.name}</span>
           {admin && (
             <span
               title="Tu es administrateur de cette ligue"
@@ -136,8 +136,15 @@ export function LeagueHub(props: {
   return (
     <div className="space-y-4">
       {/* Ligne des ligues (dans la page) */}
-      <div ref={barMark} className="flex flex-wrap items-center gap-2">
-        <div role="tablist" aria-label="Ligue affichée" className="flex flex-wrap gap-2">
+      {/* Mobile : 1 ou 2 ligues → une par ligne ; 3 → deux puis R&N en pleine largeur ; 4 → 2 × 2. Ordinateur : à la suite */}
+      <div ref={barMark}>
+        <div
+          role="tablist"
+          aria-label="Ligue affichée"
+          className={`grid gap-2 sm:flex sm:flex-wrap ${props.views.length <= 2 ? "grid-cols-1" : "grid-cols-2"} ${
+            props.views.length > 2 && props.views.length % 2 === 1 ? "[&>*:last-child]:col-span-2" : ""
+          }`}
+        >
           {leagueButtons(false)}
         </div>
       </div>
@@ -147,7 +154,7 @@ export function LeagueHub(props: {
         <div className="space-y-4">
           {props.panels.general}
           <div>
-            <h2 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Classement</h2>
+            <h2 className="hidden mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl lg:block">Classement</h2>
             <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />
           </div>
         </div>
@@ -160,11 +167,10 @@ export function LeagueHub(props: {
           {/* Ordinateur : infos à gauche (plus étroit), classement à droite (plus large) ; mobile : l'un ou l'autre */}
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <div className={`min-w-0 ${mTab === "info" ? "" : "hidden lg:block"}`}>
-              <h2 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Infos de la ligue</h2>
               {props.panels[sel]}
             </div>
             <div className={`min-w-0 ${mTab === "rank" ? "" : "hidden lg:block"}`}>
-              <h2 className="mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Classement</h2>
+              <h2 className="hidden mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl lg:block">Classement</h2>
               <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />
             </div>
           </div>

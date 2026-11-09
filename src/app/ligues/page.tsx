@@ -51,10 +51,11 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
       panels[l.id] = (
         <div className="space-y-4">
           <section className="card space-y-3">
+            <h2 className={H}>Infos de la ligue</h2>
             <div className="flex items-start gap-3">
               <LeagueAvatar leagueId={l.id} name={l.name} at={l.imageUpdatedAt?.getTime() ?? null} size={64} />
               <div className="min-w-0 space-y-1">
-                <p className="text-lg font-bold uppercase leading-tight tracking-wide">{l.name}</p>
+                <p className="font-display text-xl font-bold uppercase leading-tight tracking-wide text-noir">{l.name}</p>
                 {l.description && <p className="text-sm text-neutral-600">{l.description}</p>}
                 <p className="text-xs text-neutral-500">
                   {l._count.members} joueur{l._count.members > 1 ? "s" : ""} · {admin ? "Administrateur" : "Membre"}
