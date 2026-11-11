@@ -50,7 +50,7 @@ function computeRows(view: BoardView, selected: CompetitionCode[]): BoardRow[] {
   ).map((s) => ({ ...s, avatarAt: avatar.get(s.userId) ?? null, played: s.scoredMatches - s.missing }));
 }
 
-const td = "px-2 py-2 sm:px-3 sm:py-3";
+const td = "px-2 py-2 sm:px-2 sm:py-2.5";
 
 /** Classements des ligues et général : changement instantané (tout est déjà chargé), avec glissement. */
 export function StandingsBoard({
@@ -198,16 +198,16 @@ export function StandingsBoard({
           ) : (
             <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-surface shadow-sm">
               <table className="w-full text-sm sm:min-w-[640px]">
-                <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
+                <thead className="whitespace-nowrap bg-neutral-50 text-left text-[10px] uppercase tracking-wide text-neutral-500">
                   <tr>
                     <th scope="col" className={td}>Rang</th>
                     <th scope="col" className={td}>Pseudo</th>
                     <th scope="col" className={`${td} text-right`}>Points</th>
                     <th scope="col" className={`${td} text-right`}>Exacts</th>
-                    <th scope="col" className={`${td} hidden text-right sm:table-cell`}>Bons écarts</th>
-                    <th scope="col" className={`${td} hidden text-right sm:table-cell`}>Bons résultats</th>
+                    <th scope="col" className={`${td} hidden text-right sm:table-cell`} title="Bons écarts">Écarts</th>
+                    <th scope="col" className={`${td} hidden text-right sm:table-cell`} title="Bons résultats">Résultats</th>
                     <th scope="col" className={`${td} hidden text-right sm:table-cell`}>Buteurs</th>
-                    <th scope="col" className={`${td} hidden text-right sm:table-cell`} title="Matchs avec un pronostic saisi">Matchs joués</th>
+                    <th scope="col" className={`${td} hidden text-right sm:table-cell`} title="Matchs avec un pronostic saisi">Joués</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100">

@@ -9,6 +9,7 @@ import { InviteBox } from "@/components/LeagueAdminForms";
 import { LeagueAvatar } from "@/components/LeagueAvatar";
 import { CreateLeagueForm, JoinLeagueForm, LeaveLeagueForm } from "@/components/LeagueForms";
 import { LeagueHub, type LeaguePanel } from "@/components/LeagueHub";
+import { InvitePopup } from "@/components/InvitePopup";
 import { PageTitle } from "@/components/PageTitle";
 import { requireUser } from "@/lib/auth/session";
 import { bonusQuotas, bonusStock } from "@/lib/bonus-data";
@@ -73,6 +74,18 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
                   Gérer ma ligue
                 </Link>
               )}
+              <InvitePopup>
+            {admin ? (
+                  <InviteBox key={l.id} leagueId={l.id} url={url} code={l.inviteCode} qrSvg={qrSvg} qrPng={qrPng} />
+                ) : (
+                  <div className="space-y-1 text-sm">
+                    <p>
+                      Code d’invitation : <strong className="font-mono tracking-wider">{l.inviteCode}</strong>
+                    </p>
+                    <p className="break-all text-xs text-neutral-600">{url}</p>
+                  </div>
+                )}
+              </InvitePopup>
               {!isDefault && (
                 <form action={setDefaultLeagueAction}>
                   <input type="hidden" name="leagueId" value={l.id} />
@@ -85,7 +98,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
         ),
         bonus: stock ? (
           <section className="card space-y-2">
-            <h2 className={H}>Mes spécialités maison</h2>
+            <h2 className="whitespace-nowrap font-display text-base font-bold uppercase tracking-normal text-rouge">Mes spécialités maison</h2>
             <ul className="space-y-2">
               {BONUS_KINDS.map((k) => (
                 <li key={k} className="flex items-center gap-2 text-sm">
@@ -100,21 +113,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
             </ul>
           </section>
         ) : null,
-        invite: (
-          <section className="card space-y-2">
-            <h2 className={H}>Inviter des joueurs</h2>
-            {admin ? (
-              <InviteBox key={l.id} leagueId={l.id} url={url} code={l.inviteCode} qrSvg={qrSvg} qrPng={qrPng} />
-            ) : (
-              <div className="space-y-1 text-sm">
-                <p>
-                  Code d’invitation : <strong className="font-mono tracking-wider">{l.inviteCode}</strong>
-                </p>
-                <p className="break-all text-xs text-neutral-600">{url}</p>
-              </div>
-            )}
-          </section>
-        ),
+        invite: null,
       };
     }),
   );

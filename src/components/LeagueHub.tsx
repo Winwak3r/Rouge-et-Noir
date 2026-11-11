@@ -202,6 +202,24 @@ export function LeagueHub(props: {
   );
 
   const panel = props.panels[sel] ?? { info: null, bonus: null, invite: null };
+  // Colonne des spécialités alignée sur le tableau du classement (même haut, même hauteur)
+  const rankCol = useRef<HTMLDivElement>(null);
+  const [tableBox, setTableBox] = useState<{ top: number; height: number } | null>(null);
+  useEffect(() => {
+    const col = rankCol.current;
+    if (!col) return;
+    const measure = () => {
+      const table = col.querySelector("table")?.closest("div") ?? col.querySelector("table");
+      if (!table) return setTableBox(null);
+      const c = col.getBoundingClientRect();
+      const t = table.getBoundingClientRect();
+      setTableBox({ top: t.top - c.top, height: t.height });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(col);
+    return () => ro.disconnect();
+  }, [sel, stage]);
   const board = <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />;
   const ordered = [...props.views].sort((a, b) => (a.key === sel ? -1 : b.key === sel ? 1 : 0));
   const appear = (visible: boolean) =>
@@ -220,22 +238,45 @@ export function LeagueHub(props: {
         {/* Ordinateur : la ligue choisie en premier, ses infos juste à droite (même hauteur que la tuile),
             puis les autres ligues */}
         <div role="tablist" aria-label="Ligue affichée" className="hidden items-stretch gap-3 lg:flex">
-          {ordered.slice(0, 1).map((v) => tile(v, "w-24", true))}
-          <div key={`info-${sel}`} className="hub-fade-in h-[7.5rem] min-w-0 flex-1">
-            {panel.info}
-          </div>
+          {ordered.slice(0, 1).map((v) => (
+            // Un seul bloc : la photo (sans nom dessous) et les infos à droite, contour rouge
+            <div
+              key={v.key}
+              ref={(el) => void (el ? tileRefs.current.set(v.key, el) : tileRefs.current.delete(v.key))}
+              role="tab"
+              aria-selected
+              className="flex h-[7.5rem] min-w-0 flex-1 overflow-hidden rounded-xl border-2 border-rouge bg-[var(--color-surface)]"
+            >
+              <span className="relative block aspect-square h-full shrink-0 overflow-hidden">
+                {image(v)}
+                {props.adminKeys?.includes(v.key) && (
+                  <span className="absolute right-1 top-1 rounded bg-rouge px-1 py-px text-[9px] font-bold uppercase tracking-wide text-white shadow">Admin</span>
+                )}
+              </span>
+              <div key={`info-${sel}`} className="hub-fade-in min-w-0 flex-1 [&>section]:h-full [&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none">
+                {panel.info}
+              </div>
+            </div>
+          ))}
           {ordered.slice(1).map((v) => tile(v, "w-24", true))}
         </div>
       </div>
 
       {/* Ordinateur : Classement (80 %) puis Mes spécialités maison (20 %), l'un après l'autre */}
       <div className="hidden items-start gap-4 lg:flex">
-        <div className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
+        <div ref={rankCol} className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
           <h2 className={T}>Classement</h2>
           {board}
         </div>
         {panel.bonus && (
-          <div className={`w-1/5 min-w-0 pt-10 ${appear(stage >= 2)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
+          <div
+            className={`w-1/5 min-w-0 [&>section]:h-full ${appear(stage >= 2)}`}
+            style={{
+              transitionDuration: `${STEP_MS}ms`,
+              marginTop: tableBox?.top ?? 40,
+              height: tableBox?.height,
+            }}
+          >
             {panel.bonus}
           </div>
         )}

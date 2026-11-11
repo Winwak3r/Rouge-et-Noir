@@ -124,7 +124,7 @@ export function InviteBox({ leagueId, url, code, qrSvg, qrPng }: { leagueId: str
           Code à saisir : <strong className="font-mono text-base tracking-widest">{code}</strong>
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={share} className="btn-primary px-3 py-1.5">Partager</button>
+          <button type="button" onClick={share} className="rounded-lg bg-l1 px-3 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90">Partager</button>
           <a href={qrPng} download={`invitation-${code}.png`} className="btn-secondary px-3 py-1.5">Télécharger le QR code</a>
         </div>
         <form
