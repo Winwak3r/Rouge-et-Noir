@@ -87,6 +87,21 @@ export function PredictionSheet(props: {
   const [compact, setCompact] = useState(false);
   const [progress, setProgress] = useState(0);
   const SHRINK = 140; // px de défilement pour passer de l'en-tête complet à la barre épinglée
+  const topRef = useRef<HTMLDivElement>(null);
+  const [topPad, setTopPad] = useState(0);
+  const progressRef = useRef(0);
+  useEffect(() => {
+    const el = topRef.current;
+    if (!el) return;
+    const measure = () => {
+      // la marge suit l'en-tête complet uniquement : pendant la réduction, elle ne bouge pas
+      if (progressRef.current === 0) setTopPad(el.getBoundingClientRect().height);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   useEffect(() => {
     const scroller = bodyRef.current;
     if (!scroller) return;
@@ -99,6 +114,7 @@ export function PredictionSheet(props: {
         // Tailles réduites au fil du défilement ; la disposition (noms en sigles…) bascule vers la fin,
         // avec une marge pour ne pas osciller autour du seuil
         const p = Math.min(1, Math.max(0, y / SHRINK));
+        progressRef.current = p;
         setProgress(p);
         setCompact((c) => (c ? p > 0.6 : p > 0.85));
       });
@@ -282,7 +298,10 @@ export function PredictionSheet(props: {
 
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
-      <div className="sheet-head z-10 w-full shrink-0 bg-[var(--header-bg)] shadow-sm" style={{ "--p": progress } as CSSProperties}>
+      {/* En-tête et onglets posés par-dessus la zone qui défile : leur réduction ne change jamais la hauteur
+          de défilement (sinon le navigateur recale le défilement et l'animation se répète) */}
+      <div ref={topRef} className="absolute inset-x-0 top-0 z-10">
+      <div className="sheet-head w-full bg-[var(--header-bg)] shadow-sm" style={{ "--p": progress } as CSSProperties}>
       {/* Mobile : place réservée sous les cases pour les spécialités affichées sous le buteur */}
       <div
         className={`mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] ${
@@ -344,7 +363,9 @@ export function PredictionSheet(props: {
         ))}
       </div>
       </div>
-      <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto [overflow-anchor:none]">
+      </div>
+      {/* Marge fixe = hauteur de l'en-tête complet : le contenu commence sous l'en-tête */}
+      <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto [overflow-anchor:none]" style={{ paddingTop: topPad }}>
         <div data-tour="sheet-body" className="mx-auto w-full max-w-5xl px-3 py-4">
         {tab === "pre" && <div>{props.prematch}</div>}
 

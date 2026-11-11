@@ -3,7 +3,8 @@
 @theme {
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-barlow), var(--font-inter), system-ui, sans-serif;
-  --font-club: var(--font-oswald), var(--font-barlow), system-ui, sans-serif;
+  /* Chiffres du score : Barlow Condensed (Oswald retirée : son téléchargement faisait échouer la compilation) */
+  --font-club: var(--font-barlow), var(--font-inter), system-ui, sans-serif;
 
   --color-rouge: #e1001a;
   --color-rouge-fonce: #b00014;
