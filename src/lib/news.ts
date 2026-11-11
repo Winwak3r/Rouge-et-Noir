@@ -80,8 +80,17 @@ export function parseRss(xml: string, max = 20): NewsItem[] {
   return items.sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0)).slice(0, max);
 }
 
-// Sources retenues : presse locale et site officiel du club (fiables, peu nombreuses)
-export const NEWS_SITES = ["staderennais.com", "ouest-france.fr", "letelegramme.fr", "rennes.maville.com", "actu.fr", "20minutes.fr"];
+// Sources retenues : presse locale, site officiel du club, L'Équipe et So Foot (fiables, peu nombreuses)
+export const NEWS_SITES = [
+  "staderennais.com",
+  "ouest-france.fr",
+  "letelegramme.fr",
+  "rennes.maville.com",
+  "actu.fr",
+  "20minutes.fr",
+  "lequipe.fr",
+  "sofoot.com",
+];
 const SITE_Q = `"Stade Rennais" (${NEWS_SITES.map((d) => `site:${d}`).join(" OR ")})`;
 const BING = `https://www.bing.com/news/search?q=${encodeURIComponent(SITE_Q)}&format=rss&setlang=fr&cc=fr`;
 const GOOGLE = `https://news.google.com/rss/search?q=${encodeURIComponent(`${SITE_Q} when:14d`)}&hl=fr&gl=FR&ceid=FR:fr`;
@@ -95,7 +104,7 @@ export function isTrustedSource(item: Pick<NewsItem, "link" | "source">): boolea
     return false;
   }
   if (NEWS_SITES.some((d) => host === d || host.endsWith(`.${d}`))) return true;
-  return /ouest-france|t[ée]l[ée]gramme|stade rennais|maville|actu\.fr|20 ?minutes/i.test(item.source ?? "");
+  return /ouest-france|t[ée]l[ée]gramme|stade rennais|maville|actu\.fr|20 ?minutes|l[’']?[ée]quipe|so ?foot/i.test(item.source ?? "");
 }
 
 /** Image d'aperçu de l'article (balise og:image de la page du média), mise en cache un jour. */

@@ -5,6 +5,7 @@ import { PlayerPhoto } from "@/components/PlayerPhoto";
 import { prisma } from "@/lib/db";
 import { formatShortNumeric } from "@/lib/dates";
 import { fetchNews, type NewsItem } from "@/lib/news";
+import { RAUZY_PLAYLIST, fetchRauzyLatest, type VideoItem } from "@/lib/video";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { ageOn, nationalityFr } from "@/lib/nationality";
 import { fetchOfficialTransfers, transferTypeLabel, type TransferItem } from "@/lib/transfers";
@@ -28,11 +29,45 @@ const ago = (d: Date | null) => {
   return formatShortNumeric(d);
 };
 
-function NewsList({ items, empty }: { items: NewsItem[] | null; empty: string }) {
+/** « Le lundi, c'est Rauzy » (ICI Armorique) : le lecteur vidéo à la place de la vignette. */
+function RauzyCard({ video }: { video: VideoItem | null }) {
+  // Dernier épisode ; à défaut, la playlist complète
+  const src = video
+    ? `https://www.youtube-nocookie.com/embed/${video.id}?rel=0`
+    : `https://www.youtube-nocookie.com/embed/videoseries?list=${RAUZY_PLAYLIST}&rel=0`;
+  return (
+    <li className="card flex flex-col gap-3 p-3 sm:flex-row sm:gap-4">
+      <div className="aspect-video w-full shrink-0 overflow-hidden rounded-lg bg-black sm:w-80">
+        <iframe
+          src={src}
+          title={video ? video.title : "Le lundi, c'est Rauzy"}
+          loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          referrerPolicy="strict-origin-when-cross-origin"
+          className="h-full w-full"
+        />
+      </div>
+      <span className="min-w-0">
+        <span className="mb-1 inline-block rounded bg-rouge px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Vidéo · Le lundi, c’est Rauzy</span>
+        <span className="block font-semibold leading-snug">{video ? video.title : "Tous les épisodes de l’émission"}</span>
+        <span className="mt-1 block text-sm text-neutral-600">
+          Chaque lundi, François Rauzy débriefe l’actualité du Stade Rennais avec des supporters et d’anciens joueurs.
+        </span>
+        <span className="mt-1 block text-xs text-neutral-500">
+          ICI Armorique{video?.date ? ` · ${ago(video.date)}` : ""}
+        </span>
+      </span>
+    </li>
+  );
+}
+
+function NewsList({ items, empty, video }: { items: NewsItem[] | null; empty: string; video?: VideoItem | null }) {
   if (!items) return <p className="card text-sm text-neutral-600">Fil indisponible pour le moment.</p>;
-  if (items.length === 0) return <p className="card text-sm text-neutral-600">{empty}</p>;
+  if (items.length === 0 && video === undefined) return <p className="card text-sm text-neutral-600">{empty}</p>;
   return (
     <ul className="space-y-3">
+      {video !== undefined && <RauzyCard video={video} />}
       {items.map((n) => (
         <li key={n.link}>
           <a href={n.link} target="_blank" rel="noopener noreferrer" className="card flex flex-col gap-3 p-3 transition-colors hover:border-neutral-400 sm:flex-row sm:gap-4">
@@ -215,14 +250,18 @@ function MoreLinks() {
 
 export default async function ActusPage({ searchParams }: { searchParams: Promise<{ onglet?: string }> }) {
   const { onglet } = await searchParams;
-  const [news, official] = await Promise.all([fetchNews().catch(() => null), fetchOfficialTransfers().catch(() => null)]);
+  const [news, official, rauzy] = await Promise.all([
+    fetchNews().catch(() => null),
+    fetchOfficialTransfers().catch(() => null),
+    fetchRauzyLatest(),
+  ]);
   return (
     <div className="space-y-6">
       <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">La zone mixte</PageTitle>
       <PageTabs
         initial={onglet}
         tabs={[
-          { key: "actus", label: "Actus", content: <NewsList items={news} empty="Pas d’actualité sur le Stade Rennais cette semaine." /> },
+          { key: "actus", label: "Actus", content: <NewsList items={news} video={rauzy} empty="Pas d’actualité sur le Stade Rennais cette semaine." /> },
           { key: "classements", label: "Classements", content: <OfficialStandings /> },
           { key: "transferts", label: "Transferts", content: <Transfers official={official} /> },
           { key: "plus", label: "Voir plus…", content: <MoreLinks /> },
@@ -243,7 +282,8 @@ export default async function ActusPage({ searchParams }: { searchParams: Promis
         ]}
       />
       <p className="text-xs text-neutral-500">
-        Actualités : Bing et Google Actualités (les articles s’ouvrent sur le site de leur média). Transferts officiels : API-Football. Classements :
+        Actualités : presse locale, site du club, L’Équipe et So Foot, via Bing et Google Actualités (les articles s’ouvrent sur le site de leur
+        média). Vidéo : « Le lundi, c’est Rauzy », ICI Armorique (YouTube). Transferts officiels : API-Football. Classements :
         ESPN.
       </p>
     </div>

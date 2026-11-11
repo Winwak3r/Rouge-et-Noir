@@ -59,6 +59,9 @@ describe("Actualités : sources fiables et image d'aperçu", () => {
     expect(isTrustedSource({ link: "https://www.ouest-france.fr/sport/a.html", source: null })).toBe(true);
     expect(isTrustedSource({ link: "https://www.staderennais.com/actualites/x", source: null })).toBe(true);
     expect(isTrustedSource({ link: "https://news.google.com/rss/articles/abc", source: "Le Télégramme" })).toBe(true);
+    expect(isTrustedSource({ link: "https://www.lequipe.fr/Football/Actualites/x", source: null })).toBe(true);
+    expect(isTrustedSource({ link: "https://www.sofoot.com/articles/x", source: null })).toBe(true);
+    expect(isTrustedSource({ link: "https://news.google.com/rss/articles/abc", source: "L'Équipe" })).toBe(true);
     expect(isTrustedSource({ link: "https://www.site-de-rumeurs.com/a", source: "Rumeurs Foot" })).toBe(false);
   });
   it("image og:image lue dans la page de l'article", () => {
