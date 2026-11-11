@@ -202,24 +202,7 @@ export function LeagueHub(props: {
   );
 
   const panel = props.panels[sel] ?? { info: null, bonus: null, invite: null };
-  // Colonne des spécialités alignée sur le tableau du classement (même haut, même hauteur)
-  const rankCol = useRef<HTMLDivElement>(null);
-  const [tableBox, setTableBox] = useState<{ top: number; height: number } | null>(null);
-  useEffect(() => {
-    const col = rankCol.current;
-    if (!col) return;
-    const measure = () => {
-      const table = col.querySelector("table")?.closest("div") ?? col.querySelector("table");
-      if (!table) return setTableBox(null);
-      const c = col.getBoundingClientRect();
-      const t = table.getBoundingClientRect();
-      setTableBox({ top: t.top - c.top, height: t.height });
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(col);
-    return () => ro.disconnect();
-  }, [sel, stage]);
+
   const board = <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />;
   const ordered = [...props.views].sort((a, b) => (a.key === sel ? -1 : b.key === sel ? 1 : 0));
   const appear = (visible: boolean) =>
@@ -264,29 +247,16 @@ export function LeagueHub(props: {
 
       {/* Ordinateur : Classement (80 %) puis Mes spécialités maison (20 %), l'un après l'autre */}
       <div className="hidden items-start gap-4 lg:flex">
-        <div ref={rankCol} className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
+        <div className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
           <h2 className={T}>Classement</h2>
           {board}
         </div>
         {panel.bonus && (
-          <div
-            className={`w-1/5 min-w-0 [&>section]:h-full ${appear(stage >= 2)}`}
-            style={{
-              transitionDuration: `${STEP_MS}ms`,
-              marginTop: tableBox?.top ?? 40,
-              height: tableBox?.height,
-            }}
-          >
+          <div className={`w-1/5 min-w-0 ${appear(stage >= 2)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
             {panel.bonus}
           </div>
         )}
       </div>
-      {panel.invite && (
-        <div className={`hidden lg:block ${appear(stage >= 2)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
-          {panel.invite}
-        </div>
-      )}
-
       {/* Mobile : Général → infos puis classement ; ligue → Classement / Infos de ligue */}
       <div className="lg:hidden">
         {sel === "general" ? (
@@ -305,7 +275,6 @@ export function LeagueHub(props: {
               <div className="space-y-4">
                 {panel.info}
                 {panel.bonus}
-                {panel.invite}
               </div>
             )}
           </div>

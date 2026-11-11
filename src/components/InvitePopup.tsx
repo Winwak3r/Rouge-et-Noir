@@ -16,7 +16,7 @@ export function InvitePopup({ children }: { children: ReactNode }) {
   }, [open]);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="rounded-lg bg-l1 px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90">
+      <button type="button" onClick={() => setOpen(true)} className="invite-blue-bg rounded-lg px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90">
         Inviter
       </button>
       {mounted &&
@@ -30,7 +30,7 @@ export function InvitePopup({ children }: { children: ReactNode }) {
               onClick={(e) => e.stopPropagation()}
               className="hub-fade-in w-full max-w-lg space-y-3 rounded-2xl bg-[var(--color-surface)] p-5 shadow-2xl"
             >
-              <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-l1">Inviter des joueurs</h2>
+              <h2 className="font-display text-2xl font-bold uppercase tracking-wide invite-blue-text">Inviter des joueurs</h2>
               {children}
             </div>
           </div>,

@@ -404,3 +404,9 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .hub-fade-in { animation: none; }
 }
+
+/* Invitation : bleu Ligue 1, plus clair en thème sombre */
+.invite-blue-bg { background-color: #1d4ed8; }
+.invite-blue-text { color: #1d4ed8; }
+:root[data-theme="dark"] .invite-blue-bg { background-color: #3b82f6; }
+:root[data-theme="dark"] .invite-blue-text { color: #60a5fa; }
