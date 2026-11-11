@@ -30,6 +30,8 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { PlayerName } from "@/components/PlayerName";
 import { shortPlayerName } from "@/lib/player-name";
 import { Landing } from "@/components/landing/Landing";
+import { MatchRecap } from "@/components/MatchRecap";
+import { loadRecap } from "@/lib/match-recap";
 import { LeagueComparison } from "@/components/LeagueComparison";
 import { HomeStickyMatch } from "@/components/HomeStickyMatch";
 import { PastMatches } from "@/components/PastMatches";
@@ -50,6 +52,8 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   // Visiteur sans compte : page d'accueil de présentation, sans accès au site
   if (!user) return <Landing />;
+  // Animation « fin de match » (affichée une seule fois par appareil, côté navigateur)
+  const recap = await loadRecap(user.id).catch(() => null);
   // Ligue affichée : classement et pronostics des autres limités à ses joueurs (sinon tous les joueurs)
   const scope = user ? await activeLeagueScope(user) : null;
   // Sans ligue : on ne voit que ses propres pronostics (pas ceux des autres joueurs du site)
@@ -643,6 +647,7 @@ export default async function HomePage() {
 
   return (
     <AccordionGroup defaultOpenId={null}>
+      {recap && <MatchRecap data={recap} userId={user.id} />}
       {announcementWindow}
       {live && <LiveRefresh />}
       <div className="space-y-8">
