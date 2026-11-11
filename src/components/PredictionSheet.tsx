@@ -145,7 +145,7 @@ export function PredictionSheet(props: {
         value={value}
         onChange={(e) => set(e.target.value)}
         className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
-          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-16 w-16 text-4xl sm:h-20 sm:w-20 sm:text-5xl"
+          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-14 w-14 text-3xl sm:h-20 sm:w-20 sm:text-5xl"
         }`}
         style={{ textAlignLast: "center" }}
       >
@@ -170,7 +170,7 @@ export function PredictionSheet(props: {
           </span>
           {!compact && (
             <span
-              className={`pointer-events-none absolute -bottom-2 flex h-7 items-center gap-1.5 ${
+              className={`pointer-events-none absolute -bottom-2 hidden h-7 items-center gap-1.5 sm:flex ${
                 props.rennesIsHome ? "right-full mr-4 flex-row-reverse" : "left-full ml-4"
               }`}
             >
@@ -179,28 +179,23 @@ export function PredictionSheet(props: {
               </span>
             </span>
           )}
-          {/* Mobile : spécialités sous le buteur, alignées avec le début de son nom */}
-          {!compact && appliedBonuses.length > 0 && (
-            <span
-              className={`pointer-events-none absolute -bottom-9 flex gap-1 sm:hidden ${props.rennesIsHome ? "right-full mr-4 flex-row-reverse" : "left-full ml-4"}`}
-            >
-              {appliedBonuses.slice(0, 3).map((b) => (
-                <span key={b.id} title={`${BONUS_INFO[b.kind].name} · ${b.name}`}>
-                  <BonusIcon kind={b.kind} size={22} />
-                </span>
-              ))}
-            </span>
-          )}
+
         </>
       )}
-      {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && !(chosen || scorer === NO_SCORER) && (
-        // Mobile, sans buteur choisi (ex. Kouign-Amann seul) : les spécialités à la place du buteur
+      {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
+        // Mobile : les spécialités en dessous du buteur, une par ligne (icône + ligue, 20 caractères au plus)
         <span
-          className={`pointer-events-none absolute -bottom-2 flex gap-1 sm:hidden ${props.rennesIsHome ? "right-full mr-4 flex-row-reverse" : "left-full ml-4"}`}
+          className={`pointer-events-none absolute top-full flex flex-col gap-1 sm:hidden ${chosen || scorer === NO_SCORER ? "mt-4" : "mt-1.5"} ${
+            props.rennesIsHome ? "-left-2 items-start" : "-right-2 items-end"
+          }`}
         >
           {appliedBonuses.slice(0, 3).map((b) => (
-            <span key={b.id} title={`${BONUS_INFO[b.kind].name} · ${b.name}`}>
-              <BonusIcon kind={b.kind} size={22} />
+            <span
+              key={b.id}
+              className={`flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600 ${props.rennesIsHome ? "" : "flex-row-reverse"}`}
+            >
+              <BonusIcon kind={b.kind} size={18} />
+              {b.name.length > 20 ? `${b.name.slice(0, 20)}…` : b.name}
             </span>
           ))}
         </span>
@@ -226,7 +221,7 @@ export function PredictionSheet(props: {
   const team = (t: Side, side: "home" | "away") => {
     const logo = t.logo ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={t.logo} alt="" className={`shrink-0 object-contain transition-all duration-300 ${compact ? "h-8 w-8" : "h-14 w-14"}`} />
+      <img src={t.logo} alt="" className={`shrink-0 object-contain transition-all duration-300 ${compact ? "h-8 w-8" : "h-11 w-11 sm:h-14 sm:w-14"}`} />
     ) : (
       <span className={compact ? "h-8 w-8" : "h-14 w-14"} />
     );
@@ -245,7 +240,7 @@ export function PredictionSheet(props: {
     return (
       <div
         className={`flex min-w-0 items-center gap-1.5 transition-all duration-300 ${
-          compact ? (side === "home" ? "flex-row justify-end" : "flex-row-reverse justify-end") : "flex-col"
+          compact ? (side === "home" ? "flex-row justify-end" : "flex-row-reverse justify-end") : "flex-col gap-0.5"
         }`}
       >
         {compact ? (
@@ -285,7 +280,12 @@ export function PredictionSheet(props: {
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
       <div className="z-10 w-full shrink-0 bg-[var(--header-bg)] shadow-sm">
-      <div className="mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+      {/* Mobile : place réservée sous les cases pour les spécialités affichées sous le buteur */}
+      <div
+        className={`mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] ${
+          !compact && appliedBonuses.length > 0 ? ["", "max-sm:pb-10", "max-sm:pb-14", "max-sm:pb-[4.5rem]"][Math.min(3, appliedBonuses.length)] : ""
+        }`}
+      >
         <div className="relative flex min-h-9 items-center justify-center">
           <button type="button" onClick={() => sheet?.close()} aria-label="Retour" className="absolute left-0 grid h-9 w-9 place-items-center rounded-full hover:bg-neutral-100">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
