@@ -111,6 +111,44 @@ export function LeagueHub(props: {
       );
     });
 
+  // Tuiles : image en bloc, nom en dessous (20 caractères, une seule ligne), contour rouge si sélectionnée
+  const leagueTiles = props.views.map((v) => {
+    const on = v.key === sel;
+    const admin = props.adminKeys?.includes(v.key);
+    const label = v.name.length > 20 ? `${v.name.slice(0, 20)}…` : v.name;
+    return (
+      <button
+        key={v.key}
+        type="button"
+        role="tab"
+        aria-selected={on}
+        title={v.name}
+        onClick={() => setSel(v.key)}
+        className="group flex min-w-0 flex-col items-center gap-1.5 sm:w-28"
+      >
+        <span
+          className={`relative block aspect-square w-full overflow-hidden rounded-xl border-2 bg-[var(--color-surface)] transition-colors ${
+            on ? "border-rouge" : "border-neutral-200 group-hover:border-neutral-400"
+          }`}
+        >
+          {v.key === "general" ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/icon-192.png" alt="" className="h-full w-full object-cover" />
+          ) : (
+            <LeagueAvatar leagueId={v.key} name={v.name} at={v.imageAt} size={96} radius={0} className="!h-full !w-full !ring-0" />
+          )}
+          {admin && (
+            <span className="absolute right-1 top-1 rounded bg-rouge px-1 py-px text-[9px] font-bold uppercase tracking-wide text-white shadow">Admin</span>
+          )}
+        </span>
+        <span className={`block w-full truncate text-center text-xs font-semibold sm:text-sm ${on ? "text-rouge" : "text-neutral-700"}`}>{label}</span>
+      </button>
+    );
+  });
+  const n = props.views.length;
+  // Mobile : 2 par ligne (1 ligue + Général), 3 par ligne (2 ligues + Général), 2 par ligne (3 ligues + Général)
+  const mobileCols = n <= 1 ? "grid-cols-1" : n === 3 ? "grid-cols-3" : "grid-cols-2";
+
   const tabButtons = (
     <>
       {(
@@ -136,16 +174,10 @@ export function LeagueHub(props: {
   return (
     <div className="space-y-4">
       {/* Ligne des ligues (dans la page) */}
-      {/* Mobile : 1 ou 2 ligues → une par ligne ; 3 → deux puis R&N en pleine largeur ; 4 → 2 × 2. Ordinateur : à la suite */}
+      {/* Ligues en tuiles (image + nom). Ordinateur : alignées ; mobile : grille selon leur nombre */}
       <div ref={barMark}>
-        <div
-          role="tablist"
-          aria-label="Ligue affichée"
-          className={`grid gap-2 sm:flex sm:flex-wrap ${props.views.length <= 2 ? "grid-cols-1" : "grid-cols-2"} ${
-            props.views.length > 2 && props.views.length % 2 === 1 ? "[&>*:last-child]:col-span-2" : ""
-          }`}
-        >
-          {leagueButtons(false)}
+        <div role="tablist" aria-label="Ligue affichée" className={`grid gap-3 sm:flex sm:flex-wrap ${mobileCols}`}>
+          {leagueTiles}
         </div>
       </div>
 
