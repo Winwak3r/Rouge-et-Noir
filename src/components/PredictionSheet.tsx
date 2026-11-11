@@ -144,8 +144,8 @@ export function PredictionSheet(props: {
         name={name}
         value={value}
         onChange={(e) => set(e.target.value)}
-        className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
-          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-14 w-14 text-3xl sm:h-20 sm:w-20 sm:text-5xl"
+        className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-500 ease-in-out hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
+          compact ? "h-9 w-9 rounded-lg text-xl sm:h-11 sm:w-11 sm:rounded-xl sm:text-2xl" : "h-14 w-14 text-3xl sm:h-20 sm:w-20 sm:text-5xl"
         }`}
         style={{ textAlignLast: "center" }}
       >
@@ -186,13 +186,13 @@ export function PredictionSheet(props: {
         // Mobile : les spécialités en dessous du buteur, une par ligne (icône + ligue, 20 caractères au plus)
         <span
           className={`pointer-events-none absolute top-full flex flex-col gap-1 sm:hidden ${chosen || scorer === NO_SCORER ? "mt-4" : "mt-1.5"} ${
-            props.rennesIsHome ? "-left-2 items-start" : "-right-2 items-end"
+            props.rennesIsHome ? "right-0 items-end" : "left-0 items-start"
           }`}
         >
           {appliedBonuses.slice(0, 3).map((b) => (
             <span
               key={b.id}
-              className={`flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600 ${props.rennesIsHome ? "" : "flex-row-reverse"}`}
+              className={`flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600 ${props.rennesIsHome ? "flex-row-reverse" : ""}`}
             >
               <BonusIcon kind={b.kind} size={18} />
               {b.name.length > 20 ? `${b.name.slice(0, 20)}…` : b.name}
@@ -221,9 +221,9 @@ export function PredictionSheet(props: {
   const team = (t: Side, side: "home" | "away") => {
     const logo = t.logo ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={t.logo} alt="" className={`shrink-0 object-contain transition-all duration-300 ${compact ? "h-8 w-8" : "h-11 w-11 sm:h-14 sm:w-14"}`} />
+      <img src={t.logo} alt="" className={`shrink-0 object-contain transition-all duration-500 ease-in-out ${compact ? "h-6 w-6 sm:h-8 sm:w-8" : "h-11 w-11 sm:h-14 sm:w-14"}`} />
     ) : (
-      <span className={compact ? "h-8 w-8" : "h-14 w-14"} />
+      <span className={compact ? "h-6 w-6 sm:h-8 sm:w-8" : "h-11 w-11 sm:h-14 sm:w-14"} />
     );
     const name = compact ? (
       <span className="font-display text-lg font-bold uppercase">{teamAbbr(t.name)}</span>
@@ -239,7 +239,7 @@ export function PredictionSheet(props: {
       ) : null;
     return (
       <div
-        className={`flex min-w-0 items-center gap-1.5 transition-all duration-300 ${
+        className={`flex min-w-0 items-center gap-1.5 transition-all duration-500 ease-in-out ${
           compact ? (side === "home" ? "flex-row justify-end" : "flex-row-reverse justify-end") : "flex-col gap-0.5"
         }`}
       >
@@ -293,7 +293,7 @@ export function PredictionSheet(props: {
             </svg>
           </button>
           <p
-            className={`flex items-center gap-1.5 overflow-hidden text-sm font-semibold text-neutral-600 transition-all duration-300 ${
+            className={`flex items-center gap-1.5 overflow-hidden text-sm font-semibold text-neutral-600 transition-all duration-500 ease-in-out ${
               compact ? "max-h-0 opacity-0" : "max-h-8 opacity-100"
             }`}
           >
@@ -304,9 +304,12 @@ export function PredictionSheet(props: {
             {props.title}
           </p>
         </div>
-        <div data-tour="sheet-score" className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-all duration-300 ${compact ? "-mt-10 pl-9" : "mt-2"}`}>
+        <div
+          data-tour="sheet-score"
+          className={`grid grid-cols-[1fr_auto_1fr] items-center transition-all duration-500 ease-in-out ${compact ? "-mt-10 gap-1 pl-9 sm:gap-2" : "mt-2 gap-2"}`}
+        >
           {team(props.home, "home")}
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center ${compact ? "gap-1 sm:gap-2" : "gap-2"}`}>
             {scoreBox(home, setHome, props.rennesIsHome ? "rennesGoals" : "opponentGoals", props.home.name)}
             <span className="font-display text-2xl font-bold text-neutral-400">–</span>
             {scoreBox(away, setAway, props.rennesIsHome ? "opponentGoals" : "rennesGoals", props.away.name)}
