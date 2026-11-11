@@ -47,7 +47,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
         {/* 1. Actus : actualités du Stade Rennais (infos, transferts, classements, effectif) */}
         {item(
           "/actus",
-          "La Zone",
+          "Zone SRFC",
           props.rennesLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={props.rennesLogo} alt="" className="h-6 w-6 object-contain" />
