@@ -69,7 +69,8 @@ export default async function ManageLeaguePage({ searchParams }: { searchParams:
         </div>
       </section>
 
-      <section className="card space-y-3">
+      {/* Mobile : pas de bloc d'invitation ici (le bouton bleu « Inviter » des infos de la ligue s'en charge) */}
+      <section className="card hidden space-y-3 sm:block">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Inviter des joueurs</h2>
         <p className="text-sm text-neutral-600">Partage le lien ou fais scanner le QR code : le joueur s’inscrit (ou se connecte) et rejoint la ligue directement.</p>
         <InviteBox key={league.id} leagueId={league.id} url={url} code={league.inviteCode} qrSvg={qrSvg} qrPng={qrPng} />

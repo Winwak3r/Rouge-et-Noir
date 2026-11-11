@@ -28,7 +28,7 @@ export function InvitePopup({ children }: { children: ReactNode }) {
               aria-modal="true"
               aria-label="Inviter des joueurs"
               onClick={(e) => e.stopPropagation()}
-              className="hub-fade-in w-full max-w-lg space-y-3 rounded-2xl bg-[var(--color-surface)] p-5 shadow-2xl"
+              className="page-enter w-full max-w-lg space-y-3 rounded-2xl bg-[var(--color-surface)] p-5 shadow-2xl"
             >
               <h2 className="font-display text-2xl font-bold uppercase tracking-wide invite-blue-text">Inviter des joueurs</h2>
               {children}

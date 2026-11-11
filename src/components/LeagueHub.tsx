@@ -14,7 +14,7 @@ export interface LeaguePanel {
   invite: ReactNode | null;
 }
 
-const STEP_MS = 450; // durée de chaque transition (déplacement des ligues, puis Classement, puis Spécialités)
+const STEP_MS = 1250; // durée de chaque transition (déplacement des ligues, puis Classement, puis Spécialités)
 const T = "mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 
 /**
