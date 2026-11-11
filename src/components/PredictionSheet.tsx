@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useActionState, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useActionState, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { savePredictionAction, type PredictionState } from "@/app/actions/predictions";
 import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib/scoring/bonus";
 import { BonusIcon } from "./BonusIcon";
@@ -85,6 +85,8 @@ export function PredictionSheet(props: {
   // La zone de contenu défile seule, sous l'en-tête : réduire l'en-tête ne déplace pas le contenu (pas de va-et-vient)
   const bodyRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const SHRINK = 140; // px de défilement pour passer de l'en-tête complet à la barre épinglée
   useEffect(() => {
     const scroller = bodyRef.current;
     if (!scroller) return;
@@ -94,8 +96,11 @@ export function PredictionSheet(props: {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const y = scroller.scrollTop;
-        // hystérésis large : on réduit après 72 px, on ne redéplie qu'en revenant tout en haut
-        setCompact((c) => (c ? y > 8 : y > 72));
+        // Tailles réduites au fil du défilement ; la disposition (noms en sigles…) bascule vers la fin,
+        // avec une marge pour ne pas osciller autour du seuil
+        const p = Math.min(1, Math.max(0, y / SHRINK));
+        setProgress(p);
+        setCompact((c) => (c ? p > 0.6 : p > 0.85));
       });
     };
     scroller.addEventListener("scroll", onScroll, { passive: true });
@@ -144,9 +149,7 @@ export function PredictionSheet(props: {
         name={name}
         value={value}
         onChange={(e) => set(e.target.value)}
-        className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-500 ease-in-out hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
-          compact ? "h-9 w-9 rounded-lg text-xl sm:h-11 sm:w-11 sm:rounded-xl sm:text-2xl" : "h-14 w-14 text-3xl sm:h-20 sm:w-20 sm:text-5xl"
-        }`}
+        className="sheet-box cursor-pointer appearance-none border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-colors hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none"
         style={{ textAlignLast: "center" }}
       >
         <option value="">–</option>
@@ -221,9 +224,9 @@ export function PredictionSheet(props: {
   const team = (t: Side, side: "home" | "away") => {
     const logo = t.logo ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={t.logo} alt="" className={`shrink-0 object-contain transition-all duration-500 ease-in-out ${compact ? "h-6 w-6 sm:h-8 sm:w-8" : "h-11 w-11 sm:h-14 sm:w-14"}`} />
+      <img src={t.logo} alt="" className="sheet-logo shrink-0 object-contain" />
     ) : (
-      <span className={compact ? "h-6 w-6 sm:h-8 sm:w-8" : "h-11 w-11 sm:h-14 sm:w-14"} />
+      <span className="sheet-logo" />
     );
     const name = compact ? (
       <span className="font-display text-lg font-bold uppercase">{teamAbbr(t.name)}</span>
@@ -279,7 +282,7 @@ export function PredictionSheet(props: {
 
 
       {/* En-tête fixe : retour, journée, équipes et score à saisir */}
-      <div className="z-10 w-full shrink-0 bg-[var(--header-bg)] shadow-sm">
+      <div className="sheet-head z-10 w-full shrink-0 bg-[var(--header-bg)] shadow-sm" style={{ "--p": progress } as CSSProperties}>
       {/* Mobile : place réservée sous les cases pour les spécialités affichées sous le buteur */}
       <div
         className={`mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] ${
@@ -293,9 +296,8 @@ export function PredictionSheet(props: {
             </svg>
           </button>
           <p
-            className={`flex items-center gap-1.5 overflow-hidden text-sm font-semibold text-neutral-600 transition-all duration-500 ease-in-out ${
-              compact ? "max-h-0 opacity-0" : "max-h-8 opacity-100"
-            }`}
+            className="flex items-center gap-1.5 overflow-hidden text-sm font-semibold text-neutral-600"
+            style={{ maxHeight: `${Math.round(32 * (1 - Math.min(1, progress * 1.4)))}px`, opacity: 1 - Math.min(1, progress * 1.6) }}
           >
             {props.competitionLogo && (
               // eslint-disable-next-line @next/next/no-img-element

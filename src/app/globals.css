@@ -337,3 +337,29 @@ body::before {
 :root[data-theme="dark"] .bonus-card { background-color: #111111; color: #ffffff; border-color: #111111; }
 :root[data-theme="dark"] .bonus-card-muted { color: rgba(255, 255, 255, 0.8); }
 :root[data-theme="dark"] .bonus-card-warn { color: #fdba74; }
+
+/* Page du match : l'en-tête se réduit progressivement au défilement (--p de 0 à 1) */
+.sheet-head {
+  --logo-max: 44px; --logo-min: 24px;
+  --box-max: 56px; --box-min: 36px;
+  --digit-max: 30px; --digit-min: 20px;
+  --radius-max: 16px; --radius-min: 8px;
+}
+@media (min-width: 640px) {
+  .sheet-head {
+    --logo-max: 56px; --logo-min: 32px;
+    --box-max: 80px; --box-min: 44px;
+    --digit-max: 48px; --digit-min: 24px;
+    --radius-max: 16px; --radius-min: 12px;
+  }
+}
+.sheet-logo {
+  width: calc(var(--logo-max) - (var(--logo-max) - var(--logo-min)) * var(--p, 0));
+  height: calc(var(--logo-max) - (var(--logo-max) - var(--logo-min)) * var(--p, 0));
+}
+.sheet-box {
+  width: calc(var(--box-max) - (var(--box-max) - var(--box-min)) * var(--p, 0));
+  height: calc(var(--box-max) - (var(--box-max) - var(--box-min)) * var(--p, 0));
+  font-size: calc(var(--digit-max) - (var(--digit-max) - var(--digit-min)) * var(--p, 0));
+  border-radius: calc(var(--radius-max) - (var(--radius-max) - var(--radius-min)) * var(--p, 0));
+}
