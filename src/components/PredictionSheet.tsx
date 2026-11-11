@@ -170,7 +170,7 @@ export function PredictionSheet(props: {
           {!compact && (
             <span
               className={`pointer-events-none absolute -bottom-1 max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir ${
-                props.rennesIsHome ? "right-full mr-1" : "left-full ml-1"
+                props.rennesIsHome ? "right-full mr-4" : "left-full ml-4"
               }`}
             >
               {chosen ? lastName(chosen.name) : "Aucun buteur"}
@@ -181,7 +181,7 @@ export function PredictionSheet(props: {
       {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
         // Spécialités choisies : icône + ligue (20 caractères au plus), 3 lignes au maximum, côté extérieur
         <span
-          className={`pointer-events-none absolute top-0 flex flex-col gap-0.5 ${props.rennesIsHome ? "right-full mr-2 items-end" : "left-full ml-2 items-start"}`}
+          className={`pointer-events-none absolute -top-3 flex flex-col gap-0.5 ${props.rennesIsHome ? "right-full mr-2 items-end" : "left-full ml-2 items-start"}`}
         >
           {appliedBonuses.slice(0, 3).map((b) => (
             <span key={b.id} className="flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600">

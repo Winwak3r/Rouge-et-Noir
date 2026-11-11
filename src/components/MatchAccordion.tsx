@@ -65,7 +65,7 @@ function PickBonuses({ list, size }: { list: NonNullable<MatchHeader["myPick"]>[
             name={b.leagueName}
             at={b.leagueImageAt}
             size={Math.round(size * 0.5)}
-            className="absolute -bottom-1 -right-1 rounded-md ring-2 ring-[var(--color-surface)]"
+            className="absolute -bottom-1 -right-1 !rounded-[3px] ring-2 ring-[var(--color-surface)]"
           />
         </span>
       ))}

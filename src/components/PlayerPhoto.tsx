@@ -42,6 +42,8 @@ function PhotoOnly({
   number?: number | null;
 }) {
   const radius = shape === "card" ? "rounded-xl" : "rounded-full";
+  // Arrondi aussi en style direct : certains navigateurs (Chrome) ignoraient la classe sur ces images
+  const borderRadius = shape === "card" ? Math.max(6, Math.round(size * 0.18)) : 9999;
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [url]);
   if (url && !failed) {
@@ -56,8 +58,8 @@ function PhotoOnly({
         loading="lazy"
         referrerPolicy="no-referrer"
         onError={() => setFailed(true)}
-        className={`shrink-0 ${radius} bg-neutral-100 object-cover object-top ring-1 ring-neutral-300 ${className}`}
-        style={{ width: size, height: size }}
+        className={`shrink-0 ${radius} overflow-hidden bg-neutral-100 object-cover object-top ring-1 ring-neutral-300 ${className}`}
+        style={{ width: size, height: size, borderRadius }}
       />
     );
   }
@@ -65,7 +67,7 @@ function PhotoOnly({
     <span
       aria-hidden
       className={`inline-grid shrink-0 place-items-center ${radius} font-bold text-white ring-1 ring-neutral-300 ${className}`}
-      style={{ width: size, height: size, fontSize: Math.max(9, Math.round(size * 0.4)), background: `hsl(${hueOf(name)} 35% 40%)` }}
+      style={{ width: size, height: size, borderRadius, fontSize: Math.max(9, Math.round(size * 0.4)), background: `hsl(${hueOf(name)} 35% 40%)` }}
     >
       {initials(name)}
     </span>
