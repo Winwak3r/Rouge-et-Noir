@@ -329,3 +329,11 @@ body::before {
 /* Journée du match (J1, J2…) : plus foncée en thème clair, plus claire en thème sombre */
 .match-code { color: #7a7a7a; }
 :root[data-theme="dark"] .match-code { color: #a3a3a3; }
+
+/* Page du match : blocs des spécialités maison (blancs en thème clair, noirs en thème sombre) */
+.bonus-card { background-color: #ffffff; color: #111111; border-color: #e5e5e5; }
+.bonus-card-muted { color: #525252; }
+.bonus-card-warn { color: #c2410c; }
+:root[data-theme="dark"] .bonus-card { background-color: #111111; color: #ffffff; border-color: #111111; }
+:root[data-theme="dark"] .bonus-card-muted { color: rgba(255, 255, 255, 0.8); }
+:root[data-theme="dark"] .bonus-card-warn { color: #fdba74; }

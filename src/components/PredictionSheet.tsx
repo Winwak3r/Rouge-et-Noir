@@ -9,6 +9,7 @@ import { NO_SCORER, ScorerSelect, type ScorerOption } from "./ScorerSelect";
 import { TeamLabel } from "./TeamLabel";
 import { PlayerPhoto } from "./PlayerPhoto";
 import { teamAbbr } from "@/lib/team-abbr";
+import { shortPlayerName } from "@/lib/player-name";
 
 /** Fermeture de la fiche, fournie par l'accordéon qui l'ouvre. */
 export const SheetContext = createContext<{ close: () => void; done?: () => void } | null>(null);
@@ -144,7 +145,7 @@ export function PredictionSheet(props: {
         value={value}
         onChange={(e) => set(e.target.value)}
         className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
-          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-16 w-16 text-4xl"
+          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-20 w-20 text-5xl"
         }`}
         style={{ textAlignLast: "center" }}
       >
@@ -169,19 +170,30 @@ export function PredictionSheet(props: {
           </span>
           {!compact && (
             <span
-              className={`pointer-events-none absolute -bottom-1 max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir ${
-                props.rennesIsHome ? "right-full mr-4" : "left-full ml-4"
+              className={`pointer-events-none absolute -bottom-2 flex h-7 items-center gap-1.5 ${
+                props.rennesIsHome ? "right-full mr-4 flex-row-reverse" : "left-full ml-4"
               }`}
             >
-              {chosen ? lastName(chosen.name) : "Aucun buteur"}
+              <span className="max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir">
+                {chosen ? shortPlayerName(chosen.name) : "Aucun buteur"}
+              </span>
+              {/* Mobile : spécialités à la suite du buteur, alignées avec sa vignette */}
+              {appliedBonuses.slice(0, 3).map((b) => (
+                <span key={b.id} title={`${BONUS_INFO[b.kind].name} · ${b.name}`} className="sm:hidden">
+                  <BonusIcon kind={b.kind} size={22} />
+                </span>
+              ))}
             </span>
           )}
         </>
       )}
       {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
-        // Spécialités choisies : icône + ligue (20 caractères au plus), 3 lignes au maximum, côté extérieur
+        // Ordinateur : la 1re spécialité juste au-dessus du nom du buteur, les suivantes empilées au-dessus
+        // (icône + ligue, 20 caractères au plus, 3 au maximum)
         <span
-          className={`pointer-events-none absolute -top-3 flex flex-col gap-0.5 ${props.rennesIsHome ? "right-full mr-2 items-end" : "left-full ml-2 items-start"}`}
+          className={`pointer-events-none absolute bottom-7 hidden flex-col-reverse gap-0.5 sm:flex ${
+            props.rennesIsHome ? "right-full mr-4 items-end" : "left-full ml-4 items-start"
+          }`}
         >
           {appliedBonuses.slice(0, 3).map((b) => (
             <span key={b.id} className="flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600">
@@ -328,15 +340,15 @@ export function PredictionSheet(props: {
                     type="button"
                     disabled={needsScorer && applied.length === 0}
                     onClick={() => openPopup(k)}
-                    className={`flex h-full w-full items-center gap-3 rounded-2xl border-2 bg-[#111111] p-3 text-left text-white transition-colors enabled:hover:border-rouge disabled:opacity-40 ${
-                      applied.length ? "border-rouge" : "border-[#111111]"
+                    className={`bonus-card flex h-full w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors enabled:hover:border-rouge disabled:opacity-40 ${
+                      applied.length ? "!border-rouge" : ""
                     }`}
                   >
                     <BonusIcon kind={k} size={48} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{BONUS_INFO[k].name}</span>
-                      <span className="block text-xs text-white/80">{BONUS_INFO[k].effect}</span>
-                      {needsScorer && <span className="block text-xs text-orange-300">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      <span className="bonus-card-muted block text-xs">{BONUS_INFO[k].effect}</span>
+                      {needsScorer && <span className="bonus-card-warn block text-xs">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
                       {applied.length > 0 && (
                         <span className="mt-1 flex flex-wrap gap-1">
                           {applied.map((l) => (
