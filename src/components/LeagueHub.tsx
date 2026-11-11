@@ -217,14 +217,14 @@ export function LeagueHub(props: {
           {props.views.map((v) => tile(v, "w-full max-w-[5.5rem] justify-self-center", false))}
         </div>
 
-        {/* Ordinateur : la ligue choisie en premier, les autres à sa droite, et ses infos sur la même ligne */}
-        <div className="hidden items-start gap-4 lg:flex">
-          <div role="tablist" aria-label="Ligue affichée" className="flex shrink-0 gap-3">
-            {ordered.map((v) => tile(v, "w-24", true))}
-          </div>
-          <div key={`info-${sel}`} className={`min-w-0 flex-1 hub-fade-in`} style={{ transitionDuration: `${STEP_MS}ms` }}>
+        {/* Ordinateur : la ligue choisie en premier, ses infos juste à droite (même hauteur que la tuile),
+            puis les autres ligues */}
+        <div role="tablist" aria-label="Ligue affichée" className="hidden items-stretch gap-3 lg:flex">
+          {ordered.slice(0, 1).map((v) => tile(v, "w-24", true))}
+          <div key={`info-${sel}`} className="hub-fade-in h-[7.5rem] min-w-0 flex-1">
             {panel.info}
           </div>
+          {ordered.slice(1).map((v) => tile(v, "w-24", true))}
         </div>
       </div>
 

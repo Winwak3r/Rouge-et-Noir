@@ -51,34 +51,32 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
       const isDefault = user.activeLeagueId === l.id;
       panels[l.id] = {
         info: (
-          <section className="card space-y-3">
-            <h2 className={H}>Infos de la ligue</h2>
-            <div className="flex items-start gap-3">
-              <LeagueAvatar leagueId={l.id} name={l.name} at={l.imageUpdatedAt?.getTime() ?? null} size={64} />
-              <div className="min-w-0 space-y-1">
-                <p className="font-display text-xl font-bold uppercase leading-tight tracking-wide text-noir">{l.name}</p>
-                {l.description && <p className="text-sm text-neutral-600">{l.description}</p>}
-                <p className="text-xs text-neutral-500">
-                  {l._count.members} joueur{l._count.members > 1 ? "s" : ""} · {admin ? "Administrateur" : "Membre"}
-                  {isDefault ? " · Ligue par défaut" : ""}
-                </p>
-                <span className="flex gap-1">
-                  {l.competitions.map((c) => (
-                    <CompetitionBadge key={c} code={c} logo={board.logos[c]} />
-                  ))}
-                </span>
-              </div>
+          // Bloc compact (même hauteur que la tuile de la ligue sur ordinateur) : nom + compétitions, description,
+          // joueurs, puis les boutons de gestion
+          <section className="card flex h-full flex-col justify-center gap-1 px-3 py-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <p className="truncate font-display text-xl font-bold uppercase leading-tight tracking-wide text-noir">{l.name}</p>
+              <span className="flex shrink-0 gap-1">
+                {l.competitions.map((c) => (
+                  <CompetitionBadge key={c} code={c} logo={board.logos[c]} className="!h-5 !w-5" />
+                ))}
+              </span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            {l.description && <p className="truncate text-sm text-neutral-600">{l.description}</p>}
+            <p className="text-xs text-neutral-500">
+              {l._count.members} joueur{l._count.members > 1 ? "s" : ""} · {admin ? "Administrateur" : "Membre"}
+              {isDefault ? " · Ligue par défaut" : ""}
+            </p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {admin && (
-                <Link href={`/ligue?id=${l.id}`} className="btn-primary px-3 py-1.5 text-sm">
+                <Link href={`/ligue?id=${l.id}`} className="btn-primary px-2.5 py-1 text-xs">
                   Gérer ma ligue
                 </Link>
               )}
               {!isDefault && (
                 <form action={setDefaultLeagueAction}>
                   <input type="hidden" name="leagueId" value={l.id} />
-                  <button className="btn-secondary px-3 py-1.5 text-sm">Définir par défaut</button>
+                  <button className="btn-secondary px-2.5 py-1 text-xs">Définir par défaut</button>
                 </form>
               )}
               <LeaveLeagueForm leagueId={l.id} name={l.name} />
