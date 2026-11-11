@@ -8,10 +8,10 @@ import { CompetitionBadge } from "@/components/CompetitionBadge";
 import { InviteBox } from "@/components/LeagueAdminForms";
 import { LeagueAvatar } from "@/components/LeagueAvatar";
 import { CreateLeagueForm, JoinLeagueForm, LeaveLeagueForm } from "@/components/LeagueForms";
-import { LeagueHub } from "@/components/LeagueHub";
+import { LeagueHub, type LeaguePanel } from "@/components/LeagueHub";
 import { PageTitle } from "@/components/PageTitle";
 import { requireUser } from "@/lib/auth/session";
-import { bonusStock } from "@/lib/bonus-data";
+import { bonusQuotas, bonusStock } from "@/lib/bonus-data";
 import { loadBoard } from "@/lib/board-data";
 import { prisma } from "@/lib/db";
 import { appUrl } from "@/lib/email";
@@ -36,7 +36,8 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
   const canAdd = canJoinAnother(leagues.length);
 
   // Panneau d'infos de chaque ligue (à droite du classement)
-  const panels: Record<string, ReactNode> = {};
+  const panels: Record<string, LeaguePanel> = {};
+  const quotas = await bonusQuotas();
   await Promise.all(
     active.map(async (m) => {
       const l = m.league;
@@ -48,8 +49,8 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
         admin ? QRCode.toDataURL(url, { width: 600, margin: 2, errorCorrectionLevel: "M" }) : "",
       ]);
       const isDefault = user.activeLeagueId === l.id;
-      panels[l.id] = (
-        <div className="space-y-4">
+      panels[l.id] = {
+        info: (
           <section className="card space-y-3">
             <h2 className={H}>Infos de la ligue</h2>
             <div className="flex items-start gap-3">
@@ -83,22 +84,25 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
               <LeaveLeagueForm leagueId={l.id} name={l.name} />
             </div>
           </section>
-
-          {stock && (
-            <section className="card space-y-2">
-              <h2 className={H}>Mes spécialités maison</h2>
-              <ul className="space-y-1.5">
-                {BONUS_KINDS.map((k) => (
-                  <li key={k} className="flex items-center gap-2 text-sm">
-                    <BonusIcon kind={k} size={30} />
-                    <span className="flex-1">{BONUS_INFO[k].name}</span>
-                    <span className={`font-bold tabular-nums ${stock[k] > 0 ? "text-green-700" : "text-neutral-400"}`}>{stock[k]} restant{stock[k] > 1 ? "s" : ""}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
+        ),
+        bonus: stock ? (
+          <section className="card space-y-2">
+            <h2 className={H}>Mes spécialités maison</h2>
+            <ul className="space-y-2">
+              {BONUS_KINDS.map((k) => (
+                <li key={k} className="flex items-center gap-2 text-sm">
+                  <BonusIcon kind={k} size={30} />
+                  <span className="min-w-0 flex-1 leading-tight">{BONUS_INFO[k].name}</span>
+                  {/* restant / nombre de la saison */}
+                  <span className={`font-bold tabular-nums ${stock[k] > 0 ? "text-green-700" : "text-neutral-400"}`}>
+                    {stock[k]}/{quotas[k]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null,
+        invite: (
           <section className="card space-y-2">
             <h2 className={H}>Inviter des joueurs</h2>
             {admin ? (
@@ -112,19 +116,23 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
               </div>
             )}
           </section>
-        </div>
-      );
+        ),
+      };
     }),
   );
-  panels.general = (
-    <section className="card space-y-2">
-      <p className="text-lg font-bold">Général R&amp;N</p>
-      <p className="text-sm text-neutral-600">
-        Tous les joueurs inscrits dans une ligue et ayant pronostiqué au moins un match, sur toute la saison. Les spécialités maison n’y
-        comptent pas.
-      </p>
-    </section>
-  );
+  panels.general = {
+    info: (
+      <section className="card space-y-2">
+        <p className="font-display text-xl font-bold uppercase tracking-wide text-noir">Général R&amp;N</p>
+        <p className="text-sm text-neutral-600">
+          Tous les joueurs inscrits dans une ligue et ayant pronostiqué au moins un match, sur toute la saison. Les spécialités maison n’y
+          comptent pas.
+        </p>
+      </section>
+    ),
+    bonus: null,
+    invite: null,
+  };
 
   return (
     <div className="space-y-6">
