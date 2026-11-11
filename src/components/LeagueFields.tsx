@@ -4,10 +4,10 @@ import { useState } from "react";
 import { COMPETITIONS, type CompetitionCode } from "@/lib/competitions";
 import { CompetitionBadge } from "./CompetitionBadge";
 
-const MAX = 120;
+const MAX = 50;
 const CODES: CompetitionCode[] = ["LIGUE_1", "EUROPA_LEAGUE", "COUPE_DE_FRANCE"];
 
-/** Phrase de description (120 caractères au plus, compteur en direct). */
+/** Phrase de description (50 caractères au plus, compteur en direct). */
 export function DescriptionField({ defaultValue = "" }: { defaultValue?: string }) {
   const [v, setV] = useState(defaultValue);
   return (

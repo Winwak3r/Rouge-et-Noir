@@ -15,7 +15,7 @@ describe("Ligues", () => {
     expect(validateLeagueName("  Les   Bréquignistes ")).toEqual({ ok: true, name: "Les Bréquignistes" });
     expect(validateLeagueName("ab").ok).toBe(false);
   });
-  it("description : 120 caractères au plus, vide = aucune", () => {
+  it("description : 50 caractères au plus, vide = aucune", () => {
     expect(validateLeagueDescription("  Rejoins le groupe de l’association  ")).toEqual({ ok: true, description: "Rejoins le groupe de l’association" });
     expect(validateLeagueDescription("")).toEqual({ ok: true, description: null });
     expect(validateLeagueDescription("x".repeat(121)).ok).toBe(false);

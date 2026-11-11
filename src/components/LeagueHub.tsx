@@ -202,6 +202,23 @@ export function LeagueHub(props: {
   );
 
   const panel = props.panels[sel] ?? { info: null, bonus: null, invite: null };
+  // Bord haut des spécialités aligné sur le bord haut du tableau du classement (sa taille reste celle de son contenu)
+  const rankCol = useRef<HTMLDivElement>(null);
+  const [tableTop, setTableTop] = useState<number | null>(null);
+  useEffect(() => {
+    const col = rankCol.current;
+    if (!col) return;
+    const measure = () => {
+      const table = col.querySelector("table");
+      const box = table?.parentElement ?? table; // cadre arrondi qui entoure le tableau
+      if (!box) return setTableTop(null);
+      setTableTop(box.getBoundingClientRect().top - col.getBoundingClientRect().top);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(col);
+    return () => ro.disconnect();
+  }, [sel, stage]);
 
   const board = <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />;
   const ordered = [...props.views].sort((a, b) => (a.key === sel ? -1 : b.key === sel ? 1 : 0));
@@ -247,12 +264,12 @@ export function LeagueHub(props: {
 
       {/* Ordinateur : Classement (80 %) puis Mes spécialités maison (20 %), l'un après l'autre */}
       <div className="hidden items-start gap-4 lg:flex">
-        <div className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
+        <div ref={rankCol} className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
           <h2 className={T}>Classement</h2>
           {board}
         </div>
         {panel.bonus && (
-          <div className={`w-1/5 min-w-0 ${appear(stage >= 2)}`} style={{ transitionDuration: `${STEP_MS}ms` }}>
+          <div className={`w-1/5 min-w-0 ${appear(stage >= 2)}`} style={{ transitionDuration: `${STEP_MS}ms`, marginTop: tableTop ?? 0 }}>
             {panel.bonus}
           </div>
         )}

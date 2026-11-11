@@ -63,7 +63,11 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
                 ))}
               </span>
             </div>
-            {l.description && <p className="truncate text-sm text-neutral-600">{l.description}</p>}
+            {l.description && (
+              <p className="truncate text-sm text-neutral-600" title={l.description}>
+                {l.description.length > 50 ? `${l.description.slice(0, 50)}…` : l.description}
+              </p>
+            )}
             <p className="text-xs text-neutral-500">
               {l._count.members} joueur{l._count.members > 1 ? "s" : ""} · {admin ? "Administrateur" : "Membre"}
               {isDefault ? " · Ligue par défaut" : ""}

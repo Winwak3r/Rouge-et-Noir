@@ -50,7 +50,7 @@ export const canJoinAnother = (memberships: number) => memberships < MAX_LEAGUES
 export const GENERAL_KEY = "general";
 export const GENERAL_NAME = "Général R&N";
 
-export const DESCRIPTION_MAX = 120;
+export const DESCRIPTION_MAX = 50;
 
 export function validateLeagueDescription(raw: string): { ok: true; description: string | null } | { ok: false; error: string } {
   const description = raw.replace(/\s+/g, " ").trim();
