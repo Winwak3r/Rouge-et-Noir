@@ -21,7 +21,7 @@ async function deliver(subs: Array<{ id: string; endpoint: string }>, text: Push
   for (const sub of subs) {
     // Le message rejoint la file de l'appareil : chaque « réveil » affiche le suivant
     await prisma.pushMessage.create({
-      data: { subscriptionId: sub.id, title: text.title, body: text.body, url: text.url ?? "/", tag: text.tag ?? "rn" },
+      data: { subscriptionId: sub.id, title: text.title, body: text.body, url: text.url ?? "/", tag: text.tag ?? "rn", icon: text.icon ?? null },
     });
     try {
       const r = await sendPush(sub.endpoint, vapid);
@@ -102,7 +102,7 @@ export async function messageForEndpoint(endpoint: string, now = new Date()): Pr
   await prisma.pushMessage.update({ where: { id: next.id }, data: { deliveredAt: now } });
   // ménage : messages remis depuis plus d'un jour
   await prisma.pushMessage.deleteMany({ where: { subscriptionId: sub.id, deliveredAt: { lt: new Date(now.getTime() - 24 * 3600_000) } } });
-  return { title: next.title, body: next.body, url: next.url, tag: next.tag };
+  return { title: next.title, body: next.body, url: next.url, tag: next.tag, icon: next.icon };
 }
 
 /**

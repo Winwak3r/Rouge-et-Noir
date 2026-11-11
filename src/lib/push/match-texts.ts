@@ -1,4 +1,6 @@
 // Textes des notifications de match (fonctions pures, testées).
+import { shortPlayerName } from "@/lib/player-name";
+import { teamAbbr } from "@/lib/team-abbr";
 
 export interface MatchLabel {
   id: string;
@@ -11,6 +13,7 @@ export interface MatchText {
   body: string;
   url: string;
   tag: string;
+  icon?: string | null;
 }
 
 const min = (m: number | null, extra: number | null) => (m === null ? "" : ` (${m}${extra ? `+${extra}` : ""}')`);
@@ -23,12 +26,23 @@ const base = (m: MatchLabel, tag: string, body: string, title = `${m.home} – $
 
 export function goalText(
   m: MatchLabel,
-  g: { key: string; playerName: string; team: string; minute: number | null; extra: number | null; ownGoal: boolean; penalty: boolean },
+  g: {
+    key: string;
+    playerName: string;
+    team: string;
+    teamLogo?: string | null;
+    minute: number | null;
+    extra: number | null;
+    ownGoal: boolean;
+    penalty: boolean;
+  },
   score: { home: number | null; away: number | null },
 ): MatchText {
-  const who = g.ownGoal ? `contre son camp de ${g.playerName}` : `de ${g.playerName}${g.penalty ? " sur penalty" : ""}`;
+  // Le club d'abord (son sigle ; son logo en image de la notification), puis le buteur : « M. Camara »
+  const player = shortPlayerName(g.playerName);
+  const who = g.ownGoal ? `But contre son camp de ${player}` : `But de ${player}${g.penalty ? " sur penalty" : ""}`;
   const sc = score.home !== null && score.away !== null ? ` · ${score.home}-${score.away}` : "";
-  return base(m, `goal-${g.key}`, `⚽ But pour ${g.team} ${who}${min(g.minute, g.extra)}${sc}`);
+  return { ...base(m, `goal-${g.key}`, `⚽ ${teamAbbr(g.team)} · ${who}${min(g.minute, g.extra)}${sc}`), icon: g.teamLogo ?? null };
 }
 
 export function redCardText(m: MatchLabel, c: { key: string; playerName: string; team: string; minute: number | null; extra: number | null }): MatchText {

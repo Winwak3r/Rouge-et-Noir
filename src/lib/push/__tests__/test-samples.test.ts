@@ -13,7 +13,7 @@ describe("Notifications de test (administration)", () => {
     }
   });
   it("le but est marqué par le Stade Rennais, avec le bon score selon le côté", () => {
-    expect(sampleNotification("goal", M, "Arnaud Nordin").body).toBe("⚽ But pour Stade Rennais de Arnaud Nordin (34') · 0-1");
+    expect(sampleNotification("goal", M, "Arnaud Nordin").body).toBe("⚽ REN · But de A. Nordin (34') · 0-1");
     expect(sampleNotification("eve", M, "x").body).toContain("prévu demain à 19:00");
   });
 });

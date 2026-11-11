@@ -22,7 +22,7 @@ self.addEventListener("push", (event) => {
         body: msg.body,
         tag: msg.tag,
         data: { url: msg.url },
-        icon: "/icon-192.png",
+        icon: msg.icon || "/icon-192.png", // logo du club qui marque, sinon l'icône du site
         badge: "/icon-192.png",
       });
     })(),

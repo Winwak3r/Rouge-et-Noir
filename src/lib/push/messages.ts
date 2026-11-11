@@ -6,6 +6,8 @@ export interface PushText {
   body: string;
   url: string;
   tag: string;
+  /** Image de la notification (ex. logo du club qui marque) */
+  icon?: string | null;
 }
 
 export const GENERIC_MESSAGE: PushText = {

@@ -12,9 +12,12 @@ describe("Notifications de match", () => {
   });
   it("but : joueur, minute et score", () => {
     const t = goalText(M, { key: "9", playerName: "Arnaud Nordin", team: "Stade Rennais", minute: 34, extra: null, ownGoal: false, penalty: false }, { home: 0, away: 1 });
-    expect(t.body).toBe("⚽ But pour Stade Rennais de Arnaud Nordin (34') · 0-1");
+    expect(t.body).toBe("⚽ REN · But de A. Nordin (34') · 0-1");
     const pen = goalText(M, { key: "10", playerName: "Boulaye Dia", team: "Stade Rennais", minute: 45, extra: 2, ownGoal: false, penalty: true }, { home: 0, away: 2 });
-    expect(pen.body).toContain("sur penalty (45+2')");
+    expect(pen.body).toContain("But de B. Dia sur penalty (45+2')");
+    const logo = goalText(M, { key: "11", playerName: "Hamari Traoré", team: "Lille", teamLogo: "https://a.espncdn.com/lille.png", minute: 50, extra: null, ownGoal: false, penalty: false }, { home: 1, away: 2 });
+    expect(logo.body.startsWith("⚽ LIL · But de H. Traoré")).toBe(true);
+    expect(logo.icon).toBe("https://a.espncdn.com/lille.png");
   });
   it("carton rouge et buteur remplacé / entré en jeu", () => {
     expect(redCardText(M, { key: "r", playerName: "X", team: "OGC Nice", minute: 67, extra: null }).body).toBe("🟥 Carton rouge pour X (OGC Nice) (67')");

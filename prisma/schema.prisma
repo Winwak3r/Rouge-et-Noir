@@ -192,6 +192,7 @@ model PushMessage {
   body           String
   url            String
   tag            String
+  icon           String? // image de la notification (ex. logo du club qui marque)
   createdAt      DateTime         @default(now())
   deliveredAt    DateTime?
   subscription   PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)

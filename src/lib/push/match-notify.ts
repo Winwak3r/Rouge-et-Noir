@@ -1,6 +1,8 @@
 // Notifications automatiques de match : direct (buts, cartons, buteur remplacé, déroulé),
 // veille du match, cotes disponibles, composition publiée. Chaque événement n'est envoyé qu'une fois.
 import { prisma } from "@/lib/db";
+import { clubLogo } from "@/lib/club-logo";
+import { clubLogosMode } from "@/lib/club-logo-mode";
 import type { ProviderMatchDetail } from "@/lib/providers/types";
 import { notifyOnce } from "./send";
 import {
@@ -37,6 +39,16 @@ export async function notifyMatchProgress(opts: {
   if (match.resultConfirmedAt || !isFresh(match.kickoffAt, now)) return 0;
   const teamName = (teamId: number | null) =>
     teamId === opts.rennesId ? (match.rennesIsHome ? m.home : m.away) : match.rennesIsHome ? m.away : m.home;
+  // Logo du club (officiel ou factice selon le réglage), en image de la notification
+  const teams = await prisma.match.findUnique({ where: { id: match.id }, select: { homeTeam: true, awayTeam: true } });
+  const rennesTeam = teams ? (match.rennesIsHome ? teams.homeTeam : teams.awayTeam) : null;
+  const otherTeam = teams ? (match.rennesIsHome ? teams.awayTeam : teams.homeTeam) : null;
+  const logoMode = await clubLogosMode();
+  const teamLogo = (teamId: number | null) => {
+    const t = teamId === opts.rennesId ? rennesTeam : otherTeam;
+    const url = t ? clubLogo(t, logoMode) : null;
+    return url && url.startsWith("http") ? url : null; // les logos factices (images en ligne) ne passent pas en notification
+  };
   let sent = 0;
   const send = (kind: string, text: ReturnType<typeof kickoffText>, userIds?: string[]) =>
     notifyOnce({ matchId: match.id, kind, text, pref: "live", userIds }).then((n) => (sent += n));
@@ -55,7 +67,16 @@ export async function notifyMatchProgress(opts: {
       `goal:${g.key}`,
       goalText(
         m,
-        { key: g.key, playerName: g.playerName, team: teamName(scoringTeam), minute: g.minute, extra: g.extraMinute, ownGoal: g.isOwnGoal, penalty: g.isPenalty },
+        {
+          key: g.key,
+          playerName: g.playerName,
+          team: teamName(scoringTeam),
+          teamLogo: teamLogo(scoringTeam),
+          minute: g.minute,
+          extra: g.extraMinute,
+          ownGoal: g.isOwnGoal,
+          penalty: g.isPenalty,
+        },
         { home: d.homeScore, away: d.awayScore },
       ),
     );
