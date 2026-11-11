@@ -13,7 +13,7 @@ import { teamAbbr } from "@/lib/team-abbr";
 /** Fermeture de la fiche, fournie par l'accordéon qui l'ouvre. */
 export const SheetContext = createContext<{ close: () => void; done?: () => void } | null>(null);
 
-type Side = { name: string; logo: string | null; rennes: boolean };
+type Side = { name: string; logo: string | null; rennes: boolean; rank?: number | null };
 
 /**
  * Mobile : fiche plein écran d'un match à pronostiquer. En-tête fixe avec le score à saisir,
@@ -132,6 +132,10 @@ export function PredictionSheet(props: {
     setPerLeague((cur) => Object.fromEntries(Object.entries(cur).map(([k, v]) => [k, v === "GALETTE_SAUCISSE" ? "" : v])));
   }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const lastName = (full: string) => full.trim().split(/\s+/).slice(1).join(" ") || full;
+  const appliedBonuses = props.leagues
+    .filter((l) => perLeague[l.id])
+    .map((l) => ({ id: l.id, name: l.name, kind: perLeague[l.id] as BonusKind }));
   const scoreBox = (value: string, set: (v: string) => void, name: string, label: string) => (
     <label className="relative block">
       <span className="sr-only">Buts {label}</span>
@@ -152,13 +156,36 @@ export function PredictionSheet(props: {
         ))}
       </select>
       {name === "rennesGoals" && (chosen || scorer === NO_SCORER) && (
-        <span className="pointer-events-none absolute -bottom-2 -right-2">
+        // Vignette du buteur en bas, côté extérieur ; son nom (sans le prénom) à côté — masqué une fois l'en-tête réduit
+        <span
+          className={`pointer-events-none absolute -bottom-2 flex items-center gap-1 ${
+            props.rennesIsHome ? "-left-2 flex-row-reverse" : "-right-2"
+          }`}
+        >
           <PlayerPhoto
             name={chosen ? chosen.name : "Aucun buteur rennais"}
             url={chosen ? (chosen.photo ?? null) : "/brand/aucun-buteur.png"}
             size={compact ? 20 : 28}
             className="ring-2 ring-[var(--header-bg)]"
           />
+          {!compact && (
+            <span className="max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir">
+              {chosen ? lastName(chosen.name) : "Aucun buteur"}
+            </span>
+          )}
+        </span>
+      )}
+      {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
+        // Spécialités choisies : icône + ligue (10 caractères au plus), 3 lignes au maximum, côté extérieur
+        <span
+          className={`pointer-events-none absolute top-0 flex flex-col gap-0.5 ${props.rennesIsHome ? "right-full mr-2 items-end" : "left-full ml-2 items-start"}`}
+        >
+          {appliedBonuses.slice(0, 3).map((b) => (
+            <span key={b.id} className="flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600">
+              <BonusIcon kind={b.kind} size={16} />
+              {b.name.length > 10 ? `${b.name.slice(0, 10)}…` : b.name}
+            </span>
+          ))}
         </span>
       )}
     </label>
@@ -175,6 +202,13 @@ export function PredictionSheet(props: {
     ) : (
       <TeamLabel name={t.name} rennes={t.rennes} className="max-w-full truncate font-display text-lg font-bold uppercase" />
     );
+    // Classement de l'équipe, dans un macaron gris clair, à l'extérieur du logo (masqué une fois l'en-tête réduit)
+    const rank =
+      !compact && t.rank ? (
+        <span className="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-bold tabular-nums text-neutral-600 ring-1 ring-neutral-200">
+          {t.rank === 1 ? "1er" : `${t.rank}e`}
+        </span>
+      ) : null;
     return (
       <div
         className={`flex min-w-0 items-center gap-1.5 transition-all duration-300 ${
@@ -188,7 +222,10 @@ export function PredictionSheet(props: {
           </>
         ) : (
           <>
-            {logo}
+            <span className={`flex items-center gap-2 ${side === "home" ? "" : "flex-row-reverse"}`}>
+              {rank}
+              {logo}
+            </span>
             {name}
           </>
         )}

@@ -9,6 +9,8 @@ import { playerPhotoUrl } from "@/lib/player-photo";
 import { getActiveRules } from "@/lib/scoring/active-rules";
 import { canEditPrediction, oddsToBonus } from "@/lib/scoring/engine";
 import { maxPredictedGoals } from "@/lib/settings";
+import { ESPN_LEAGUES } from "@/lib/providers/espn-parse";
+import { fetchStandings } from "@/lib/providers/espn-standings";
 
 export type LineupPlayer = { id: string; name: string; position: string | null; photo: string | null; number: number | null; starter: boolean };
 
@@ -62,6 +64,12 @@ export async function loadMatchSheet(matchId: string, userId: string) {
         .map((p) => ({ id: p.id, name: p.name, position: p.position, photo: playerPhotoUrl(p), number: p.shirtNumber, starter: lineupOf.get(p.id)! }))
     : [];
 
+  // Rang de chaque équipe dans la compétition du match (pas de classement en Coupe de France)
+  const table =
+    match.competition === "COUPE_DE_FRANCE"
+      ? []
+      : await fetchStandings(ESPN_LEAGUES[match.competition], Number(process.env.SEASON_START_YEAR ?? 2026)).catch(() => []);
+  const rankOf = (externalId: number) => table.find((r) => r.teamId === externalId)?.rank ?? null;
   const [stocks, uses, quotas] = await Promise.all([
     Promise.all(memberships.map((m) => bonusStock(userId, m.league.id, match.seasonId))),
     prisma.bonusUse.findMany({ where: { userId, matchId } }),
@@ -82,8 +90,8 @@ export async function loadMatchSheet(matchId: string, userId: string) {
       matchId: match.id,
       title: `${code} · ${formatShortNumeric(match.kickoffAt)} ${formatDateTime(match.kickoffAt).split(" à ")[1] ?? ""}`.trim(),
       competitionLogo: logos[match.competition] ?? null,
-      home: { name: match.homeTeam.name, logo: clubLogo(match.homeTeam, mode), rennes: match.rennesIsHome },
-      away: { name: match.awayTeam.name, logo: clubLogo(match.awayTeam, mode), rennes: !match.rennesIsHome },
+      home: { name: match.homeTeam.name, logo: clubLogo(match.homeTeam, mode), rennes: match.rennesIsHome, rank: rankOf(match.homeTeam.externalId) },
+      away: { name: match.awayTeam.name, logo: clubLogo(match.awayTeam, mode), rennes: !match.rennesIsHome, rank: rankOf(match.awayTeam.externalId) },
       rennesIsHome: match.rennesIsHome,
       maxGoals: maxPredictedGoals(),
       noScorerBonus: rules.noScorerBonus,
