@@ -156,34 +156,37 @@ export function PredictionSheet(props: {
         ))}
       </select>
       {name === "rennesGoals" && (chosen || scorer === NO_SCORER) && (
-        // Vignette du buteur en bas, côté extérieur ; son nom (sans le prénom) à côté — masqué une fois l'en-tête réduit
-        <span
-          className={`pointer-events-none absolute -bottom-2 flex items-center gap-1 ${
-            props.rennesIsHome ? "-left-2 flex-row-reverse" : "-right-2"
-          }`}
-        >
-          <PlayerPhoto
-            name={chosen ? chosen.name : "Aucun buteur rennais"}
-            url={chosen ? (chosen.photo ?? null) : "/brand/aucun-buteur.png"}
-            size={compact ? 20 : 28}
-            className="ring-2 ring-[var(--header-bg)]"
-          />
+        // Vignette du buteur dans le coin bas (droite si Rennes joue à l'extérieur, gauche à domicile) ;
+        // son nom (sans le prénom) après la vignette à l'extérieur, avant à domicile — masqué une fois l'en-tête réduit
+        <>
+          <span className={`pointer-events-none absolute -bottom-2 ${props.rennesIsHome ? "-left-2" : "-right-2"}`}>
+            <PlayerPhoto
+              name={chosen ? chosen.name : "Aucun buteur rennais"}
+              url={chosen ? (chosen.photo ?? null) : "/brand/aucun-buteur.png"}
+              size={compact ? 20 : 28}
+              className="ring-2 ring-[var(--header-bg)]"
+            />
+          </span>
           {!compact && (
-            <span className="max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir">
+            <span
+              className={`pointer-events-none absolute -bottom-1 max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir ${
+                props.rennesIsHome ? "right-full mr-1" : "left-full ml-1"
+              }`}
+            >
               {chosen ? lastName(chosen.name) : "Aucun buteur"}
             </span>
           )}
-        </span>
+        </>
       )}
       {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
-        // Spécialités choisies : icône + ligue (10 caractères au plus), 3 lignes au maximum, côté extérieur
+        // Spécialités choisies : icône + ligue (20 caractères au plus), 3 lignes au maximum, côté extérieur
         <span
           className={`pointer-events-none absolute top-0 flex flex-col gap-0.5 ${props.rennesIsHome ? "right-full mr-2 items-end" : "left-full ml-2 items-start"}`}
         >
           {appliedBonuses.slice(0, 3).map((b) => (
             <span key={b.id} className="flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold leading-tight text-neutral-600">
               <BonusIcon kind={b.kind} size={16} />
-              {b.name.length > 10 ? `${b.name.slice(0, 10)}…` : b.name}
+              {b.name.length > 20 ? `${b.name.slice(0, 20)}…` : b.name}
             </span>
           ))}
         </span>
@@ -202,9 +205,9 @@ export function PredictionSheet(props: {
     ) : (
       <TeamLabel name={t.name} rennes={t.rennes} className="max-w-full truncate font-display text-lg font-bold uppercase" />
     );
-    // Classement de l'équipe, dans un macaron gris clair, à l'extérieur du logo (masqué une fois l'en-tête réduit)
+    // Classement de l'équipe, dans un macaron gris clair, à l'extérieur du logo (aussi dans l'en-tête réduit)
     const rank =
-      !compact && t.rank ? (
+      t.rank ? (
         <span className="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-bold tabular-nums text-neutral-600 ring-1 ring-neutral-200">
           {t.rank === 1 ? "1er" : `${t.rank}e`}
         </span>
@@ -217,6 +220,7 @@ export function PredictionSheet(props: {
       >
         {compact ? (
           <>
+            {rank}
             {name}
             {logo}
           </>
@@ -497,6 +501,11 @@ export function PredictionSheet(props: {
 
       {/* Barre d'enregistrement, toujours visible */}
       <div className="mx-auto w-full max-w-5xl shrink-0 border-t border-neutral-200 bg-[var(--header-bg)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
+        {state.success && !pending && (
+          <p role="status" className="mx-auto mb-2 max-w-5xl text-sm font-semibold text-green-700">
+            ✓ Pronostic enregistré
+          </p>
+        )}
         {state.error && (
           <p role="alert" className="mx-auto mb-2 max-w-5xl text-sm font-medium text-red-700">
             {state.error}

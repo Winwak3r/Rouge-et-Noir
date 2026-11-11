@@ -6,7 +6,7 @@ import { SheetContext } from "./PredictionSheet";
 
 /**
  * Page d'un match à pronostiquer : plein écran (au-dessus de l'en-tête et de la barre du bas),
- * sur le fond d'écran du thème. Retour : page précédente ; une fois enregistré : retour au calendrier.
+ * sur le fond d'écran du thème. Retour : page précédente ; une fois enregistré, on reste sur la page.
  */
 export function MatchPageShell({ matchId, children }: { matchId: string; children: ReactNode }) {
   const router = useRouter();
@@ -22,7 +22,8 @@ export function MatchPageShell({ matchId, children }: { matchId: string; childre
     if (fromSite && window.history.length > 1) router.back();
     else router.push("/");
   };
-  const done = () => router.push(`/#match-${matchId}`);
+  // Enregistré : on reste sur la page du match (données rafraîchies)
+  const done = () => router.refresh();
   return (
     <div className="wallpaper-bg fixed inset-0 z-[60]">
       {/* Toute la largeur de l'écran (contenu centré à l'intérieur) : la barre de défilement est tout à droite */}
