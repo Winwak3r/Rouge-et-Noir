@@ -145,7 +145,7 @@ export function PredictionSheet(props: {
         value={value}
         onChange={(e) => set(e.target.value)}
         className={`cursor-pointer appearance-none rounded-2xl border-2 border-neutral-300 bg-neutral-50 text-center font-club font-semibold text-noir transition-all duration-300 hover:border-rouge hover:bg-neutral-100 focus:border-rouge focus:outline-none ${
-          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-20 w-20 text-5xl"
+          compact ? "h-11 w-11 rounded-xl text-2xl" : "h-16 w-16 text-4xl sm:h-20 sm:w-20 sm:text-5xl"
         }`}
         style={{ textAlignLast: "center" }}
       >
@@ -177,15 +177,33 @@ export function PredictionSheet(props: {
               <span className="max-w-[7rem] truncate rounded bg-[var(--header-bg)] px-1 text-xs font-semibold text-noir">
                 {chosen ? shortPlayerName(chosen.name) : "Aucun buteur"}
               </span>
-              {/* Mobile : spécialités à la suite du buteur, alignées avec sa vignette */}
+            </span>
+          )}
+          {/* Mobile : spécialités sous le buteur, alignées avec le début de son nom */}
+          {!compact && appliedBonuses.length > 0 && (
+            <span
+              className={`pointer-events-none absolute -bottom-9 flex gap-1 sm:hidden ${props.rennesIsHome ? "right-full mr-4 flex-row-reverse" : "left-full ml-4"}`}
+            >
               {appliedBonuses.slice(0, 3).map((b) => (
-                <span key={b.id} title={`${BONUS_INFO[b.kind].name} · ${b.name}`} className="sm:hidden">
+                <span key={b.id} title={`${BONUS_INFO[b.kind].name} · ${b.name}`}>
                   <BonusIcon kind={b.kind} size={22} />
                 </span>
               ))}
             </span>
           )}
         </>
+      )}
+      {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && !(chosen || scorer === NO_SCORER) && (
+        // Mobile, sans buteur choisi (ex. Kouign-Amann seul) : les spécialités à la place du buteur
+        <span
+          className={`pointer-events-none absolute -bottom-2 flex gap-1 sm:hidden ${props.rennesIsHome ? "right-full mr-4 flex-row-reverse" : "left-full ml-4"}`}
+        >
+          {appliedBonuses.slice(0, 3).map((b) => (
+            <span key={b.id} title={`${BONUS_INFO[b.kind].name} · ${b.name}`}>
+              <BonusIcon kind={b.kind} size={22} />
+            </span>
+          ))}
+        </span>
       )}
       {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
         // Ordinateur : la 1re spécialité juste au-dessus du nom du buteur, les suivantes empilées au-dessus
