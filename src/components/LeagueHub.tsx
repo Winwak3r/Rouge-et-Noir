@@ -15,8 +15,9 @@ export interface LeaguePanel {
 }
 
 const STEP_MS = 1000; // déplacement des ligues et apparition de leurs infos
-const REVEAL_DELAY = 150; // Classement puis Spécialités : affichés presque aussitôt
-const REVEAL_MS = 350; // durée de leur apparition
+const RANK_DELAY = 350; // Classement : délai avant apparition
+const BONUS_DELAY = 950; // Mes spécialités maison : délai avant apparition
+const REVEAL_MS = 600; // durée de leur apparition
 const T = "mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 
 /**
@@ -50,8 +51,8 @@ export function LeagueHub(props: {
   const [stage, setStage] = useState(0);
   useEffect(() => {
     setStage(0);
-    const a = window.setTimeout(() => setStage(1), REVEAL_DELAY);
-    const b = window.setTimeout(() => setStage(2), REVEAL_DELAY * 2);
+    const a = window.setTimeout(() => setStage(1), RANK_DELAY);
+    const b = window.setTimeout(() => setStage(2), BONUS_DELAY);
     return () => {
       clearTimeout(a);
       clearTimeout(b);
