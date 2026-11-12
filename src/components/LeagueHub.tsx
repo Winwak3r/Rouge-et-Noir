@@ -56,6 +56,7 @@ export function LeagueHub(props: {
   //  2. la tuile de la nouvelle ligue glisse aussitôt tout à gauche ;
   //  3. ses infos se déroulent et repoussent les autres tuiles vers la droite.
   const [shown, setShown] = useState(sel); // ligue placée en premier (avec ses infos)
+  const [boardSel, setBoardSel] = useState(sel); // ligue du classement / des spécialités (ordinateur)
   const [infoOpen, setInfoOpen] = useState(true);
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -99,10 +100,13 @@ export function LeagueHub(props: {
   const choose = (key: string) => {
     if (key === sel) return;
     timers.current.forEach(clearTimeout);
-    setSel(key); // classement, spécialités (et mobile) suivent aussitôt
+    setSel(key); // mobile : suit aussitôt
+    setStage(0); // ordinateur : classement et spécialités s'effacent (toujours ceux de l'ancienne ligue)…
     setInfoOpen(false); // 1. repli des infos de la ligue affichée
     timers.current = [
       window.setTimeout(() => {
+        // … et ne passent à la nouvelle ligue qu'une fois effacés
+        setBoardSel(key);
         // 2. la nouvelle ligue passe tout à gauche (position de départ mémorisée pour l'animation)
         before.current = new Map([...tileRefs.current].map(([k, el]) => [k, el.getBoundingClientRect()]));
         setShown(key);
@@ -267,6 +271,10 @@ export function LeagueHub(props: {
   }, [sel, stage]);
 
   const board = <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />;
+  const boardPc = (
+    <StandingsBoard views={props.views} initial={boardSel} forcedKey={boardSel} hideSelector hideHeading me={props.me} logos={props.logos} />
+  );
+  const pcBonus = props.panels[boardSel]?.bonus ?? null;
   const ordered = [...props.views].sort((a, b) => (a.key === shown ? -1 : b.key === shown ? 1 : 0));
   const shownInfo = props.panels[shown]?.info ?? null;
   const appear = (visible: boolean) =>
@@ -319,13 +327,13 @@ export function LeagueHub(props: {
 
       {/* Ordinateur : Classement (80 %) puis Mes spécialités maison (20 %), l'un après l'autre */}
       <div className="hidden items-start gap-4 lg:flex">
-        <div ref={rankCol} className={`min-w-0 ${panel.bonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${REVEAL_MS}ms` }}>
+        <div ref={rankCol} className={`min-w-0 ${pcBonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${REVEAL_MS}ms` }}>
           <h2 className={T}>Classement</h2>
-          {board}
+          {boardPc}
         </div>
-        {panel.bonus && (
+        {pcBonus && (
           <div className={`w-1/5 min-w-0 ${appear(stage >= 2)}`} style={{ transitionDuration: `${REVEAL_MS}ms`, marginTop: tableTop ?? 0 }}>
-            {panel.bonus}
+            {pcBonus}
           </div>
         )}
       </div>
