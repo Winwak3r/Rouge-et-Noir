@@ -485,3 +485,14 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .recap-grow { animation: none; }
 }
+
+/* « Bien joué ! » : surgit une fois les points rangés sous le score (après l'animation de rangement) */
+.recap-bravo { animation: recap-bravo 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) 1.5s both; }
+@keyframes recap-bravo {
+  0% { opacity: 0; transform: scale(0.3) rotate(-12deg); }
+  60% { opacity: 1; transform: scale(1.25) rotate(4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recap-bravo { animation: none; }
+}

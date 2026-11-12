@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import { createPortal } from "react-dom";
 import type { RecapData } from "@/lib/match-recap";
 import { teamAbbr } from "@/lib/team-abbr";
+import { shortPlayerName } from "@/lib/player-name";
 import { BonusIcon } from "./BonusIcon";
 import { LeagueAvatar } from "./LeagueAvatar";
 import { PlayerPhoto } from "./PlayerPhoto";
@@ -299,7 +300,10 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                 {my.scorer ? (
                   <>
                     <PlayerPhoto name={my.scorer.name} url={my.scorer.photo} size={40} shape="card" />
-                    <span className="truncate text-[1.9vh] font-semibold">{my.scorer.name}</span>
+                    <span className="truncate text-[1.9vh] font-semibold">
+                      <span className="sm:hidden">{shortPlayerName(my.scorer.name)}</span>
+                      <span className="hidden sm:inline">{my.scorer.name}</span>
+                    </span>
                   </>
                 ) : my.noScorer ? (
                   <span className="text-[1.9vh] font-semibold">Aucun buteur rennais</span>
@@ -315,8 +319,11 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                 <Settle show={t >= T_PTS_SCORE} big={4} className="relative">
                   <span className={`${pillBase} ${scoreColor(my.scorePoints)}`}>{signed(my.scorePoints, t >= T_PTS_SCORE)}</span>
                   {my.scorePoints >= 4 && (
-                    <span className="absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-green-600 px-1.5 py-0.5 text-[1.4vh] font-bold uppercase text-white shadow">
-                      Bien joué !
+                    // apparaît une fois les points rangés sous le score
+                    <span className="absolute left-full top-1/2 ml-2 -translate-y-1/2">
+                      <span className="recap-bravo block whitespace-nowrap rounded-md bg-green-600 px-1.5 py-0.5 text-[1.4vh] font-bold uppercase text-white shadow">
+                        Bien joué !
+                      </span>
                     </span>
                   )}
                 </Settle>
