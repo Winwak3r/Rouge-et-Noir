@@ -31,7 +31,8 @@ export function Landing() {
     // Pleine largeur, au-delà de la colonne centrale du site
     <div className="recap-bg relative left-1/2 w-screen -translate-x-1/2 text-white" style={{ marginTop: "calc(-1 * var(--main-pt, 1.5rem))" }}>
       {/* Page visiteur en plein écran : l'en-tête du site est masqué ici */}
-      <style>{"body > header, header.site-header { display: none !important; }"}</style>
+      {/* … et la marge du bas de la page est retirée : le fond animé va jusqu'au pied de page */}
+      <style>{"body > header, header.site-header { display: none !important; } main { padding-bottom: 0 !important; }"}</style>
       {/* Fond animé rouge et noir : triskells et hermines qui défilent (le même que l'animation de fin de match) */}
       {/* ─── Page 1 ─── */}
       <section className="relative flex min-h-[100svh] items-start px-6 py-8 lg:items-center lg:py-16">
