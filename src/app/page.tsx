@@ -692,9 +692,9 @@ export default async function HomePage() {
               {renderMatch(next, { layout: "next" })}
             </section>
             {/* Ordinateur : les trois prochains matchs, en cartes qui ouvrent la page du match */}
-            <section className="hidden space-y-3 lg:block" data-tour="next-match">
+            <section id="home-next-cards" className="hidden space-y-3 lg:block" data-tour="next-match">
               <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochains matchs</h2>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-7 px-1">
                 {upcoming.map((m) => {
                   const h = headersById.get(m.id);
                   if (!h) return null;
@@ -722,18 +722,36 @@ export default async function HomePage() {
               : canEditPrediction(featured, now)
                 ? "Pronostics ouverts"
                 : "Pronostics fermés";
+          const nh = next ? headersById.get(next.id) : undefined;
           return (
-            <HomeStickyMatch
-              watchId={top ? "home-top-match" : "home-next-match"}
-              title={isLive ? "Match en direct" : featured.status === "FINISHED" ? "Match terminé" : "Prochain match"}
-              code={fh.code}
-              competitionLogo={fh.competitionLogo}
-              home={fh.home}
-              away={fh.away}
-              score={fh.score ? `${fh.score.home} - ${fh.score.away}` : null}
-              status={status}
-              live={isLive}
-            />
+            <>
+              <HomeStickyMatch
+                only="mobile"
+                watchId={top ? "home-top-match" : "home-next-match"}
+                title={isLive ? "Match en direct" : featured.status === "FINISHED" ? "Match terminé" : "Prochain match"}
+                code={fh.code}
+                competitionLogo={fh.competitionLogo}
+                home={fh.home}
+                away={fh.away}
+                score={fh.score ? `${fh.score.home} - ${fh.score.away}` : null}
+                status={status}
+                live={isLive}
+              />
+              {next && nh && (
+                <HomeStickyMatch
+                  only="desktop"
+                  watchId="home-next-cards"
+                  title="Prochain match"
+                  code={nh.code}
+                  competitionLogo={nh.competitionLogo}
+                  home={nh.home}
+                  away={nh.away}
+                  score={null}
+                  status={canEditPrediction(next, now) ? "Pronostics ouverts" : "Pronostics fermés"}
+                  live={false}
+                />
+              )}
+            </>
           );
         })()}
 

@@ -11,6 +11,8 @@ type Side = { name: string; logo: string | null; rennes: boolean };
  * [titre] [J10 · logo de la compétition] [Rennes 1 - 2 Lille] [statut]. Un clic remonte en haut de la page.
  */
 export function HomeStickyMatch(props: {
+  /** « mobile » : petits écrans seulement ; « desktop » : ordinateur seulement */
+  only?: "mobile" | "desktop";
   watchId: string;
   title: string;
   code: string;
@@ -61,7 +63,7 @@ export function HomeStickyMatch(props: {
       tabIndex={show ? 0 : -1}
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       title="Revenir en haut"
-      className={`fixed inset-x-0 z-[25] block w-full border-b border-neutral-200 bg-[var(--header-bg)] text-left shadow-sm transition-all duration-300 ${
+      className={`fixed inset-x-0 z-[25] w-full border-b ${props.only === "mobile" ? "block lg:hidden" : props.only === "desktop" ? "hidden lg:block" : "block"} border-neutral-200 bg-[var(--header-bg)] text-left shadow-sm transition-all duration-300 ${
         show ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
       }`}
       style={{ top }}

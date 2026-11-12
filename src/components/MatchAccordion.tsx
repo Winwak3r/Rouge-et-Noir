@@ -286,6 +286,9 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
   );
 }
 
+// Cartes : « SRFC » à la place de « Stade Rennais »
+const srfc = (t: MatchHeader["home"]): MatchHeader["home"] => (t.rennes ? { ...t, name: "SRFC" } : t);
+
 /** Carte compacte d'un match à venir (accueil, ordinateur) : un clic ouvre la page du match. */
 export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   const tone = {
@@ -297,7 +300,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   return (
     <Link
       href={href}
-      className={`match-head match-head-${h.competition.toLowerCase()} flex h-full flex-col gap-2 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 bg-surface p-3 shadow-sm transition-colors hover:bg-neutral-50 ${BORDER[h.competition]}`}
+      className={`match-head match-head-${h.competition.toLowerCase()} flex h-full flex-col gap-2 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 bg-surface p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-200 hover:z-10 hover:scale-[1.04] hover:bg-neutral-50 hover:shadow-2xl ${BORDER[h.competition]}`}
     >
       <span className="flex items-start gap-2">
         <span className="match-code w-9 shrink-0 font-display text-xl font-black">{h.code}</span>
@@ -320,9 +323,9 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
         </span>
       </span>
       <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-11">
-        <Team t={h.home} open={false} home />
+        <Team t={srfc(h.home)} open={false} home />
         <span className="font-display text-lg font-bold">–</span>
-        <Team t={h.away} open={false} />
+        <Team t={srfc(h.away)} open={false} />
       </span>
       <span className="block pl-11 text-xs text-neutral-500">{h.dateLabel}</span>
       {h.myPick ? (
