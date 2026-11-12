@@ -19,8 +19,8 @@ const CLOSE_MS = 600; // 1) repli des infos de la ligue affichée
 const MOVE_MS = 500; // 2) la tuile de la nouvelle ligue glisse tout à gauche
 // 3) puis ses infos se déroulent (INFO_MS)
 const INFO_MS = 1000; // durée du déroulé des infos
-const RANK_DELAY = 350; // Classement : délai avant apparition
-const BONUS_DELAY = 950; // Mes spécialités maison : délai avant apparition
+const RANK_DELAY = 350; // Classement : délai après que la tuile de la ligue est passée tout à gauche
+const BONUS_DELAY = 950; // Mes spécialités maison : idem
 const REVEAL_MS = 600; // durée de leur apparition
 const T = "mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 
@@ -76,12 +76,17 @@ export function LeagueHub(props: {
     return () => ro.disconnect();
   }, [props.views.length]);
 
+  const firstStage = useRef(true);
   // Étapes d'apparition (ordinateur) : 0 ligues + infos · 1 Classement · 2 Spécialités
   const [stage, setStage] = useState(0);
   useEffect(() => {
     setStage(0);
-    const a = window.setTimeout(() => setStage(1), RANK_DELAY);
-    const b = window.setTimeout(() => setStage(2), BONUS_DELAY);
+    // Au changement de ligue, on attend que sa tuile soit passée tout à gauche (repli + déplacement) ;
+    // à l'ouverture de la page, rien ne bouge : pas d'attente
+    const wait = firstStage.current ? 0 : CLOSE_MS + MOVE_MS;
+    firstStage.current = false;
+    const a = window.setTimeout(() => setStage(1), wait + RANK_DELAY);
+    const b = window.setTimeout(() => setStage(2), wait + BONUS_DELAY);
     return () => {
       clearTimeout(a);
       clearTimeout(b);
