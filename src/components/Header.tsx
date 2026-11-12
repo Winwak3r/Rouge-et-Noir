@@ -158,6 +158,7 @@ export async function Header() {
           </Link>
           <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end sm:flex-row sm:items-stretch">
             <div className="flex items-center gap-2 sm:items-stretch">
+            <ThemeSwitch className="hidden self-center sm:inline-flex" />
             <nav className="hdr-tiles flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
             <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon">
@@ -186,7 +187,6 @@ export async function Header() {
               <span className="hidden sm:inline">Zone mixte</span>
             </Link>
           </nav>
-            <ThemeSwitch className="hidden self-center sm:inline-flex" />
             </div>
             {/* Mobile : interrupteur du thème en haut à droite (sur ordinateur, il est sur la ligne des boutons) */}
             <ThemeSwitch className="inline-flex sm:hidden" />

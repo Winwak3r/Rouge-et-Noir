@@ -27,6 +27,8 @@ export function HomeStickyMatch(props: {
   score: string | null;
   status: string;
   live: boolean;
+  /** fin de ligne (ordinateur) : date et heure du match, ou minute de jeu en direct */
+  when?: string | null;
 }) {
   const [top, setTop] = useState(0);
   const [show, setShow] = useState(false);
@@ -124,6 +126,12 @@ export function HomeStickyMatch(props: {
           {logo(props.away)}
           <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? props.away.name : teamAbbr(props.away.name)}</span>
         </span>
+        {/* Date et heure, ou minute de jeu (ordinateur) */}
+        {props.when && (
+          <span className={`hidden shrink-0 whitespace-nowrap text-xs font-semibold lg:inline ${props.live ? "text-rouge" : "text-neutral-500"}`}>
+            {props.when}
+          </span>
+        )}
         {/* Statut (sauf « Pronostics ouverts / fermés ») */}
         {!/^Pronostics/.test(props.status) && (
           <span

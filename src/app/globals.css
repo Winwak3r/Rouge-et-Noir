@@ -516,3 +516,8 @@ body::before {
   }
   .hdr-tiles > :is(.hbtn, .hbtn-pseudo) + :is(.hbtn, .hbtn-pseudo) { border-left: 1px solid rgba(0, 0, 0, 0.12); }
 }
+
+/* Ordinateur, thème clair : boutons de l'en-tête plus clairs */
+@media (min-width: 640px) {
+  :root:not([data-theme="dark"]) { --hbtn-bg: #efefef; --hbtn-hover: #e2e2e2; }
+}

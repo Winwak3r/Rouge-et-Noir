@@ -738,6 +738,7 @@ export default async function HomePage() {
                 score={fh.score ? `${fh.score.home} - ${fh.score.away}` : null}
                 status={status}
                 live={isLive}
+                when={isLive ? (featured.liveMinute != null ? `${featured.liveMinute}’` : "En direct") : fh.dateLabel}
               />
               {/* Ordinateur : le match en direct (quand son bloc n'est plus visible), sinon le prochain match
                   (quand les 3 cartes ne sont plus visibles) ; noms complets des équipes */}
@@ -755,6 +756,7 @@ export default async function HomePage() {
                   score={fh.score ? `${fh.score.home} - ${fh.score.away}` : null}
                   status="En direct"
                   live
+                  when={featured.liveMinute != null ? `${featured.liveMinute}’` : null}
                 />
               ) : (
                 next &&
@@ -771,6 +773,7 @@ export default async function HomePage() {
                     score={null}
                     status={canEditPrediction(next, now) ? "Pronostics ouverts" : "Pronostics fermés"}
                     live={false}
+                    when={nh.dateLabel}
                   />
                 )
               )}
