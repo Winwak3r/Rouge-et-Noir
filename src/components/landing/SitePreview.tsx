@@ -55,8 +55,9 @@ function MiniSite() {
         <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wide text-white/50">Pronostics et points</p>
         {[
           ["Kévin", "6 pts"],
-          ["Maëlle", "4 pts"],
-          ["Yann", "2 pts"],
+          ["Jérémy", "4 pts"],
+          ["Michelle", "2 pts"],
+          ["Yann", "1 pt"],
         ].map(([n, p]) => (
           <p key={n} className="flex justify-between border-t border-white/5 py-1 text-[11px]">
             <span>{n}</span>

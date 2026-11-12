@@ -29,9 +29,10 @@ function Buttons() {
 export function Landing() {
   return (
     // Pleine largeur, au-delà de la colonne centrale du site
-    <div className="relative -mt-6 left-1/2 w-screen -translate-x-1/2 text-white">
+    <div className="recap-bg relative -mt-6 left-1/2 w-screen -translate-x-1/2 text-white">
+      {/* Fond animé rouge et noir : triskells et hermines qui défilent (le même que l'animation de fin de match) */}
       {/* ─── Page 1 ─── */}
-      <section className="landing-bg-1 relative flex min-h-[calc(100svh-5rem)] items-center px-6 py-16">
+      <section className="relative flex min-h-[calc(100svh-5rem)] items-center px-6 py-16">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div className="space-y-6">
             <h1 className={`${title} text-5xl sm:text-6xl lg:text-7xl`}>
@@ -57,7 +58,7 @@ export function Landing() {
       </section>
 
       {/* ─── Page 2 ─── */}
-      <section id="challenge" className="landing-bg-2 flex min-h-[100svh] items-center px-6 py-16">
+      <section id="challenge" className="flex min-h-[100svh] items-center px-6 py-16">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
           <div className="order-2 lg:order-1">
             <SitePreview />
