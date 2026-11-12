@@ -18,10 +18,12 @@ function Settle({ show, children, className = "", big = 1.6, hold = 0.45 }: { sh
   useLayoutEffect(() => {
     if (!show || !ref.current) return;
     const r = ref.current.getBoundingClientRect();
+    // agrandissement limité pour que tout l'élément reste visible (largeur et hauteur de l'écran)
+    const fit = Math.min(big, (window.innerWidth * 0.94) / r.width, (window.innerHeight * 0.8) / r.height);
     setVars({
       "--dx": `${window.innerWidth / 2 - (r.left + r.width / 2)}px`,
       "--dy": `${window.innerHeight / 2 - (r.top + r.height / 2)}px`,
-      "--big": String(big),
+      "--big": String(Math.max(1, fit)),
       "--hold": `${Math.round(hold * 100)}%`,
     });
   }, [show, big, hold]);
@@ -148,6 +150,13 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
     </div>
   );
   const base = my?.total ?? 0;
+  // « Vendredi 8 novembre · 17h30 » (ordinateur) ; « 08/11 · 17h30 » (mobile) — heure de Paris
+  const ko = new Date(data.kickoff);
+  const tz = { timeZone: "Europe/Paris" } as const;
+  const hour = ko.toLocaleTimeString("fr-FR", { ...tz, hour: "2-digit", minute: "2-digit" }).replace(":", "h");
+  const day = ko.toLocaleDateString("fr-FR", { ...tz, weekday: "long", day: "numeric", month: "long" });
+  const dateLong = `${day.charAt(0).toUpperCase()}${day.slice(1)} · ${hour}`;
+  const dateShort = `${ko.toLocaleDateString("fr-FR", { ...tz, day: "2-digit", month: "2-digit" })} · ${hour}`;
 
   const content = (
     <div
@@ -166,46 +175,76 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
         <div className={`pointer-events-none fixed inset-0 z-10 flex flex-col items-center justify-center gap-[3vh] ${t >= T_SCORE ? "recap-whistle-out" : ""}`}>
           <div className="recap-whistle3d relative" style={{ perspective: "900px" }}>
             <div className="recap-whistle-body">
-              <svg viewBox="0 0 320 220" className="h-[22vh] w-auto drop-shadow-[0_18px_25px_rgba(0,0,0,0.55)]" aria-hidden>
+              <svg viewBox="0 0 340 230" className="h-[24vh] w-auto drop-shadow-[0_22px_28px_rgba(0,0,0,0.6)]" aria-hidden>
                 <defs>
-                  <linearGradient id="chromeV" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#ffffff" />
-                    <stop offset="0.18" stopColor="#d9dde2" />
-                    <stop offset="0.45" stopColor="#8e959d" />
-                    <stop offset="0.62" stopColor="#c9ced4" />
-                    <stop offset="0.85" stopColor="#5d646c" />
-                    <stop offset="1" stopColor="#2f3439" />
+                  <linearGradient id="wTube" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#f7f8fa" />
+                    <stop offset="0.12" stopColor="#ffffff" />
+                    <stop offset="0.3" stopColor="#b9bfc6" />
+                    <stop offset="0.52" stopColor="#6c737b" />
+                    <stop offset="0.7" stopColor="#d4d8dd" />
+                    <stop offset="0.88" stopColor="#555c63" />
+                    <stop offset="1" stopColor="#26292d" />
                   </linearGradient>
-                  <radialGradient id="chromeR" cx="0.38" cy="0.32" r="0.75">
+                  <radialGradient id="wBall" cx="0.36" cy="0.3" r="0.78">
                     <stop offset="0" stopColor="#ffffff" />
-                    <stop offset="0.25" stopColor="#e3e7eb" />
-                    <stop offset="0.6" stopColor="#8c939b" />
-                    <stop offset="0.85" stopColor="#4a5057" />
-                    <stop offset="1" stopColor="#23272b" />
+                    <stop offset="0.18" stopColor="#eef0f2" />
+                    <stop offset="0.45" stopColor="#a5abb2" />
+                    <stop offset="0.72" stopColor="#5b6168" />
+                    <stop offset="0.9" stopColor="#2e3236" />
+                    <stop offset="1" stopColor="#1a1c1f" />
                   </radialGradient>
-                  <linearGradient id="slot" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#0b0c0d" />
-                    <stop offset="1" stopColor="#3a3f44" />
+                  <linearGradient id="wSide" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#3a3f44" />
+                    <stop offset="0.5" stopColor="#9aa1a8" />
+                    <stop offset="1" stopColor="#30353a" />
                   </linearGradient>
-                  <radialGradient id="ground" cx="0.5" cy="0.5" r="0.5">
-                    <stop offset="0" stopColor="rgba(0,0,0,0.45)" />
+                  <linearGradient id="wGrip" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#2a2d31" />
+                    <stop offset="0.5" stopColor="#111214" />
+                    <stop offset="1" stopColor="#2a2d31" />
+                  </linearGradient>
+                  <linearGradient id="wSlot" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#050506" />
+                    <stop offset="1" stopColor="#2b2f33" />
+                  </linearGradient>
+                  <radialGradient id="wGround" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0" stopColor="rgba(0,0,0,0.5)" />
                     <stop offset="1" stopColor="rgba(0,0,0,0)" />
                   </radialGradient>
+                  <linearGradient id="wCord" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#ff3347" />
+                    <stop offset="1" stopColor="#8a000f" />
+                  </linearGradient>
                 </defs>
-                <ellipse cx="170" cy="205" rx="120" ry="12" fill="url(#ground)" />
-                {/* embout */}
-                <path d="M18 78 Q12 78 12 90 L12 110 Q12 122 24 122 L150 122 L150 78 Z" fill="url(#chromeV)" />
-                <rect x="16" y="84" width="128" height="6" rx="3" fill="#ffffff" opacity="0.55" />
-                {/* chambre ronde */}
-                <circle cx="196" cy="128" r="76" fill="url(#chromeR)" />
-                <circle cx="196" cy="128" r="76" fill="none" stroke="#1f2327" strokeOpacity="0.5" strokeWidth="2" />
-                <ellipse cx="170" cy="92" rx="34" ry="16" fill="#ffffff" opacity="0.55" transform="rotate(-25 170 92)" />
-                {/* lumière (ouverture) */}
-                <path d="M122 78 L170 78 L166 90 L126 90 Z" fill="url(#slot)" />
-                {/* anneau du cordon */}
-                <path d="M236 66 L254 52 L262 62 L246 76 Z" fill="url(#chromeV)" />
-                <circle cx="262" cy="46" r="15" fill="none" stroke="url(#chromeV)" strokeWidth="8" />
-                <path d="M274 54 Q312 84 304 150 Q300 180 286 196" fill="none" stroke="#e1001a" strokeWidth="6" strokeLinecap="round" />
+                <ellipse cx="180" cy="216" rx="128" ry="11" fill="url(#wGround)" />
+                {/* épaisseur de la chambre (cylindre vu de trois quarts) */}
+                <ellipse cx="214" cy="132" rx="80" ry="80" fill="url(#wSide)" />
+                {/* embout avec bague de prise noire */}
+                <path d="M30 84 Q16 84 16 98 L16 116 Q16 130 30 130 L160 130 L160 84 Z" fill="url(#wTube)" />
+                <path d="M16 98 Q16 84 30 84 L62 84 L62 130 L30 130 Q16 130 16 116 Z" fill="url(#wGrip)" />
+                {[24, 34, 44, 54].map((x) => (
+                  <line key={x} x1={x} y1="88" x2={x} y2="126" stroke="#3b3f44" strokeWidth="2" />
+                ))}
+                <rect x="66" y="89" width="92" height="5" rx="2.5" fill="#ffffff" opacity="0.7" />
+                <rect x="66" y="120" width="92" height="3" rx="1.5" fill="#000000" opacity="0.25" />
+                {/* jonction embout / chambre */}
+                <path d="M150 84 L170 80 L170 134 L150 130 Z" fill="url(#wTube)" />
+                {/* chambre ronde (face) */}
+                <circle cx="204" cy="134" r="78" fill="url(#wBall)" />
+                <circle cx="204" cy="134" r="78" fill="none" stroke="#14171a" strokeOpacity="0.6" strokeWidth="2" />
+                <circle cx="204" cy="134" r="70" fill="none" stroke="#ffffff" strokeOpacity="0.18" strokeWidth="3" />
+                {/* lumière (fente d'air) avec sa profondeur */}
+                <path d="M118 80 L172 80 L166 95 L124 95 Z" fill="url(#wSlot)" />
+                <path d="M124 95 L166 95 L164 99 L126 99 Z" fill="#9aa1a8" opacity="0.6" />
+                {/* reflets */}
+                <ellipse cx="176" cy="98" rx="38" ry="15" fill="#ffffff" opacity="0.6" transform="rotate(-28 176 98)" />
+                <ellipse cx="248" cy="182" rx="22" ry="7" fill="#ffffff" opacity="0.18" transform="rotate(-35 248 182)" />
+                {/* anneau du cordon et cordon tressé */}
+                <path d="M246 70 L262 54 L272 64 L256 80 Z" fill="url(#wTube)" />
+                <circle cx="272" cy="46" r="16" fill="none" stroke="url(#wTube)" strokeWidth="8" />
+                <path d="M286 52 Q326 86 318 152 Q314 186 296 208" fill="none" stroke="url(#wCord)" strokeWidth="7" strokeLinecap="round" />
+                <path d="M286 52 Q326 86 318 152 Q314 186 296 208" fill="none" stroke="#ffffff" strokeOpacity="0.25" strokeWidth="2" strokeDasharray="3 5" />
               </svg>
             </div>
             {/* ondes sonores qui partent de la lumière */}
@@ -224,9 +263,16 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
           <p className="mb-[0.6vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.25em] text-white/70">Score final</p>
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
             {team(data.home, "home")}
-            <span className="self-center font-club text-[5.5vh] font-semibold leading-none tabular-nums sm:text-[8vh]">
-              {data.home.goals} – {data.away.goals}
-            </span>
+            <div className="flex flex-col items-center gap-[0.5vh] self-center text-center">
+              <span className="font-display text-[2vh] font-bold uppercase leading-none tracking-wide text-white/90">{data.competition}</span>
+              <span className="text-[1.35vh] leading-none text-white/70">
+                <span className="sm:hidden">{dateShort}</span>
+                <span className="hidden sm:inline">{dateLong}</span>
+              </span>
+              <span className="mt-[0.4vh] font-club text-[5.5vh] font-semibold leading-none tabular-nums sm:text-[8vh]">
+                {data.home.goals} – {data.away.goals}
+              </span>
+            </div>
             {team(data.away, "away")}
           </div>
         </Settle>
@@ -274,8 +320,9 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
 
         {/* 3. Mon total de points (score + buteur), sans tuile, avec incrémentation */}
         {my && (
-          <p className={`my-[1.5vh] text-center text-[2.2vh] font-semibold ${pop(t >= T_TOTAL)}`}>
-            Mon total : <span className={`font-club text-[3.6vh] tabular-nums ${ptsColor(base)}`}>
+          <p className={`my-[1.5vh] text-center font-display text-[3.6vh] font-bold uppercase leading-none tracking-wide sm:text-[4.5vh] ${pop(t >= T_TOTAL)}`}>
+            Mon total :{" "}
+            <span className={`font-club text-[5.5vh] tabular-nums sm:text-[7vh] ${ptsColor(base)}`}>
               <CountUp from={0} to={base} start={t >= T_TOTAL} />
             </span>{" "}
             point{Math.abs(base) > 1 ? "s" : ""}

@@ -6,12 +6,15 @@ import { clubLogosMode } from "@/lib/club-logo-mode";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { buildStandings } from "@/lib/scoring/ranking";
 import { shortPlayerName } from "@/lib/player-name";
+import { COMPETITIONS } from "@/lib/competitions";
 import type { BonusKind } from "@/lib/scoring/bonus";
 
 export interface RecapData {
   key: string; // match + date de publication du résultat : l'animation est rejouée si le résultat est republié
   home: { name: string; logo: string | null; goals: number };
   away: { name: string; logo: string | null; goals: number };
+  competition: string; // « Ligue 1 »…
+  kickoff: string; // date et heure du coup d'envoi (ISO)
   /** Buteurs du match, par équipe (initiale + nom, minute) */
   scorers: { home: string[]; away: string[] };
   my: {
@@ -60,6 +63,8 @@ export async function loadRecap(userId: string): Promise<RecapData | null> {
 
   return {
     key: `${match.id}:${match.resultConfirmedAt.getTime()}`,
+    competition: COMPETITIONS[match.competition].label,
+    kickoff: match.kickoffAt.toISOString(),
     scorers: (() => {
       const line = (g: (typeof goals)[number]) =>
         `${shortPlayerName(g.scorerName)}${g.minute != null ? ` ${g.minute}’${g.extraMinute ? `+${g.extraMinute}` : ""}` : ""}${g.isOwnGoal ? " (csc)" : ""}`;
