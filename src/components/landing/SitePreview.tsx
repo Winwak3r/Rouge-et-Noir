@@ -38,11 +38,14 @@ function MiniSite() {
           1er <span className="text-[10px] font-semibold text-white/50">sur 8</span> · <span className="text-green-400">42 pts</span>
         </p>
       </div>
-      <p className="text-[9px] font-bold uppercase tracking-wide text-white/60">Prochain match</p>
+      <p className="text-[9px] font-bold uppercase tracking-wide text-white/60">Match en cours</p>
       <div className="space-y-2 rounded-xl border-l-4 border-[#1d4ed8] bg-white/5 p-2.5 ring-1 ring-white/10">
         <div className="flex gap-1">
-          <span className="rounded bg-green-600/30 px-1.5 py-0.5 text-[8px] font-semibold text-green-300">Pronos ouverts</span>
-          <span className="rounded bg-[#FBBF24] px-1.5 py-0.5 text-[8px] font-semibold text-[#3b2600]">Buteur à saisir</span>
+          <span className="rounded bg-green-700 px-1.5 py-0.5 text-[8px] font-semibold text-white">Complété</span>
+          <span className="inline-flex items-center gap-1 rounded bg-rouge px-1.5 py-0.5 text-[8px] font-semibold text-white">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+            En direct
+          </span>
         </div>
         <p className="text-[10px] font-semibold text-[#93b4ff]">Ligue 1 · 10e journée</p>
         <div className="flex items-center justify-between text-sm font-extrabold">
@@ -53,15 +56,17 @@ function MiniSite() {
       </div>
       <div className="rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10">
         <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wide text-white/50">Pronostics et points</p>
+        {/* score en cours : SRFC 2 – 1 Lille → score exact 4 pts, bon écart 2 pts, bon résultat 1 pt */}
         {[
-          ["Kévin", "6 pts"],
-          ["Jérémy", "4 pts"],
-          ["Michelle", "2 pts"],
-          ["Yann", "1 pt"],
-        ].map(([n, p]) => (
-          <p key={n} className="flex justify-between border-t border-white/5 py-1 text-[11px]">
+          ["Kévin", "2 – 1", "4 pts"],
+          ["Jérémy", "3 – 2", "2 pts"],
+          ["Maëlle", "1 – 0", "2 pts"],
+          ["Yann", "2 – 0", "1 pt"],
+        ].map(([n, sc, p]) => (
+          <p key={n} className="grid grid-cols-[1fr_auto_3rem] items-center gap-2 border-t border-white/5 py-1 text-[11px]">
             <span>{n}</span>
-            <span className="font-bold text-green-400">{p}</span>
+            <span className="font-display text-xs tabular-nums text-white/80">{sc}</span>
+            <span className="text-right font-bold text-green-400">{p}</span>
           </p>
         ))}
       </div>

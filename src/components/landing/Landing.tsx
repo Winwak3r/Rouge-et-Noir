@@ -32,19 +32,20 @@ export function Landing() {
     <div className="recap-bg relative -mt-6 left-1/2 w-screen -translate-x-1/2 text-white">
       {/* Fond animé rouge et noir : triskells et hermines qui défilent (le même que l'animation de fin de match) */}
       {/* ─── Page 1 ─── */}
-      <section className="relative flex min-h-[calc(100svh-5rem)] items-center px-6 py-16">
+      <section className="relative flex min-h-[calc(100svh-5rem)] items-start px-6 py-8 lg:items-center lg:py-16">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div className="space-y-6">
-            <h1 className={`${title} text-5xl sm:text-6xl lg:text-7xl`}>
-              Le jeu de pronos
-              <br />
-              du <span className="text-rouge">Stade Rennais F.C.</span>
+            <h1 className={title}>
+              {/* 1re ligne en blanc, sans retour à la ligne ; 2e ligne en noir */}
+              <span className="block whitespace-nowrap text-[7.2vw] text-white sm:text-5xl lg:text-6xl">Le jeu de pronos du</span>
+              <span className="block text-5xl text-[#111111] sm:text-6xl lg:text-7xl">Stade Rennais F.C.</span>
             </h1>
             <p className="max-w-xl text-lg text-white/80 sm:text-xl">Rejoins les Rouge &amp; Noir : ici, on ne lâche rien… sauf parfois les points !</p>
             <Buttons />
           </div>
+          {/* Logo (fond transparent) ; sur mobile, tout en haut de l'écran */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo-sombre.png" alt="Roazhon Park — Rouge & Noir" className="landing-fade w-full opacity-95" />
+          <img src="/brand/logo-rouge-noir.png" alt="Roazhon Park — Rouge & Noir" className="landing-fade order-first w-full lg:order-none" />
         </div>
         <a
           href="#challenge"
@@ -65,9 +66,9 @@ export function Landing() {
           </div>
           <div className="order-1 space-y-6 lg:order-2">
             <h2 className={`${title} text-5xl sm:text-6xl lg:text-7xl`}>
-              <span className="text-rouge">Rouge</span> &amp; Noir
+              Le challenge
               <br />
-              Challenge
+              <span className="text-rouge">Rouge</span> &amp; Noir
             </h2>
             <p className="text-xl font-semibold sm:text-2xl">Du foot, des potes et un classement à défendre !</p>
             <p className="max-w-xl text-lg text-white/75">
