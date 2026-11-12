@@ -365,7 +365,11 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                   </div>
                   <span className="w-full truncate text-center text-[1.6vh] font-semibold">{l.name}</span>
                   <span className="relative flex items-center gap-2">
-                    <span className={`font-club text-[3vh] font-semibold leading-none tabular-nums ${ptsColor(newOn ? after : base)}`}>
+                    <span
+                      className={`inline-block font-club text-[3vh] font-semibold leading-none tabular-nums ${ptsColor(newOn ? after : base)} ${
+                        newOn && after !== base ? "recap-grow" : ""
+                      }`}
+                    >
                       <CountUp from={base} to={after} start={newOn} ms={800} /> pts
                     </span>
                     {b && (

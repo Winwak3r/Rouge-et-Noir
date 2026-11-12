@@ -50,8 +50,18 @@ export async function loadRecap(userId: string): Promise<RecapData | null> {
   // Pas de pronostic sur ce match : pas d'animation
   if (!pred || !result) return null;
 
+  // Ligues concernées par ce match : celles qui jouent sa compétition et existaient déjà au coup d'envoi
+  const concerned = await prisma.league.findMany({
+    where: {
+      id: { in: board.views.filter((v) => v.key !== "general").map((v) => v.key) },
+      competitions: { has: match.competition },
+      createdAt: { lte: match.kickoffAt },
+    },
+    select: { id: true },
+  });
+  const concernedIds = new Set(concerned.map((l) => l.id));
   const leagues = board.views
-    .filter((v) => v.key !== "general")
+    .filter((v) => v.key !== "general" && concernedIds.has(v.key))
     .map((v) => {
       const st = buildStandings(
         v.players.map((p) => ({ userId: p.userId, pseudo: p.pseudo })),
@@ -85,7 +95,7 @@ export async function loadRecap(userId: string): Promise<RecapData | null> {
       scorerPoints: result.scorerPoints,
       total: result.totalPoints,
     },
-    bonuses: uses.map((u) => ({ leagueId: u.leagueId, leagueName: u.league.name, kind: u.kind, points: u.points ?? 0 })),
+    bonuses: uses.filter((u) => concernedIds.has(u.leagueId)).map((u) => ({ leagueId: u.leagueId, leagueName: u.league.name, kind: u.kind, points: u.points ?? 0 })),
     leagues,
   };
 }
