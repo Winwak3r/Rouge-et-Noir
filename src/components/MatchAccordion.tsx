@@ -299,6 +299,24 @@ function shortDate(label: string): string | null {
   return `${m[1]} ${MONTHS[m[2].toLowerCase()] ?? m[2].slice(0, 3).toUpperCase()} · ${m[3]}H${m[4]}`;
 }
 
+/** État de mon prono, en icône : vert coché (complété) · jaune crayon (buteur à saisir) · rouge « ! » (à compléter). */
+function PickStateIcon({ mine }: { mine: MatchHeader["mine"] }) {
+  if (!mine) return null;
+  const conf = {
+    complete: { bg: "bg-[#097D42]", label: "Pronostic complété", path: <path d="M6 12.5l4 4 8-9" /> },
+    score: { bg: "bg-[#F59E0B]", label: "Buteur à saisir", path: <path d="M14.5 5.5l4 4L9 19H5v-4z M12.5 7.5l4 4" /> },
+    scorer: { bg: "bg-[#F59E0B]", label: "Buteur à saisir", path: <path d="M14.5 5.5l4 4L9 19H5v-4z M12.5 7.5l4 4" /> },
+    incomplete: { bg: "bg-rouge", label: "Pronostic à compléter", path: <path d="M12 6v7 M12 17.5v.5" /> },
+  }[mine];
+  return (
+    <span title={conf.label} aria-label={conf.label} role="img" className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${conf.bg} text-white shadow-sm ring-2 ring-white/70`}>
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {conf.path}
+      </svg>
+    </span>
+  );
+}
+
 // Cartes : « SRFC » à la place de « Stade Rennais »
 const srfc = (t: MatchHeader["home"]): MatchHeader["home"] => (t.rennes ? { ...t, name: "SRFC" } : t);
 
@@ -346,9 +364,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
           </span>
         )}
         {!/^Pronostics/.test(h.statusLabel) && <span className={`rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>}
-        {h.mine === "complete" && <span className="rounded bg-[#097D42] px-1.5 py-0.5 font-medium text-white">Complété</span>}
-        {(h.mine === "score" || h.mine === "scorer") && <span className="rounded bg-[#FBBF24] px-1.5 py-0.5 font-medium text-[#3b2600]">Buteur à saisir</span>}
-        {h.mine === "incomplete" && <span className="rounded bg-rouge px-1.5 py-0.5 font-medium text-white">À compléter</span>}
+        <PickStateIcon mine={h.mine} />
         <span className="text-neutral-500">
           · {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
         </span>
@@ -370,7 +386,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
               aria-hidden
               className={`col-start-1 row-start-1 translate-y-1 text-xs font-semibold opacity-0 transition-[opacity,transform] duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 ${TEXT[h.competition]}`}
             >
-              Pronostiquer ce match →
+              {h.mine === "complete" ? "Modifier mon pronostic →" : "Pronostiquer ce match →"}
             </span>
           </>
         ) : (

@@ -525,3 +525,6 @@ body::before {
 /* Cartes des prochains matchs : date « 22 NOV · 17H15 » en noir (thème clair) ou blanc (thème sombre) */
 .card-date { color: #111111; }
 :root[data-theme="dark"] .card-date { color: #ffffff; }
+
+/* Date des cartes : blanche au survol (thème clair compris, sur la couleur de la compétition) */
+.group:hover .card-date { color: #ffffff; }
