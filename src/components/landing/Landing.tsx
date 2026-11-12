@@ -52,7 +52,7 @@ export function Landing() {
           </div>
           {/* Logo (fond transparent) ; sur mobile, tout en haut de l'écran */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <div className="landing-fade order-first rounded-2xl bg-white p-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/60 sm:p-5 lg:order-none">
+          <div className="order-first rounded-2xl bg-white p-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/60 sm:p-5 lg:order-none">
             <img src="/brand/logo-rouge-noir.png" alt="Roazhon Park — Rouge & Noir" className="w-full" />
           </div>
         </div>
