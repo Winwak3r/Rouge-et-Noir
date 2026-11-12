@@ -126,12 +126,19 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
     window.setTimeout(() => setShow(false), 450);
   };
   const cols = nL <= 1 ? "grid-cols-1" : nL === 2 ? "grid-cols-2" : "grid-cols-3";
-  const pts = (n: number) => (n > 0 ? `+${n}` : String(n));
   const ptsColor = (n: number) => (n > 0 ? "text-green-400" : n < 0 ? "text-red-400" : "text-white/70");
-  const pill = (n: number) =>
-    `rounded-full px-3 py-[0.4vh] font-club text-[2.6vh] font-semibold leading-none tabular-nums shadow-lg ring-2 ring-black/30 ${
-      n > 0 ? "bg-green-600 text-white" : n < 0 ? "bg-red-600 text-white" : "bg-neutral-600 text-white"
-    }`;
+  const pillBase = "inline-block rounded-full px-3 py-[0.4vh] font-club text-[2.6vh] font-semibold leading-none tabular-nums shadow-lg ring-2 ring-black/30";
+  // Score : −1 noir · 0 rouge · 1 jaune · 2 vert clair · 4 vert (+ « Bien joué ! »)
+  const scoreColor = (n: number) =>
+    n < 0 ? "bg-neutral-950 text-white" : n === 0 ? "bg-red-600 text-white" : n === 1 ? "bg-yellow-400 text-black" : n === 2 ? "bg-lime-400 text-black" : "bg-green-600 text-white";
+  // Buteur : aucun prono noir · 0 rouge · 1 et plus vert
+  const scorerColor = (n: number, none: boolean) => (none ? "bg-neutral-950 text-white" : n <= 0 ? "bg-red-600 text-white" : "bg-green-600 text-white");
+  const signed = (n: number, start: boolean) => (
+    <>
+      {n > 0 ? "+" : ""}
+      <CountUp from={0} to={n} start={start} ms={700} />
+    </>
+  );
   const team = (s: RecapData["home"], side: "home" | "away") => (
     <div className="flex min-w-0 flex-col items-center gap-[0.5vh]">
       {s.logo && (
@@ -263,7 +270,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
           <p className="mb-[0.6vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.25em] text-white/70">Score final</p>
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
             {team(data.home, "home")}
-            <div className="flex flex-col items-center gap-[0.5vh] self-center text-center">
+            <div className="flex flex-col items-center gap-[0.5vh] self-start pt-[0.5vh] text-center">
               <span className="font-display text-[2vh] font-bold uppercase leading-none tracking-wide text-white/90">{data.competition}</span>
               <span className="text-[1.35vh] leading-none text-white/70">
                 <span className="sm:hidden">{dateShort}</span>
@@ -280,7 +287,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
         {/* 2. Ton prono (juste sous le score final), avec ses points à cheval sur le bas de la tuile */}
         {my && (
           <Settle show={t >= T_PRONO} big={1.4} className="relative mb-[2vh] rounded-2xl bg-black/35 px-4 pb-[2.4vh] pt-[1vh] ring-1 ring-white/10">
-            <p className="mb-[0.6vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.25em] text-white/70">Ton prono</p>
+            <p className="mb-[0.6vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.25em] text-white/70">Mon prono</p>
             <div className="grid grid-cols-2 items-center gap-3">
               <div className="relative flex flex-col items-center gap-[0.4vh]">
                 <span className="text-[1.3vh] font-semibold uppercase tracking-widest text-white/60">Score</span>
@@ -305,13 +312,20 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
             {/* Points du score et du buteur : en grand au centre, puis rangés sous chacun, à cheval sur la tuile */}
             <div className="absolute inset-x-4 -bottom-[1.6vh] grid grid-cols-2 gap-3">
               <div className="flex justify-center">
-                <Settle show={t >= T_PTS_SCORE} big={4}>
-                  <span className={pill(my.scorePoints)}>{pts(my.scorePoints)}</span>
+                <Settle show={t >= T_PTS_SCORE} big={4} className="relative">
+                  <span className={`${pillBase} ${scoreColor(my.scorePoints)}`}>{signed(my.scorePoints, t >= T_PTS_SCORE)}</span>
+                  {my.scorePoints >= 4 && (
+                    <span className="absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-green-600 px-1.5 py-0.5 text-[1.4vh] font-bold uppercase text-white shadow">
+                      Bien joué !
+                    </span>
+                  )}
                 </Settle>
               </div>
               <div className="flex justify-center">
                 <Settle show={t >= T_PTS_SCORER} big={4}>
-                  <span className={pill(my.scorerPoints)}>{pts(my.scorerPoints)}</span>
+                  <span className={`${pillBase} ${scorerColor(my.scorerPoints, !my.scorer && !my.noScorer)}`}>
+                    {!my.scorer && !my.noScorer ? "Aucun prono" : signed(my.scorerPoints, t >= T_PTS_SCORER)}
+                  </span>
                 </Settle>
               </div>
             </div>
@@ -320,7 +334,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
 
         {/* 3. Mon total de points (score + buteur), sans tuile, avec incrémentation */}
         {my && (
-          <p className={`my-[1.5vh] text-center font-display text-[3.6vh] font-bold uppercase leading-none tracking-wide sm:text-[4.5vh] ${pop(t >= T_TOTAL)}`}>
+          <p className={`mb-[3.5vh] mt-[1.5vh] text-center font-display text-[3.6vh] font-bold uppercase leading-none tracking-wide sm:text-[4.5vh] ${pop(t >= T_TOTAL)}`}>
             Mon total :{" "}
             <span className={`font-club text-[5.5vh] tabular-nums sm:text-[7vh] ${ptsColor(base)}`}>
               <CountUp from={0} to={base} start={t >= T_TOTAL} />
