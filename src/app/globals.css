@@ -427,3 +427,22 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .recap-settle, .recap-pop { animation: none; }
 }
+
+/* Spécialité qui se pose sur la vignette de la ligue (« coup de tampon ») */
+.recap-stamp { animation: recap-stamp 0.55s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+@keyframes recap-stamp {
+  0% { opacity: 0; transform: scale(2.4) rotate(-25deg); }
+  60% { opacity: 1; transform: scale(0.85) rotate(6deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+/* « Total ×2 » / « Buteur ×2 » : apparaît, reste ~1 s, puis s'efface */
+.recap-flash { animation: recap-flash 1s ease-in-out both; }
+@keyframes recap-flash {
+  0% { opacity: 0; transform: translateX(-6px) scale(0.8); }
+  20% { opacity: 1; transform: none; }
+  80% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateX(6px) scale(0.9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recap-stamp, .recap-flash { animation: none; }
+}
