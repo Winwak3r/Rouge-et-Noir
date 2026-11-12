@@ -84,7 +84,7 @@ export async function Header() {
   const rankText = me && me.scoredMatches > 0 ? ordinalFr(me.rank) : "—";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-neutral-200 bg-[var(--header-bg)]">
+    <header className="site-header sticky top-0 z-30 border-b border-neutral-200 bg-[var(--header-bg)]">
       {user && !user.emailVerifiedAt && <VerifyEmailBanner email={user.email} />}
       {/* Première connexion (ou aucune ligue) : rejoindre ou créer une ligue */}
       {user && membershipCount === 0 && <LeagueOnboarding canCreate logos={logos} />}

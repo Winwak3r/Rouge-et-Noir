@@ -29,18 +29,22 @@ function Buttons() {
 export function Landing() {
   return (
     // Pleine largeur, au-delà de la colonne centrale du site
-    <div className="recap-bg relative -mt-6 left-1/2 w-screen -translate-x-1/2 text-white">
+    <div className="recap-bg relative left-1/2 w-screen -translate-x-1/2 text-white" style={{ marginTop: "calc(-1 * var(--main-pt, 1.5rem))" }}>
+      {/* Page visiteur en plein écran : l'en-tête du site est masqué ici */}
+      <style>{"body > header, header.site-header { display: none !important; }"}</style>
       {/* Fond animé rouge et noir : triskells et hermines qui défilent (le même que l'animation de fin de match) */}
       {/* ─── Page 1 ─── */}
-      <section className="relative flex min-h-[calc(100svh-5rem)] items-start px-6 py-8 lg:items-center lg:py-16">
+      <section className="relative flex min-h-[100svh] items-start px-6 py-8 lg:items-center lg:py-16">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div className="space-y-6">
             <h1 className={title}>
               {/* 1re ligne en blanc, sans retour à la ligne ; 2e ligne en noir */}
               <span className="block whitespace-nowrap text-[7.2vw] text-white sm:text-5xl lg:text-6xl">Le jeu de pronos du</span>
-              {/* Écharpe de supporter : rayures rouges et noires, bande centrale claire, maille, franges aux deux bouts */}
-              <span className="mt-3 block">
-                <span className="scarf whitespace-nowrap text-[6.6vw] sm:text-5xl lg:text-6xl">Stade Rennais F.C.</span>
+              {/* texte noir sur un bloc blanc incliné avec ombre ; une seule ligne (taille adaptée sur mobile) */}
+              <span className="mt-2 block">
+                <span className="inline-block -rotate-1 whitespace-nowrap bg-white px-3 pb-1 pt-2 text-[8.6vw] leading-none text-[#111111] shadow-[0_6px_20px_rgba(0,0,0,0.35)] sm:text-6xl lg:text-7xl">
+                  Stade Rennais F.C.
+                </span>
               </span>
             </h1>
             <p className="max-w-xl text-lg text-white/80 sm:text-xl">Rejoins les Rouge &amp; Noir : ici, on ne lâche rien… sauf parfois les points !</p>
@@ -48,7 +52,7 @@ export function Landing() {
           </div>
           {/* Logo (fond transparent) ; sur mobile, tout en haut de l'écran */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <div className="landing-fade order-first rounded-2xl bg-white/95 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/60 sm:p-5 lg:order-none">
+          <div className="landing-fade order-first rounded-2xl bg-white p-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/60 sm:p-5 lg:order-none">
             <img src="/brand/logo-rouge-noir.png" alt="Roazhon Park — Rouge & Noir" className="w-full" />
           </div>
         </div>

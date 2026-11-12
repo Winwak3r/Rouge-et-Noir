@@ -498,36 +498,3 @@ body::before {
   .recap-bravo { animation: none; }
 }
 
-/* Page visiteur : « STADE RENNAIS F.C. » sur une écharpe de supporter (rouge et noir, maille, franges) */
-.scarf {
-  position: relative;
-  display: inline-block;
-  margin: 0 1.1em;
-  padding: 0.42em 0.5em 0.36em;
-  color: #111111;
-  line-height: 1;
-  letter-spacing: 0.04em;
-  /* bandes : rouge · noir · bande claire du texte · noir · rouge */
-  background:
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 6px),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, #e1001a 0 13%, #111 13% 19%, #f4efe6 19% 81%, #111 81% 87%, #e1001a 87% 100%);
-  border-radius: 3px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), inset 0 -3px 6px rgba(0, 0, 0, 0.25), inset 0 3px 6px rgba(255, 255, 255, 0.25);
-  transform: rotate(-2deg) skewX(-4deg);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-/* franges (fils rouges et noirs) aux deux bouts */
-.scarf::before,
-.scarf::after {
-  content: "";
-  position: absolute;
-  top: 6%;
-  bottom: 6%;
-  width: 0.9em;
-  background: repeating-linear-gradient(180deg, #e1001a 0 3px, transparent 3px 5px, #111 5px 8px, transparent 8px 10px);
-  -webkit-mask: repeating-linear-gradient(180deg, #000 0 2px, transparent 2px 5px);
-  mask: repeating-linear-gradient(180deg, #000 0 2px, transparent 2px 5px);
-}
-.scarf::before { right: 100%; transform: skewY(-6deg); }
-.scarf::after { left: 100%; transform: skewY(6deg); }
