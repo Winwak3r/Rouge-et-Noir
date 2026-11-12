@@ -33,6 +33,9 @@ export const SYNC_INTERVALS = {
 
 // ─── Petits outils ──────────────────────────────────────────────────────────
 
+/** Réglage : match passé « en direct » par la simulation de l'administration (ignoré par la synchronisation). */
+export const LIVE_SIM_KEY = "live_simulation";
+
 export async function getSetting<T>(key: string): Promise<T | null> {
   const row = await prisma.appSetting.findUnique({ where: { key } });
   return row ? (row.value as unknown as T) : null;
@@ -86,6 +89,7 @@ export async function syncCalendar(provider: FootballProvider): Promise<number> 
   const matches = await provider.listMatches(season.startYear);
   let changed = 0;
 
+  const liveSim = await getSetting<{ matchId: string }>(LIVE_SIM_KEY);
   for (const m of matches) {
     const [home, away] = await Promise.all([upsertTeam(m.home), upsertTeam(m.away)]);
     const existing = await prisma.match.findUnique({ where: { externalId: m.externalId } });
@@ -103,6 +107,7 @@ export async function syncCalendar(provider: FootballProvider): Promise<number> 
       // La mettre à jour avec le calendrier retardait la récupération des cotes de plusieurs heures.
     };
 
+    if (existing && liveSim?.matchId === existing.id) continue; // match en direct simulé (administration)
     if (!existing) {
       await prisma.match.create({ data: { ...common, externalId: m.externalId, kickoffAt: m.kickoffAt, status: m.status } });
       changed++;
@@ -569,9 +574,11 @@ export async function runSmartSync(opts: { force?: boolean; reason: string; budg
     }
 
     const now = new Date();
+    const liveSimId = (await getSetting<{ matchId: string }>(LIVE_SIM_KEY))?.matchId;
     const candidates = await prisma.match.findMany({
       where: {
         simulation: { equals: Prisma.AnyNull },
+        ...(liveSimId ? { id: { not: liveSimId } } : {}), // match en direct simulé (administration)
         OR: [
           { status: { in: ["LIVE", "INTERRUPTED"] } },
           { status: "SCHEDULED", kickoffAt: { lte: now } }, // aurait dû commencer

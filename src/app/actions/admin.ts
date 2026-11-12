@@ -14,7 +14,8 @@ import { saveRules } from "@/lib/scoring/active-rules";
 import { simulateResult } from "@/lib/simulation";
 import { canEditPrediction } from "@/lib/scoring/engine";
 import { parseOddsInput, parseRulesForm } from "@/lib/scoring/rules-form";
-import { currentSeason, runSmartSync, scoreMatch, syncPhotosNow } from "@/lib/sync/sync";
+import { LIVE_SIM_KEY, currentSeason, getSetting, runSmartSync, scoreMatch, syncPhotosNow } from "@/lib/sync/sync";
+import type { MatchStatus } from "@prisma/client";
 
 export interface AdminState {
   error?: string;
@@ -560,4 +561,46 @@ export async function toggleHomegrownAction(form: FormData): Promise<void> {
   await audit(admin.id, "PLAYER_HOMEGROWN", "Player", id, { homegrown: p.homegrown }, { homegrown: !p.homegrown });
   revalidatePath("/admin/joueurs");
   revalidatePath("/actus");
+}
+
+/** Simulation d'un match EN DIRECT (pour tester l'affichage) : statut, score et minute choisis. */
+export async function simulateLiveAction(form: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const id = str(form, "matchId");
+  const num = (k: string, max: number) => Math.min(max, Math.max(0, Math.round(Number(form.get(k)) || 0)));
+  const m = await prisma.match.findUnique({ where: { id }, select: { status: true, liveHomeScore: true, liveAwayScore: true, liveMinute: true } });
+  if (!m) return;
+  const prev = await getSetting<{ matchId: string; before: unknown }>(LIVE_SIM_KEY);
+  // une seule simulation en direct à la fois : l'éventuelle précédente est d'abord arrêtée
+  if (prev && prev.matchId !== id) await restoreLiveSim(prev as { matchId: string; before: { status: MatchStatus; liveHomeScore: number | null; liveAwayScore: number | null; liveMinute: number | null } });
+  const before = prev?.matchId === id ? prev.before : m;
+  await prisma.appSetting.upsert({
+    where: { key: LIVE_SIM_KEY },
+    create: { key: LIVE_SIM_KEY, value: { matchId: id, before } as Prisma.InputJsonValue },
+    update: { value: { matchId: id, before } as Prisma.InputJsonValue },
+  });
+  await prisma.match.update({
+    where: { id },
+    data: { status: "LIVE", liveHomeScore: num("home", 20), liveAwayScore: num("away", 20), liveMinute: num("minute", 130) },
+  });
+  await audit(admin.id, "LIVE_SIMULATION_START", "Match", id, null, { home: num("home", 20), away: num("away", 20), minute: num("minute", 130) });
+  revalidatePath("/");
+  revalidatePath("/admin/simulation");
+}
+
+async function restoreLiveSim(sim: { matchId: string; before: { status: MatchStatus; liveHomeScore: number | null; liveAwayScore: number | null; liveMinute: number | null } }) {
+  await prisma.match.update({ where: { id: sim.matchId }, data: sim.before }).catch(() => undefined);
+}
+
+/** Fin de la simulation en direct : le match retrouve son état d'origine. */
+export async function stopLiveSimulationAction(): Promise<void> {
+  const admin = await requireAdmin();
+  const sim = await getSetting<{ matchId: string; before: { status: MatchStatus; liveHomeScore: number | null; liveAwayScore: number | null; liveMinute: number | null } }>(LIVE_SIM_KEY);
+  if (sim) {
+    await restoreLiveSim(sim);
+    await prisma.appSetting.delete({ where: { key: LIVE_SIM_KEY } }).catch(() => undefined);
+    await audit(admin.id, "LIVE_SIMULATION_STOP", "Match", sim.matchId, null, null);
+  }
+  revalidatePath("/");
+  revalidatePath("/admin/simulation");
 }

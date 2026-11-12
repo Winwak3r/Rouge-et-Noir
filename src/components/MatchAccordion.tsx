@@ -300,40 +300,43 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   return (
     <Link
       href={href}
-      className={`match-head match-head-${h.competition.toLowerCase()} flex h-full flex-col gap-2 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 bg-surface p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-200 hover:z-10 hover:scale-[1.04] hover:bg-neutral-50 hover:shadow-2xl ${BORDER[h.competition]}`}
+      className={`match-head match-head-${h.competition.toLowerCase()} relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 bg-surface p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:z-10 hover:scale-[1.04] hover:bg-neutral-50 hover:shadow-2xl ${BORDER[h.competition]}`}
     >
-      <span className="flex items-start gap-2">
-        <span className="match-code w-9 shrink-0 font-display text-xl font-black">{h.code}</span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-xs">
-            <CompetitionBadge code={h.competition} logo={h.competitionLogo} />
-            <span className={`truncate font-medium ${TEXT[h.competition]}`}>{h.competitionLabel}</span>
+      {/* Journée et compétition */}
+      <span className="flex items-center gap-2">
+        <span className="match-code font-display text-xl font-black">{h.code}</span>
+        <CompetitionBadge code={h.competition} logo={h.competitionLogo} />
+        <span className={`truncate text-xs font-medium ${TEXT[h.competition]}`}>{h.competitionLabel}</span>
+      </span>
+      {/* Statut du match et du prono, puis nombre de joueurs : une seule ligne */}
+      <span className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap text-[10px]">
+        {h.live && (
+          <span className="inline-flex items-center gap-1 rounded bg-rouge px-1.5 py-0.5 font-semibold text-white">
+            <span aria-hidden className="animate-blink-slow h-1.5 w-1.5 rounded-full bg-white" />
+            {h.live}
           </span>
-        </span>
-        <span className="flex shrink-0 flex-col items-end gap-1 text-[10px]">
-          <span className={`whitespace-nowrap rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>
-          {h.mine === "complete" && <span className="rounded bg-[#097D42] px-1.5 py-0.5 font-medium text-white">Complété</span>}
-          {(h.mine === "score" || h.mine === "scorer") && (
-            <span className="whitespace-nowrap rounded bg-[#FBBF24] px-1.5 py-0.5 font-medium text-[#3b2600]">Buteur à saisir</span>
-          )}
-          {h.mine === "incomplete" && <span className="rounded bg-rouge px-1.5 py-0.5 font-medium text-white">À compléter</span>}
-          <span className="text-neutral-500">
-            {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
-          </span>
+        )}
+        <span className={`rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>
+        {h.mine === "complete" && <span className="rounded bg-[#097D42] px-1.5 py-0.5 font-medium text-white">Complété</span>}
+        {(h.mine === "score" || h.mine === "scorer") && <span className="rounded bg-[#FBBF24] px-1.5 py-0.5 font-medium text-[#3b2600]">Buteur à saisir</span>}
+        {h.mine === "incomplete" && <span className="rounded bg-rouge px-1.5 py-0.5 font-medium text-white">À compléter</span>}
+        <span className="text-neutral-500">
+          · {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
         </span>
       </span>
-      <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-11">
+      {/* La rencontre et le prono, sans retrait */}
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
         <Team t={srfc(h.home)} open={false} home />
-        <span className="font-display text-lg font-bold">–</span>
+        <span className="font-display text-lg font-bold">{h.score ? `${h.score.home} - ${h.score.away}` : "–"}</span>
         <Team t={srfc(h.away)} open={false} />
       </span>
-      <span className="block pl-11 text-xs text-neutral-500">{h.dateLabel}</span>
+      <span className="block text-xs text-neutral-500">{h.dateLabel}</span>
       {h.myPick ? (
-        <span className="mt-auto border-t border-neutral-200 pt-2 pl-11">
+        <span className="mt-auto border-t border-neutral-200 pt-2">
           <MyPick p={h.myPick} open={false} variant="pc" />
         </span>
       ) : (
-        <span className="mt-auto border-t border-neutral-200 pt-2 pl-11 text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
+        <span className="mt-auto border-t border-neutral-200 pt-2 text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
       )}
     </Link>
   );

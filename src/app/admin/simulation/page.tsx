@@ -1,3 +1,5 @@
+import { simulateLiveAction, stopLiveSimulationAction } from "@/app/actions/admin";
+import { LIVE_SIM_KEY, getSetting } from "@/lib/sync/sync";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { cancelSimulationAction, simulateMatchAction } from "@/app/actions/admin";
@@ -21,9 +23,66 @@ export default async function SimulationPage({ searchParams }: { searchParams: P
     ? await prisma.match.findUnique({ where: { id: match.id }, include: { goals: true } })
     : null;
 
+  // Simulation EN DIRECT (affichage) : match en cours de simulation, et matchs à venir proposés
+  const liveSim = await getSetting<{ matchId: string }>(LIVE_SIM_KEY);
+  const liveMatch = liveSim
+    ? await prisma.match.findUnique({ where: { id: liveSim.matchId }, include: { homeTeam: true, awayTeam: true } })
+    : null;
+  const liveChoices = matches.filter((m) => !m.simulation);
+
   return (
     <div className="space-y-6">
       <PageTitle className="page-title">Simulation de match (test)</PageTitle>
+
+      <section className="card space-y-3">
+        <h2 className="text-lg font-semibold">Match en direct (affichage)</h2>
+        <p className="text-sm text-neutral-600">
+          Passe un match à venir « en direct », avec le score et la minute de ton choix, pour vérifier l’affichage (en-têtes, barre épinglée,
+          bandeaux). Aucun point n’est calculé. Le match est ignoré par la synchronisation tant que la simulation dure ; « Arrêter » lui
+          rend son état d’origine.
+        </p>
+        {liveMatch && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-rouge/10 px-3 py-2 text-sm">
+            <span>
+              <strong className="text-rouge">● En direct (simulé)</strong> {liveMatch.homeTeam.name} {liveMatch.liveHomeScore ?? 0} – {liveMatch.liveAwayScore ?? 0}{" "}
+              {liveMatch.awayTeam.name} · {liveMatch.liveMinute ?? 0}’
+            </span>
+            <form action={stopLiveSimulationAction}>
+              <button className="btn-secondary px-3 py-1 text-sm">Arrêter la simulation</button>
+            </form>
+          </div>
+        )}
+        <form action={simulateLiveAction} className="flex flex-wrap items-end gap-2 text-sm">
+          <label className="min-w-[14rem] flex-1">
+            <span className="mb-1 block text-xs font-semibold text-neutral-500">Match</span>
+            <select name="matchId" defaultValue={liveMatch?.id ?? liveChoices[0]?.id} className="input">
+              {liveMatch && !liveChoices.some((m) => m.id === liveMatch.id) && (
+                <option value={liveMatch.id}>
+                  {liveMatch.homeTeam.name} – {liveMatch.awayTeam.name}
+                </option>
+              )}
+              {liveChoices.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.homeTeam.name} – {m.awayTeam.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="w-20">
+            <span className="mb-1 block text-xs font-semibold text-neutral-500">Dom.</span>
+            <input name="home" type="number" min={0} max={20} defaultValue={liveMatch?.liveHomeScore ?? 1} className="input" />
+          </label>
+          <label className="w-20">
+            <span className="mb-1 block text-xs font-semibold text-neutral-500">Ext.</span>
+            <input name="away" type="number" min={0} max={20} defaultValue={liveMatch?.liveAwayScore ?? 0} className="input" />
+          </label>
+          <label className="w-24">
+            <span className="mb-1 block text-xs font-semibold text-neutral-500">Minute</span>
+            <input name="minute" type="number" min={0} max={130} defaultValue={liveMatch?.liveMinute ?? 34} className="input" />
+          </label>
+          <button className="btn-primary">{liveMatch ? "Mettre à jour" : "Passer en direct"}</button>
+        </form>
+      </section>
       <div className="space-y-2 rounded-lg border border-orange-300 bg-orange-100 p-3 text-sm text-orange-800">
         <p>
           <strong>À lire avant de simuler.</strong> La simulation donne un résultat fictif à un match pas encore joué (score
