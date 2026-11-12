@@ -521,3 +521,7 @@ body::before {
 @media (min-width: 640px) {
   :root:not([data-theme="dark"]) { --hbtn-bg: #efefef; --hbtn-hover: #e2e2e2; }
 }
+
+/* Cartes des prochains matchs : date « 22 NOV · 17H15 » en noir (thème clair) ou blanc (thème sombre) */
+.card-date { color: #111111; }
+:root[data-theme="dark"] .card-date { color: #ffffff; }

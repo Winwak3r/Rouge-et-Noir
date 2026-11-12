@@ -288,6 +288,17 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
   );
 }
 
+// « dimanche 22 novembre à 17:15 » → « 22 NOV · 17H15 »
+const MONTHS: Record<string, string> = {
+  janvier: "JAN", février: "FÉV", mars: "MARS", avril: "AVR", mai: "MAI", juin: "JUIN",
+  juillet: "JUIL", août: "AOÛT", septembre: "SEPT", octobre: "OCT", novembre: "NOV", décembre: "DÉC",
+};
+function shortDate(label: string): string | null {
+  const m = /(\d{1,2})(?:er)?\s+([a-zéû]+)(?:\s+\d{4})?\s+à\s+(\d{1,2})[:h](\d{2})/i.exec(label);
+  if (!m) return null;
+  return `${m[1]} ${MONTHS[m[2].toLowerCase()] ?? m[2].slice(0, 3).toUpperCase()} · ${m[3]}H${m[4]}`;
+}
+
 // Cartes : « SRFC » à la place de « Stade Rennais »
 const srfc = (t: MatchHeader["home"]): MatchHeader["home"] => (t.rennes ? { ...t, name: "SRFC" } : t);
 
@@ -299,16 +310,27 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
     grey: "bg-neutral-200 text-neutral-700",
     orange: "bg-orange-100 text-orange-800",
   }[h.statusTone];
+  const when = shortDate(h.dateLabel);
   return (
     <Link
       href={href}
-      className={`match-head relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
+      className={`group match-head relative flex h-full flex-col gap-1.5 overflow-hidden rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
     >
-      {/* Journée et compétition */}
-      <span className="flex items-center gap-2">
-        <span className="match-code font-display text-xl font-black">{h.code}</span>
-        <CompetitionBadge code={h.competition} logo={h.competitionLogo} />
-        <span className={`truncate text-xs font-medium ${TEXT[h.competition]}`}>{h.competitionLabel}</span>
+      {/* Journée, compétition et date ; au survol, la couleur de la compétition remplit la ligne de gauche à droite */}
+      <span className="relative -mx-3 -mt-3 flex items-center gap-2 px-3 pb-1 pt-3 transition-[padding] duration-500 ease-out group-hover:pb-2.5">
+        <span aria-hidden className={`absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100 ${OPEN[h.competition].bg}`} />
+        <span className="match-code relative font-display text-xl font-black transition-colors duration-300 group-hover:text-white/80">{h.code}</span>
+        <span className="relative">
+          <CompetitionBadge code={h.competition} logo={h.competitionLogo} />
+        </span>
+        <span className={`relative min-w-0 truncate text-xs font-medium transition-colors duration-300 group-hover:text-white ${TEXT[h.competition]}`}>
+          {h.competitionLabel}
+        </span>
+        {when && (
+          <span className="card-date relative ml-auto shrink-0 whitespace-nowrap font-display text-sm font-bold uppercase tracking-wide transition-colors duration-300 group-hover:text-white">
+            {when}
+          </span>
+        )}
       </span>
       {/* Statut du match et du prono, puis nombre de joueurs : une seule ligne */}
       <span className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap text-[10px]">
@@ -332,7 +354,6 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
         <span className="font-display text-lg font-bold">{h.score ? `${h.score.home} - ${h.score.away}` : "–"}</span>
         <Team t={srfc(h.away)} open={false} />
       </span>
-      <span className="block pl-3 text-xs text-neutral-500">{h.dateLabel}</span>
       {h.myPick ? (
         <span className="mt-auto flex min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2">
           <MyPick p={h.myPick} open={false} variant="pc" />
