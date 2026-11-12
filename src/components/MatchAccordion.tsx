@@ -42,7 +42,8 @@ export interface MatchHeader {
   live: string | null; // « En direct · 67’ »
   isNext: boolean;
   cancelled: boolean;
-  playersCount: number;
+  playersCount: number; // joueurs ayant pronostiqué (au moins le score)
+  playersTotal?: number; // joueurs inscrits sur le site
   /** complete : tout validé · score : score validé, aucun buteur à choisir · scorer : buteurs disponibles, à choisir · incomplete : rien */
   mine: "complete" | "score" | "scorer" | "incomplete" | null;
   /** Mon pronostic, rappelé dans l'en-tête : score, buteur (photo) et spécialités jouées (avec la ligue) */
@@ -210,7 +211,9 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
     <section
       ref={ref}
       id={`match-${h.id}`}
-      className={`relative scroll-mt-40 rounded-lg border-y border-r border-l-[6px] bg-surface shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out hover:z-10 hover:scale-[1.015] hover:shadow-xl ${BORDER[h.competition]} ${
+      className={`relative scroll-mt-40 rounded-lg border-y border-r border-l-[6px] bg-surface shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out ${
+        open ? "" : "hover:z-10 hover:scale-[1.04] hover:shadow-2xl"
+      } ${BORDER[h.competition]} ${
         open ? OPEN[h.competition].border : "border-y-neutral-200 border-r-neutral-200"
       }`}
     >
@@ -370,8 +373,9 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
           </span>
         )}
         {!/^Pronostics/.test(h.statusLabel) && <span className={`rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>}
-        <span className="text-neutral-500">
-          · {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
+        <span className="text-neutral-500" title="Joueurs ayant pronostiqué ce match / joueurs inscrits sur le site">
+          {h.playersCount}
+          {h.playersTotal ? `/${h.playersTotal}` : ""} joueur{(h.playersTotal ?? h.playersCount) > 1 ? "s" : ""}
         </span>
       </span>
       {/* La rencontre et le prono, avec un léger retrait */}

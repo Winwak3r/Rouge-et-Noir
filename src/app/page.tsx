@@ -168,6 +168,8 @@ export default async function HomePage() {
       })
     : [];
   const countBy = new Map(predCounts.map((c) => [c.matchId, c._count._all]));
+  // Joueurs inscrits sur le site (comptes actifs) : « 5/12 joueurs » sur les cartes
+  const siteTotal = await prisma.user.count({ where: { isActive: true } });
   const myBy = new Map(mine.map((p) => [p.matchId, p]));
   const oddsBy = new Map<string, Map<string, number>>();
   for (const o of odds) {
@@ -262,6 +264,7 @@ export default async function HomePage() {
       isNext: next?.id === m.id,
       cancelled: m.status === "CANCELLED",
       playersCount: countBy.get(m.id) ?? 0,
+      playersTotal: siteTotal,
       mine:
         user && editable
           ? !my

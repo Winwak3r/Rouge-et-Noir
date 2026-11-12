@@ -514,7 +514,8 @@ body::before {
     border-radius: 0 !important;
     font-size: 12px;
   }
-  .hdr-tiles > :is(.hbtn, .hbtn-pseudo) { border-left: 1px solid rgba(0, 0, 0, 0.12); }
+  .hdr-tiles > :is(.hbtn, .hbtn-pseudo) { border-left: 1px solid rgba(0, 0, 0, 0.22); }
+  :root[data-theme="dark"] .hdr-tiles > :is(.hbtn, .hbtn-pseudo) { border-left-color: rgba(255, 255, 255, 0.2); }
 }
 
 /* Ordinateur, thème clair : boutons de l'en-tête plus clairs */
