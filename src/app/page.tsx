@@ -737,19 +737,39 @@ export default async function HomePage() {
                 status={status}
                 live={isLive}
               />
-              {next && nh && (
+              {/* Ordinateur : le match en direct (quand son bloc n'est plus visible), sinon le prochain match
+                  (quand les 3 cartes ne sont plus visibles) ; noms complets des équipes */}
+              {isLive ? (
                 <HomeStickyMatch
                   only="desktop"
-                  watchId="home-next-cards"
-                  title="Prochain match"
-                  code={nh.code}
-                  competitionLogo={nh.competitionLogo}
-                  home={nh.home}
-                  away={nh.away}
-                  score={null}
-                  status={canEditPrediction(next, now) ? "Pronostics ouverts" : "Pronostics fermés"}
-                  live={false}
+                  fullNames
+                  watchId="home-top-match"
+                  title="Match en direct"
+                  code={fh.code}
+                  competitionLogo={fh.competitionLogo}
+                  home={fh.home}
+                  away={fh.away}
+                  score={fh.score ? `${fh.score.home} - ${fh.score.away}` : null}
+                  status="En direct"
+                  live
                 />
+              ) : (
+                next &&
+                nh && (
+                  <HomeStickyMatch
+                    only="desktop"
+                    fullNames
+                    watchId="home-next-cards"
+                    title="Prochain match"
+                    code={nh.code}
+                    competitionLogo={nh.competitionLogo}
+                    home={nh.home}
+                    away={nh.away}
+                    score={null}
+                    status={canEditPrediction(next, now) ? "Pronostics ouverts" : "Pronostics fermés"}
+                    live={false}
+                  />
+                )
               )}
             </>
           );

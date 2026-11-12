@@ -300,7 +300,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   return (
     <Link
       href={href}
-      className={`match-head match-head-${h.competition.toLowerCase()} relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 bg-surface p-3 shadow-sm transition-[transform,box-shadow,background-color] duration-300 ease-out will-change-transform hover:z-10 hover:scale-[1.04] hover:bg-neutral-50 hover:shadow-2xl ${BORDER[h.competition]}`}
+      className={`match-head relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-300 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
     >
       {/* Journée et compétition */}
       <span className="flex items-center gap-2">
@@ -324,19 +324,19 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
           · {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
         </span>
       </span>
-      {/* La rencontre et le prono, sans retrait */}
-      <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+      {/* La rencontre et le prono, avec un léger retrait */}
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-3">
         <Team t={srfc(h.home)} open={false} home />
         <span className="font-display text-lg font-bold">{h.score ? `${h.score.home} - ${h.score.away}` : "–"}</span>
         <Team t={srfc(h.away)} open={false} />
       </span>
-      <span className="block text-xs text-neutral-500">{h.dateLabel}</span>
+      <span className="block pl-3 text-xs text-neutral-500">{h.dateLabel}</span>
       {h.myPick ? (
-        <span className="mt-auto border-t border-neutral-200 pt-2">
+        <span className="mt-auto border-t border-neutral-300 pl-3 pt-2">
           <MyPick p={h.myPick} open={false} variant="pc" />
         </span>
       ) : (
-        <span className="mt-auto border-t border-neutral-200 pt-2 text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
+        <span className="mt-auto border-t border-neutral-300 pl-3 pt-2 text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
       )}
     </Link>
   );

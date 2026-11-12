@@ -13,6 +13,8 @@ type Side = { name: string; logo: string | null; rennes: boolean };
 export function HomeStickyMatch(props: {
   /** « mobile » : petits écrans seulement ; « desktop » : ordinateur seulement */
   only?: "mobile" | "desktop";
+  /** noms complets des équipes (sinon sigles) */
+  fullNames?: boolean;
   watchId: string;
   title: string;
   code: string;
@@ -88,11 +90,11 @@ export function HomeStickyMatch(props: {
         </span>
         {/* Le match */}
         <span className="flex min-w-0 flex-1 items-center justify-center gap-1.5 font-semibold">
-          <span className="font-display text-base font-bold uppercase tracking-wide">{teamAbbr(props.home.name)}</span>
+          <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? props.home.name : teamAbbr(props.home.name)}</span>
           {logo(props.home)}
           <span className="shrink-0 px-1 font-club text-base font-semibold tabular-nums">{props.score ?? "–"}</span>
           {logo(props.away)}
-          <span className="font-display text-base font-bold uppercase tracking-wide">{teamAbbr(props.away.name)}</span>
+          <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? props.away.name : teamAbbr(props.away.name)}</span>
         </span>
         {/* Statut */}
         <span
