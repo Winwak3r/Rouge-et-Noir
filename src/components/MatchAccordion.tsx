@@ -356,20 +356,23 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
         <span className="font-display text-lg font-bold">{h.score ? `${h.score.home} - ${h.score.away}` : "–"}</span>
         <Team t={srfc(h.away)} open={false} />
       </span>
+      {/* Prono saisi : Mon prono, remplacé au survol par « Pronostiquer ce match → » ; sinon ce lien d'emblée */}
       <span className="relative mt-auto grid min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2">
-        <span className="col-start-1 row-start-1 transition-opacity duration-300 ease-out group-hover:opacity-0">
-          {h.myPick ? (
-            <MyPick p={h.myPick} open={false} variant="pc" />
-          ) : (
-            <span className="text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
-          )}
-        </span>
-        <span
-          aria-hidden
-          className={`col-start-1 row-start-1 translate-y-1 text-sm font-bold uppercase tracking-wide opacity-0 transition-[opacity,transform] duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 ${TEXT[h.competition]}`}
-        >
-          Clique pour pronostiquer →
-        </span>
+        {h.myPick ? (
+          <>
+            <span className="col-start-1 row-start-1 transition-opacity duration-300 ease-out group-hover:opacity-0">
+              <MyPick p={h.myPick} open={false} variant="pc" />
+            </span>
+            <span
+              aria-hidden
+              className={`col-start-1 row-start-1 translate-y-1 text-xs font-semibold opacity-0 transition-[opacity,transform] duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 ${TEXT[h.competition]}`}
+            >
+              Pronostiquer ce match →
+            </span>
+          </>
+        ) : (
+          <span className="text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
+        )}
       </span>
     </Link>
     </div>
