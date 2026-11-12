@@ -38,11 +38,9 @@ export function Landing() {
             <h1 className={title}>
               {/* 1re ligne en blanc, sans retour à la ligne ; 2e ligne en noir */}
               <span className="block whitespace-nowrap text-[7.2vw] text-white sm:text-5xl lg:text-6xl">Le jeu de pronos du</span>
-              {/* texte noir sur un bandeau blanc légèrement incliné (façon écharpe) : lisible sur tout le fond */}
-              <span className="mt-2 block text-5xl sm:text-6xl lg:text-7xl">
-                <span className="inline-block -rotate-1 bg-white px-3 pb-1 pt-2 leading-none text-[#111111] shadow-[0_6px_20px_rgba(0,0,0,0.35)] [box-decoration-break:clone]">
-                  Stade Rennais F.C.
-                </span>
+              {/* Écharpe de supporter : rayures rouges et noires, bande centrale claire, maille, franges aux deux bouts */}
+              <span className="mt-3 block">
+                <span className="scarf whitespace-nowrap text-[6.6vw] sm:text-5xl lg:text-6xl">Stade Rennais F.C.</span>
               </span>
             </h1>
             <p className="max-w-xl text-lg text-white/80 sm:text-xl">Rejoins les Rouge &amp; Noir : ici, on ne lâche rien… sauf parfois les points !</p>
@@ -50,7 +48,9 @@ export function Landing() {
           </div>
           {/* Logo (fond transparent) ; sur mobile, tout en haut de l'écran */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo-rouge-noir.png" alt="Roazhon Park — Rouge & Noir" className="landing-fade order-first w-full lg:order-none [filter:drop-shadow(0_0_1px_rgba(255,255,255,0.9))_drop-shadow(0_0_10px_rgba(255,255,255,0.35))]" />
+          <div className="landing-fade order-first rounded-2xl bg-white/95 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/60 sm:p-5 lg:order-none">
+            <img src="/brand/logo-rouge-noir.png" alt="Roazhon Park — Rouge & Noir" className="w-full" />
+          </div>
         </div>
         <a
           href="#challenge"
