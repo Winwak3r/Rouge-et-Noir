@@ -309,8 +309,8 @@ function PickStateIcon({ mine }: { mine: MatchHeader["mine"] }) {
     incomplete: { bg: "bg-rouge", label: "Pronostic à compléter", path: <path d="M12 6v7 M12 17.5v.5" /> },
   }[mine];
   return (
-    <span title={conf.label} aria-label={conf.label} role="img" className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${conf.bg} text-white shadow-sm ring-2 ring-white/70`}>
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <span title={conf.label} aria-label={conf.label} role="img" className={`grid aspect-square h-[22px] w-[22px] shrink-0 place-items-center rounded-full ${conf.bg} text-white shadow-md ring-2 ring-[var(--header-bg)]`}>
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         {conf.path}
       </svg>
     </span>
@@ -331,9 +331,15 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   const when = shortDate(h.dateLabel);
   return (
     <div className="group relative h-full pt-3 transition-transform duration-[850ms] ease-out hover:z-10 hover:scale-[1.04]">
+      {/* État de mon prono (icône ronde), à droite de la date */}
+      {h.mine && (
+        <span className="absolute right-3 top-0.5 z-10">
+          <PickStateIcon mine={h.mine} />
+        </span>
+      )}
       {/* Date et heure, à cheval sur le coin supérieur droit de la carte */}
       {when && (
-        <span className="card-date absolute right-3 top-0 z-10 overflow-hidden whitespace-nowrap rounded-md border border-neutral-300 bg-[var(--header-bg)] px-2.5 py-1 font-display text-lg font-bold uppercase leading-none tracking-wide shadow-md transition-[color,border-color] duration-300 ease-out group-hover:border-transparent group-hover:text-white">
+        <span className="card-date absolute right-11 top-0 z-10 overflow-hidden whitespace-nowrap rounded-md border border-neutral-300 bg-[var(--header-bg)] px-2.5 py-1 font-display text-lg font-bold uppercase leading-none tracking-wide shadow-md transition-[color,border-color] duration-300 ease-out group-hover:border-transparent group-hover:text-white">
           {/* couleur de la compétition qui apparaît au survol */}
           <span aria-hidden className={`absolute inset-0 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 ${OPEN[h.competition].bg}`} />
           <span className="relative">
@@ -364,7 +370,6 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
           </span>
         )}
         {!/^Pronostics/.test(h.statusLabel) && <span className={`rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>}
-        <PickStateIcon mine={h.mine} />
         <span className="text-neutral-500">
           · {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
         </span>

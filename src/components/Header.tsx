@@ -114,17 +114,18 @@ export async function Header() {
       )}
       <div className="mx-auto max-w-5xl px-3 py-2 sm:px-4 sm:py-0">
         {/* Compte à gauche, logo au centre, Règles et Classement à droite (mobile et ordinateur) */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:items-stretch sm:gap-x-4">
-          <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:items-stretch sm:gap-2">
+        {/* Ordinateur : logo à gauche, puis tout à droite : thème | Règles | Mes Ligues | Zone mixte | Mon compte */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:flex sm:items-stretch sm:gap-x-0">
+          <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:contents">
 
             {user ? (
               // Ordinateur : « Mon compte » (rouge, avec la photo) puis « Ligues »
-              <div className="hdr-tiles hidden items-center gap-2 sm:flex">
-                <Link href="/compte" data-tour="user-menu" className="hbtn-pseudo">
+              <div className="hdr-tiles hidden sm:contents">
+                <Link href="/compte" data-tour="user-menu" className="hbtn-pseudo sm:order-6">
                   <Avatar userId={user.id} pseudo={user.pseudo} at={user.avatarUpdatedAt?.getTime() ?? null} size={22} className="ring-white/60" />
                   Mon compte
                 </Link>
-                <Link href="/ligues" data-tour="leagues" className="hbtn">
+                <Link href="/ligues" data-tour="leagues" className="hbtn sm:order-4">
                   <span className="hicon">
                   <svg aria-hidden viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -137,30 +138,33 @@ export async function Header() {
               </div>
             ) : (
               <>
-                <Link href="/connexion" className="hbtn">
+                <Link href="/connexion" className="hbtn sm:order-6 sm:self-center">
                   Connexion
                 </Link>
-                <Link href="/inscription" className="hbtn">
+                <Link href="/inscription" className="hbtn sm:order-6 sm:ml-2 sm:self-center">
                   <span className="sm:hidden">S’inscrire</span>
                   <span className="hidden sm:inline">Créer un compte</span>
                 </Link>
               </>
             )}
           </div>
-          <Link href="/" aria-label="Rouge & Noir — accueil" className="col-start-2 row-start-1 flex flex-col items-center justify-center justify-self-center rounded focus-visible:outline-2 focus-visible:outline-noir sm:py-1.5">
+          <Link href="/" aria-label="Rouge & Noir — accueil" className="col-start-2 row-start-1 flex flex-col items-center justify-center justify-self-center rounded focus-visible:outline-2 focus-visible:outline-noir sm:order-1 sm:mr-auto sm:py-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-clair.png" alt="Rouge & Noir" width={860} height={160} className="logo-clair h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-sombre.png" alt="Rouge & Noir" width={858} height={160} className="logo-sombre h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
-            <span className="mt-0.5 hidden text-center text-[10px] leading-tight text-neutral-500 sm:block">
-              Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
-            </span>
           </Link>
-          <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end sm:flex-row sm:items-stretch">
-            <div className="flex items-center gap-2 sm:items-stretch">
-            <ThemeSwitch className="hidden self-center sm:inline-flex" />
-            <nav className="hdr-tiles flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
-            <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
+          <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end sm:contents">
+            <div className="flex items-center gap-2 sm:contents">
+            {/* Ordinateur : thème, et la dernière synchro dessous */}
+            <div className="hidden sm:order-2 sm:mr-3 sm:flex sm:flex-col sm:items-center sm:justify-center sm:gap-1">
+              <ThemeSwitch className="inline-flex" />
+              <span className="whitespace-nowrap text-center text-[10px] leading-tight text-neutral-500">
+                Synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
+              </span>
+            </div>
+            <nav className="hdr-tiles flex items-center gap-1 sm:contents" aria-label="Navigation principale">
+            <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn sm:order-3 ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon">
                 <svg aria-hidden viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
@@ -169,7 +173,7 @@ export async function Header() {
               </span>
               <span className="max-[359px]:hidden">Règles</span>
             </Link>
-            <Link href="/actus" aria-label="La zone mixte : actualités du Stade Rennais" data-tour="standings" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
+            <Link href="/actus" aria-label="La zone mixte : actualités du Stade Rennais" data-tour="standings" className={`hbtn sm:order-5 ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon bg-white">
                 {rennesLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
