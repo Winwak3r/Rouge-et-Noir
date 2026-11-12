@@ -15,8 +15,9 @@ export interface LeaguePanel {
 }
 
 const STEP_MS = 1000; // déplacement des ligues et apparition de leurs infos
-const MOVE_MS = 500; // 1) la tuile choisie glisse seule en première position
-const INFO_DELAY = MOVE_MS; // 2) puis ses infos se déroulent (une fois la tuile en place)
+const CLOSE_MS = 600; // 1) repli des infos de la ligue affichée
+const MOVE_MS = 500; // 2) la tuile de la nouvelle ligue glisse tout à gauche
+// 3) puis ses infos se déroulent (INFO_MS)
 const INFO_MS = 1000; // durée du déroulé des infos
 const RANK_DELAY = 350; // Classement : délai avant apparition
 const BONUS_DELAY = 950; // Mes spécialités maison : délai avant apparition
@@ -50,13 +51,14 @@ export function LeagueHub(props: {
   const tabsMark = useRef<HTMLDivElement>(null);
   const BAR_H = 52;
 
-  // Infos de la ligue choisie : repliées au changement de ligue, puis déroulées après un court délai
-  const [infoOpen, setInfoOpen] = useState(false);
-  useEffect(() => {
-    setInfoOpen(false);
-    const t = window.setTimeout(() => setInfoOpen(true), INFO_DELAY);
-    return () => clearTimeout(t);
-  }, [sel]);
+  // Ordinateur, au clic sur une autre ligue :
+  //  1. les infos de la ligue affichée se replient (les autres tuiles se rapprochent de sa photo) ;
+  //  2. la tuile de la nouvelle ligue glisse aussitôt tout à gauche ;
+  //  3. ses infos se déroulent et repoussent les autres tuiles vers la droite.
+  const [shown, setShown] = useState(sel); // ligue placée en premier (avec ses infos)
+  const [infoOpen, setInfoOpen] = useState(true);
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
   // Largeur des infos une fois déroulées : la place laissée par la photo et les autres tuiles
   const rowRef = useRef<HTMLDivElement>(null);
   const [infoW, setInfoW] = useState(0);
@@ -91,8 +93,17 @@ export function LeagueHub(props: {
   const before = useRef(new Map<string, DOMRect>());
   const choose = (key: string) => {
     if (key === sel) return;
-    before.current = new Map([...tileRefs.current].map(([k, el]) => [k, el.getBoundingClientRect()]));
-    setSel(key);
+    timers.current.forEach(clearTimeout);
+    setSel(key); // classement, spécialités (et mobile) suivent aussitôt
+    setInfoOpen(false); // 1. repli des infos de la ligue affichée
+    timers.current = [
+      window.setTimeout(() => {
+        // 2. la nouvelle ligue passe tout à gauche (position de départ mémorisée pour l'animation)
+        before.current = new Map([...tileRefs.current].map(([k, el]) => [k, el.getBoundingClientRect()]));
+        setShown(key);
+      }, CLOSE_MS),
+      window.setTimeout(() => setInfoOpen(true), CLOSE_MS + MOVE_MS), // 3. déroulé de ses infos
+    ];
   };
   useLayoutEffect(() => {
     if (before.current.size === 0) return;
@@ -110,7 +121,7 @@ export function LeagueHub(props: {
       }
     }
     before.current = new Map();
-  }, [sel]);
+  }, [shown]);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -251,7 +262,8 @@ export function LeagueHub(props: {
   }, [sel, stage]);
 
   const board = <StandingsBoard views={props.views} initial={sel} forcedKey={sel} hideSelector hideHeading me={props.me} logos={props.logos} />;
-  const ordered = [...props.views].sort((a, b) => (a.key === sel ? -1 : b.key === sel ? 1 : 0));
+  const ordered = [...props.views].sort((a, b) => (a.key === shown ? -1 : b.key === shown ? 1 : 0));
+  const shownInfo = props.panels[shown]?.info ?? null;
   const appear = (visible: boolean) =>
     `transition-all ease-out ${visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`;
   const n = props.views.length;
@@ -285,13 +297,13 @@ export function LeagueHub(props: {
               </span>
               <div
                 className="overflow-hidden"
-                style={{ width: infoOpen ? infoW : 0, transition: `width ${INFO_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1)` }}
+                style={{ width: infoOpen ? infoW : 0, transition: `width ${infoOpen ? INFO_MS : CLOSE_MS}ms cubic-bezier(0.4, 0, 0.2, 1)` }}
               >
                 <div
                   className="h-full [&>section]:h-full [&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none"
                   style={{ width: infoW }}
                 >
-                  {panel.info}
+                  {shownInfo}
                 </div>
               </div>
             </div>
