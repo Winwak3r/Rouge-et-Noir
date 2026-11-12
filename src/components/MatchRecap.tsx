@@ -318,7 +318,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
               <div className="flex justify-center">
                 <Settle show={t >= T_PTS_SCORE} big={4} className="relative">
                   <span className={`${pillBase} ${scoreColor(my.scorePoints)}`}>{signed(my.scorePoints, t >= T_PTS_SCORE)}</span>
-                  {my.scorePoints >= 4 && (
+                  {my.scorePoints >= 4 && t >= T_PTS_SCORE && (
                     // apparaît une fois les points rangés sous le score
                     <span className="absolute left-full top-1/2 ml-2 -translate-y-1/2">
                       <span className="recap-bravo block whitespace-nowrap rounded-md bg-green-600 px-1.5 py-0.5 text-[1.4vh] font-bold uppercase text-white shadow">
@@ -373,10 +373,11 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                   <span className="w-full truncate text-center text-[1.6vh] font-semibold">{l.name}</span>
                   <span className="relative flex items-center gap-2">
                     <span
-                      className={`inline-block font-club text-[3vh] font-semibold leading-none tabular-nums ${ptsColor(newOn ? after : base)} ${
+                      className={`inline-block font-club text-[4.2vh] font-semibold leading-none tabular-nums ${ptsColor(newOn ? after : base)} ${
                         newOn && after !== base ? "recap-grow" : ""
                       }`}
                     >
+                      {(newOn ? after : base) > 0 ? "+" : ""}
                       <CountUp from={base} to={after} start={newOn} ms={800} /> pts
                     </span>
                     {b && (
@@ -389,7 +390,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                       </span>
                     )}
                   </span>
-                  <span className={`w-full rounded-xl bg-white/10 px-2 py-[0.7vh] text-center font-display text-[2.4vh] font-bold uppercase leading-none ${pop(t >= T_RANK)}`}>
+                  <span className={`w-full rounded-xl bg-white/10 px-2 py-[1vh] text-center font-display text-[3.3vh] font-bold uppercase leading-none ${pop(t >= T_RANK)}`}>
                     {l.rank ? (l.rank === 1 ? "1er" : `${l.rank}e`) : "—"} <span className="text-white/50">·</span> {l.points} pts
                   </span>
                 </div>
