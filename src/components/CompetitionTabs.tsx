@@ -74,7 +74,9 @@ export function CompetitionTabs(props: {
           );
         })}
       </div>
-      <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {/* Zone qui coupe le glissement entre compétitions : marge intérieure pour laisser la place au zoom des
+          en-têtes au survol (sinon leurs bords et leur fond étaient rognés, seul le texte semblait grossir) */}
+      <div className="-mx-6 overflow-hidden px-6 py-3 -my-3" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div
           key={`${active.code}-${changes.current}`}
           className={`space-y-3 ${direction === "right" ? "slide-from-right" : direction === "left" ? "slide-from-left" : ""}`}
