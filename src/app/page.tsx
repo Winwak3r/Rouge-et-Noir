@@ -656,6 +656,7 @@ export default async function HomePage() {
     .sort((a, b) => a.kickoffAt.getTime() - b.kickoffAt.getTime())
     .slice(0, 3);
   upcoming.forEach((m) => renderMatch(m, { layout: "list" })); // calcule et mémorise leurs en-têtes
+  const upcomingIds = new Set(upcoming.map((m) => m.id));
   return (
     <AccordionGroup defaultOpenId={null}>
       {recap && <MatchRecap data={recap} userId={user.id} />}
@@ -805,7 +806,18 @@ export default async function HomePage() {
                     <div className="space-y-3">
                       {/* Matchs déjà joués : masqués (sauf le « Match terminé » en haut de page), affichables d'un clic */}
                       <PastMatches count={list.filter((m) => isPlayed(m)).length}>{list.filter((m) => isPlayed(m)).map((m) => renderMatch(m))}</PastMatches>
-                      {list.filter((m) => !isPlayed(m)).map((m) => renderMatch(m))}
+                      {/* Ordinateur : les matchs déjà présentés dans les 3 cartes ne sont pas répétés ici */}
+                      {list
+                        .filter((m) => !isPlayed(m))
+                        .map((m) =>
+                          upcomingIds.has(m.id) ? (
+                            <div key={m.id} className="lg:hidden">
+                              {renderMatch(m)}
+                            </div>
+                          ) : (
+                            renderMatch(m)
+                          ),
+                        )}
                     </div>
                   ),
               };
