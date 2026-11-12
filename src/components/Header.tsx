@@ -112,10 +112,10 @@ export async function Header() {
           }}
         />
       )}
-      <div className="mx-auto max-w-5xl px-3 py-2 sm:px-4 sm:py-2">
+      <div className="mx-auto max-w-5xl px-3 py-2 sm:px-4 sm:py-0">
         {/* Compte à gauche, logo au centre, Règles et Classement à droite (mobile et ordinateur) */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:items-center sm:gap-x-4">
-          <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:items-stretch sm:gap-x-4">
+          <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:items-stretch sm:gap-2">
 
             {user ? (
               // Ordinateur : « Mon compte » (rouge, avec la photo) puis « Ligues »
@@ -147,14 +147,17 @@ export async function Header() {
               </>
             )}
           </div>
-          <Link href="/" aria-label="Rouge & Noir — accueil" className="col-start-2 row-start-1 justify-self-center rounded focus-visible:outline-2 focus-visible:outline-noir">
+          <Link href="/" aria-label="Rouge & Noir — accueil" className="col-start-2 row-start-1 flex flex-col items-center justify-center justify-self-center rounded focus-visible:outline-2 focus-visible:outline-noir sm:py-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-clair.png" alt="Rouge & Noir" width={860} height={160} className="logo-clair h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-sombre.png" alt="Rouge & Noir" width={858} height={160} className="logo-sombre h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
+            <span className="mt-0.5 hidden text-center text-[10px] leading-tight text-neutral-500 sm:block">
+              Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
+            </span>
           </Link>
-          <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end">
-            <div className="flex items-center gap-2">
+          <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end sm:flex-row sm:items-stretch">
+            <div className="flex items-center gap-2 sm:items-stretch">
             <nav className="hdr-tiles flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
             <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon">
@@ -183,11 +186,8 @@ export async function Header() {
               <span className="hidden sm:inline">Zone mixte</span>
             </Link>
           </nav>
-            <ThemeSwitch className="hidden sm:inline-flex" />
+            <ThemeSwitch className="hidden self-center sm:inline-flex" />
             </div>
-            <span className="hidden text-right text-[10px] leading-tight text-neutral-500 sm:inline sm:text-[10px]">
-              Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
-            </span>
             {/* Mobile : interrupteur du thème en haut à droite (sur ordinateur, il est sur la ligne des boutons) */}
             <ThemeSwitch className="inline-flex sm:hidden" />
           </div>
