@@ -15,6 +15,9 @@ export interface LeaguePanel {
 }
 
 const STEP_MS = 1000; // déplacement des ligues et apparition de leurs infos
+const MOVE_MS = 500; // 1) la tuile choisie glisse seule en première position
+const INFO_DELAY = MOVE_MS; // 2) puis ses infos se déroulent (une fois la tuile en place)
+const INFO_MS = 1000; // durée du déroulé des infos
 const RANK_DELAY = 350; // Classement : délai avant apparition
 const BONUS_DELAY = 950; // Mes spécialités maison : délai avant apparition
 const REVEAL_MS = 600; // durée de leur apparition
@@ -47,6 +50,30 @@ export function LeagueHub(props: {
   const tabsMark = useRef<HTMLDivElement>(null);
   const BAR_H = 52;
 
+  // Infos de la ligue choisie : repliées au changement de ligue, puis déroulées après un court délai
+  const [infoOpen, setInfoOpen] = useState(false);
+  useEffect(() => {
+    setInfoOpen(false);
+    const t = window.setTimeout(() => setInfoOpen(true), INFO_DELAY);
+    return () => clearTimeout(t);
+  }, [sel]);
+  // Largeur des infos une fois déroulées : la place laissée par la photo et les autres tuiles
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [infoW, setInfoW] = useState(0);
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const measure = () => {
+      const others = props.views.length - 1;
+      const photo = 120 + 4; // photo carrée (hauteur du bloc) + bordures
+      setInfoW(Math.max(0, row.getBoundingClientRect().width - photo - others * (96 + 12) - 12));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [props.views.length]);
+
   // Étapes d'apparition (ordinateur) : 0 ligues + infos · 1 Classement · 2 Spécialités
   const [stage, setStage] = useState(0);
   useEffect(() => {
@@ -77,7 +104,7 @@ export function LeagueHub(props: {
       const dy = b.top - a.top;
       if (dx || dy) {
         el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "translate(0, 0)" }], {
-          duration: STEP_MS,
+          duration: MOVE_MS,
           easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
         });
       }
@@ -240,15 +267,15 @@ export function LeagueHub(props: {
 
         {/* Ordinateur : la ligue choisie en premier, ses infos juste à droite (même hauteur que la tuile),
             puis les autres ligues */}
-        <div role="tablist" aria-label="Ligue affichée" className="hidden items-stretch gap-3 lg:flex">
+        <div ref={rowRef} role="tablist" aria-label="Ligue affichée" className="hidden items-stretch gap-3 lg:flex">
           {ordered.slice(0, 1).map((v) => (
-            // Un seul bloc : la photo (sans nom dessous) et les infos à droite, contour rouge
+            // Un seul bloc : la photo, puis les infos qui se déroulent vers la droite (contour rouge)
             <div
               key={v.key}
               ref={(el) => void (el ? tileRefs.current.set(v.key, el) : tileRefs.current.delete(v.key))}
               role="tab"
               aria-selected
-              className="flex h-[7.5rem] min-w-0 flex-1 overflow-hidden rounded-xl border-2 border-rouge bg-[var(--color-surface)]"
+              className="flex h-[7.5rem] shrink-0 overflow-hidden rounded-xl border-2 border-rouge bg-[var(--color-surface)]"
             >
               <span className="relative block aspect-square h-full shrink-0 overflow-hidden">
                 {image(v)}
@@ -256,8 +283,16 @@ export function LeagueHub(props: {
                   <span className="absolute right-1 top-1 rounded bg-rouge px-1 py-px text-[9px] font-bold uppercase tracking-wide text-white shadow">Admin</span>
                 )}
               </span>
-              <div key={`info-${sel}`} className="hub-fade-in min-w-0 flex-1 [&>section]:h-full [&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none">
-                {panel.info}
+              <div
+                className="overflow-hidden"
+                style={{ width: infoOpen ? infoW : 0, transition: `width ${INFO_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1)` }}
+              >
+                <div
+                  className="h-full [&>section]:h-full [&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none"
+                  style={{ width: infoW }}
+                >
+                  {panel.info}
+                </div>
               </div>
             </div>
           ))}
