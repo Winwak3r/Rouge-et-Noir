@@ -190,7 +190,9 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
           {h.live}
         </span>
       )}
-      <span className={`whitespace-nowrap rounded px-2 py-0.5 font-medium ${tone}`}>{mobile && h.statusShort ? h.statusShort : h.statusLabel}</span>
+      {!/^Pronostics/.test(h.statusLabel) && (
+        <span className={`whitespace-nowrap rounded px-2 py-0.5 font-medium ${tone}`}>{mobile && h.statusShort ? h.statusShort : h.statusLabel}</span>
+      )}
       {h.mine === "complete" && <span className="rounded bg-[#097D42] px-2 py-0.5 font-medium text-white">Complété</span>}
       {(h.mine === "score" || h.mine === "scorer") && (
         <span className="whitespace-nowrap rounded bg-[#FBBF24] px-2 py-0.5 font-medium text-[#3b2600]">Buteur à saisir</span>
@@ -300,7 +302,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   return (
     <Link
       href={href}
-      className={`match-head relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-500 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
+      className={`match-head relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
     >
       {/* Journée et compétition */}
       <span className="flex items-center gap-2">
@@ -316,7 +318,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
             {h.live}
           </span>
         )}
-        <span className={`rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>
+        {!/^Pronostics/.test(h.statusLabel) && <span className={`rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>}
         {h.mine === "complete" && <span className="rounded bg-[#097D42] px-1.5 py-0.5 font-medium text-white">Complété</span>}
         {(h.mine === "score" || h.mine === "scorer") && <span className="rounded bg-[#FBBF24] px-1.5 py-0.5 font-medium text-[#3b2600]">Buteur à saisir</span>}
         {h.mine === "incomplete" && <span className="rounded bg-rouge px-1.5 py-0.5 font-medium text-white">À compléter</span>}

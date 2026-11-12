@@ -112,14 +112,14 @@ export async function Header() {
           }}
         />
       )}
-      <div className="mx-auto max-w-5xl px-3 py-2 sm:px-4 sm:py-3">
+      <div className="mx-auto max-w-5xl px-3 py-2 sm:px-4 sm:py-2">
         {/* Compte à gauche, logo au centre, Règles et Classement à droite (mobile et ordinateur) */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:gap-x-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2 sm:items-center sm:gap-x-4">
           <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
 
             {user ? (
               // Ordinateur : « Mon compte » (rouge, avec la photo) puis « Ligues »
-              <div className="hidden items-center gap-2 sm:flex">
+              <div className="hdr-tiles hidden items-center gap-2 sm:flex">
                 <Link href="/compte" data-tour="user-menu" className="hbtn-pseudo">
                   <Avatar userId={user.id} pseudo={user.pseudo} at={user.avatarUpdatedAt?.getTime() ?? null} size={22} className="ring-white/60" />
                   Mon compte
@@ -154,7 +154,8 @@ export async function Header() {
             <img src="/brand/logo-sombre.png" alt="Rouge & Noir" width={858} height={160} className="logo-sombre h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
           </Link>
           <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end">
-            <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
+            <div className="flex items-center gap-2">
+            <nav className="hdr-tiles flex items-center gap-1 sm:gap-2" aria-label="Navigation principale">
             <Link href="/regles" aria-label="Règles" data-tour="rules" className={`hbtn ${user ? "max-sm:hidden" : "hidden"}`}>
               <span className="hicon">
                 <svg aria-hidden viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -181,9 +182,10 @@ export async function Header() {
               </svg>
               <span className="hidden sm:inline">Zone mixte</span>
             </Link>
-            <ThemeSwitch className="hidden sm:inline-flex" />
           </nav>
-            <span className="hidden text-right text-[10px] leading-tight text-neutral-500 sm:inline sm:text-xs">
+            <ThemeSwitch className="hidden sm:inline-flex" />
+            </div>
+            <span className="hidden text-right text-[10px] leading-tight text-neutral-500 sm:inline sm:text-[10px]">
               Dernière synchro : {lastSync ? formatStamp(lastSync.finishedAt ?? lastSync.startedAt) : "jamais"}
             </span>
             {/* Mobile : interrupteur du thème en haut à droite (sur ordinateur, il est sur la ligne des boutons) */}

@@ -124,14 +124,16 @@ export function HomeStickyMatch(props: {
           {logo(props.away)}
           <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? props.away.name : teamAbbr(props.away.name)}</span>
         </span>
-        {/* Statut */}
-        <span
-          className={`shrink-0 rounded px-2 py-0.5 text-[11px] font-semibold ${
-            props.live ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-700"
-          }`}
-        >
-          {props.status}
-        </span>
+        {/* Statut (sauf « Pronostics ouverts / fermés ») */}
+        {!/^Pronostics/.test(props.status) && (
+          <span
+            className={`shrink-0 rounded px-2 py-0.5 text-[11px] font-semibold ${
+              props.live ? "bg-rouge text-white" : "bg-neutral-100 text-neutral-700"
+            }`}
+          >
+            {props.status}
+          </span>
+        )}
       </span>
     </button>,
     document.body,

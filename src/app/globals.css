@@ -498,3 +498,22 @@ body::before {
   .recap-bravo { animation: none; }
 }
 
+
+/* En-tête (ordinateur) : boutons en tuiles carrées, collées, de la hauteur de l'en-tête */
+@media (min-width: 640px) {
+  .hdr-tiles { gap: 0 !important; }
+  .hdr-tiles > .hbtn,
+  .hdr-tiles > .hbtn-pseudo {
+    height: 4rem;
+    min-width: 4.5rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0 0.8rem;
+    border-radius: 0;
+    font-size: 12px;
+  }
+  .hdr-tiles > :is(.hbtn, .hbtn-pseudo):not(.hidden):first-child { border-radius: 0.6rem 0 0 0.6rem; }
+  .hdr-tiles > :is(.hbtn, .hbtn-pseudo):last-child { border-radius: 0 0.6rem 0.6rem 0; }
+  .hdr-tiles > :is(.hbtn, .hbtn-pseudo) + :is(.hbtn, .hbtn-pseudo) { border-left: 1px solid rgba(0, 0, 0, 0.08); }
+}
