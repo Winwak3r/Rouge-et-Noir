@@ -222,7 +222,7 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
             ? `rounded-tr-lg text-white ${OPEN[h.competition].bg}`
             : h.cancelled
               ? "cursor-default"
-              : `match-head match-head-${h.competition.toLowerCase()} rounded-r-lg hover:bg-neutral-50`
+              : "match-head rounded-r-lg"
         }`}
       >
         <span className={`flex w-full items-start gap-3 ${h.cancelled ? "opacity-35" : ""}`}>

@@ -17,6 +17,8 @@ export function HomeStickyMatch(props: {
   fullNames?: boolean;
   /** repère(s) à surveiller : le premier présent dans la page est utilisé */
   watchId: string | string[];
+  /** match en direct : « Pronostics et points » si l'accordéon est ouvert, sinon le titre « Prochains matchs » */
+  liveWatch?: { container: string; open: string; closed: string };
   title: string;
   code: string;
   competitionLogo: string | null;
@@ -41,17 +43,41 @@ export function HomeStickyMatch(props: {
     return () => ro.disconnect();
   }, []);
 
-  // Visible dès que le bloc du match est passé sous l'en-tête
+  // Visible dès que le repère est passé sous l'en-tête :
+  //  - repère « bloc » (watchId) : quand tout le bloc est sorti par le haut ;
+  //  - match en direct (live) : quand on arrive sur « Pronostics et points » si son accordéon est ouvert,
+  //    sinon sur le titre « Prochains matchs ».
   useEffect(() => {
-    const ids = Array.isArray(props.watchId) ? props.watchId : [props.watchId];
-    const el = ids.map((id) => document.getElementById(id)).find(Boolean) ?? null;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setShow(!e.isIntersecting && e.boundingClientRect.top < top), {
-      rootMargin: `-${Math.round(top)}px 0px 0px 0px`,
-    });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [JSON.stringify(props.watchId), top]); // eslint-disable-line react-hooks/exhaustive-deps
+    let frame = 0;
+    const check = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (props.live && props.liveWatch) {
+          const { container, open, closed } = props.liveWatch;
+          const isOpen = Boolean(document.querySelector(`#${container} [aria-expanded="true"]`));
+          const el = document.getElementById(isOpen ? open : closed) ?? document.getElementById(container);
+          if (!el) return setShow(false);
+          const r = el.getBoundingClientRect();
+          setShow((isOpen || el.id !== container ? r.top : r.bottom) < top);
+          return;
+        }
+        const ids = Array.isArray(props.watchId) ? props.watchId : [props.watchId];
+        const el = ids.map((id) => document.getElementById(id)).find(Boolean);
+        if (!el) return setShow(false);
+        setShow(el.getBoundingClientRect().bottom < top);
+      });
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    window.addEventListener("click", check); // ouverture / fermeture d'un accordéon
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+      window.removeEventListener("click", check);
+    };
+  }, [JSON.stringify(props.watchId), JSON.stringify(props.liveWatch), props.live, top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!mounted) return null;
   const logo = (s: Side) =>
