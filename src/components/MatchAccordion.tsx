@@ -211,7 +211,7 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
     <section
       ref={ref}
       id={`match-${h.id}`}
-      className={`relative scroll-mt-40 rounded-lg border-y border-r border-l-[6px] bg-surface shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out ${
+      className={`relative scroll-mt-40 rounded-lg border-y border-r border-l-[6px] bg-surface shadow-sm transition-[scale,transform,box-shadow] duration-[850ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
         open ? "" : "hover:z-10 hover:scale-[1.04] hover:shadow-2xl"
       } ${BORDER[h.competition]} ${
         open ? OPEN[h.competition].border : "border-y-neutral-200 border-r-neutral-200"
