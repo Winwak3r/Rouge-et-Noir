@@ -312,12 +312,19 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   }[h.statusTone];
   const when = shortDate(h.dateLabel);
   return (
+    <div className="group relative h-full pt-3 transition-transform duration-[850ms] ease-out hover:z-10 hover:scale-[1.04]">
+      {/* Date et heure, à cheval sur le coin supérieur droit de la carte */}
+      {when && (
+        <span className="card-date absolute right-3 top-0 z-10 whitespace-nowrap rounded-md border border-neutral-300 bg-[var(--header-bg)] px-2.5 py-1 font-display text-lg font-bold uppercase leading-none tracking-wide shadow-md">
+          {when}
+        </span>
+      )}
     <Link
       href={href}
-      className={`group match-head relative flex h-full flex-col gap-1.5 overflow-hidden rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-[850ms] ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
+      className={`match-head relative flex h-full flex-col gap-1.5 overflow-hidden rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-shadow duration-[850ms] ease-out group-hover:shadow-2xl ${BORDER[h.competition]}`}
     >
       {/* Journée, compétition et date ; au survol, la couleur de la compétition remplit la ligne de gauche à droite */}
-      <span className="relative -mx-3 -mt-3 flex items-center gap-2 px-3 pb-1 pt-3 transition-[padding] duration-500 ease-out group-hover:pb-2.5">
+      <span className="relative -mx-3 -mt-3 flex items-center gap-2 px-3 pb-2 pt-4">
         <span aria-hidden className={`absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100 ${OPEN[h.competition].bg}`} />
         <span className="match-code relative font-display text-xl font-black transition-colors duration-300 group-hover:text-white/80">{h.code}</span>
         <span className="relative">
@@ -326,11 +333,6 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
         <span className={`relative min-w-0 truncate text-xs font-medium transition-colors duration-300 group-hover:text-white ${TEXT[h.competition]}`}>
           {h.competitionLabel}
         </span>
-        {when && (
-          <span className="card-date relative ml-auto shrink-0 whitespace-nowrap font-display text-sm font-bold uppercase tracking-wide transition-colors duration-300 group-hover:text-white">
-            {when}
-          </span>
-        )}
       </span>
       {/* Statut du match et du prono, puis nombre de joueurs : une seule ligne */}
       <span className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap text-[10px]">
@@ -354,15 +356,22 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
         <span className="font-display text-lg font-bold">{h.score ? `${h.score.home} - ${h.score.away}` : "–"}</span>
         <Team t={srfc(h.away)} open={false} />
       </span>
-      {h.myPick ? (
-        <span className="mt-auto flex min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2">
-          <MyPick p={h.myPick} open={false} variant="pc" />
+      <span className="relative mt-auto grid min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2">
+        <span className="col-start-1 row-start-1 transition-opacity duration-300 ease-out group-hover:opacity-0">
+          {h.myPick ? (
+            <MyPick p={h.myPick} open={false} variant="pc" />
+          ) : (
+            <span className="text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
+          )}
         </span>
-      ) : (
-        <span className="mt-auto flex min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2 text-xs font-semibold text-rouge">
-          Pronostiquer ce match →
+        <span
+          aria-hidden
+          className={`col-start-1 row-start-1 translate-y-1 text-sm font-bold uppercase tracking-wide opacity-0 transition-[opacity,transform] duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 ${TEXT[h.competition]}`}
+        >
+          Clique pour pronostiquer →
         </span>
-      )}
+      </span>
     </Link>
+    </div>
   );
 }
