@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { BonusIcon } from "./BonusIcon";
@@ -282,5 +283,55 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
       </div>
       )}
     </section>
+  );
+}
+
+/** Carte compacte d'un match à venir (accueil, ordinateur) : un clic ouvre la page du match. */
+export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
+  const tone = {
+    green: "bg-green-100 text-green-800",
+    red: "bg-red-100 text-red-700",
+    grey: "bg-neutral-200 text-neutral-700",
+    orange: "bg-orange-100 text-orange-800",
+  }[h.statusTone];
+  return (
+    <Link
+      href={href}
+      className={`match-head match-head-${h.competition.toLowerCase()} flex h-full flex-col gap-2 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 bg-surface p-3 shadow-sm transition-colors hover:bg-neutral-50 ${BORDER[h.competition]}`}
+    >
+      <span className="flex items-start gap-2">
+        <span className="match-code w-9 shrink-0 font-display text-xl font-black">{h.code}</span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5 text-xs">
+            <CompetitionBadge code={h.competition} logo={h.competitionLogo} />
+            <span className={`truncate font-medium ${TEXT[h.competition]}`}>{h.competitionLabel}</span>
+          </span>
+        </span>
+        <span className="flex shrink-0 flex-col items-end gap-1 text-[10px]">
+          <span className={`whitespace-nowrap rounded px-1.5 py-0.5 font-medium ${tone}`}>{h.statusShort ?? h.statusLabel}</span>
+          {h.mine === "complete" && <span className="rounded bg-[#097D42] px-1.5 py-0.5 font-medium text-white">Complété</span>}
+          {(h.mine === "score" || h.mine === "scorer") && (
+            <span className="whitespace-nowrap rounded bg-[#FBBF24] px-1.5 py-0.5 font-medium text-[#3b2600]">Buteur à saisir</span>
+          )}
+          {h.mine === "incomplete" && <span className="rounded bg-rouge px-1.5 py-0.5 font-medium text-white">À compléter</span>}
+          <span className="text-neutral-500">
+            {h.playersCount} joueur{h.playersCount > 1 ? "s" : ""}
+          </span>
+        </span>
+      </span>
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pl-11">
+        <Team t={h.home} open={false} home />
+        <span className="font-display text-lg font-bold">–</span>
+        <Team t={h.away} open={false} />
+      </span>
+      <span className="block pl-11 text-xs text-neutral-500">{h.dateLabel}</span>
+      {h.myPick ? (
+        <span className="mt-auto border-t border-neutral-200 pt-2 pl-11">
+          <MyPick p={h.myPick} open={false} variant="pc" />
+        </span>
+      ) : (
+        <span className="mt-auto border-t border-neutral-200 pt-2 pl-11 text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
+      )}
+    </Link>
   );
 }

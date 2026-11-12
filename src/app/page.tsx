@@ -7,7 +7,7 @@ import { LiveRefresh } from "@/components/LiveRefresh";
 import { CompetitionTabs } from "@/components/CompetitionTabs";
 import { Collapsible } from "@/components/Collapsible";
 import { Comparison } from "@/components/Comparison";
-import { MatchAccordion, type MatchHeader } from "@/components/MatchAccordion";
+import { MatchCard, MatchAccordion, type MatchHeader } from "@/components/MatchAccordion";
 import { MatchResult } from "@/components/MatchResult";
 import { MatchStats } from "@/components/MatchStats";
 import { MyPrediction } from "@/components/MyPrediction";
@@ -195,6 +195,7 @@ export default async function HomePage() {
   const next = matches.find((m) => m.status === "SCHEDULED" && m.kickoffAt > now) ?? null;
 
   const headersById = new Map<string, MatchHeader>();
+  let upcoming: typeof matches = [];
   const renderMatch = (m: (typeof matches)[number], opts: { layout?: "next" | "top" | "list" } = {}) => {
     const c = COMPETITIONS[m.competition];
     const phase = matchPhase(m, now);
@@ -645,6 +646,12 @@ export default async function HomePage() {
     );
   }
 
+  // Ordinateur : trois prochains matchs (à venir, non annulés), en cartes
+  upcoming = matches
+    .filter((m) => m.status === "SCHEDULED" && m.kickoffAt > now && m.id !== live?.id)
+    .sort((a, b) => a.kickoffAt.getTime() - b.kickoffAt.getTime())
+    .slice(0, 3);
+  upcoming.forEach((m) => renderMatch(m, { layout: "list" })); // calcule et mémorise leurs en-têtes
   return (
     <AccordionGroup defaultOpenId={null}>
       {recap && <MatchRecap data={recap} userId={user.id} />}
@@ -678,10 +685,24 @@ export default async function HomePage() {
         )}
 
         {next ? (
-          <section id="home-next-match" className="space-y-3" data-tour="next-match">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
-            {renderMatch(next, { layout: "next" })}
-          </section>
+          <>
+            {/* Mobile : le prochain match */}
+            <section id="home-next-match" className="space-y-3 lg:hidden" data-tour="next-match">
+              <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
+              {renderMatch(next, { layout: "next" })}
+            </section>
+            {/* Ordinateur : les trois prochains matchs, en cartes qui ouvrent la page du match */}
+            <section className="hidden space-y-3 lg:block" data-tour="next-match">
+              <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochains matchs</h2>
+              <div className="grid grid-cols-3 gap-3">
+                {upcoming.map((m) => {
+                  const h = headersById.get(m.id);
+                  if (!h) return null;
+                  return <MatchCard key={m.id} h={h} href={canEditPrediction(m, now) ? `/match/${m.id}` : `/#match-${m.id}`} />;
+                })}
+              </div>
+            </section>
+          </>
         ) : (
           !top && <p className="card text-sm text-neutral-700">Le calendrier est en attente de nouvelles rencontres.</p>
         )}
