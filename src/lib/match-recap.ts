@@ -5,12 +5,15 @@ import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
 import { playerPhotoUrl } from "@/lib/player-photo";
 import { buildStandings } from "@/lib/scoring/ranking";
+import { shortPlayerName } from "@/lib/player-name";
 import type { BonusKind } from "@/lib/scoring/bonus";
 
 export interface RecapData {
   key: string; // match + date de publication du résultat : l'animation est rejouée si le résultat est republié
   home: { name: string; logo: string | null; goals: number };
   away: { name: string; logo: string | null; goals: number };
+  /** Buteurs du match, par équipe (initiale + nom, minute) */
+  scorers: { home: string[]; away: string[] };
   my: {
     score: string; // dans l'ordre domicile - extérieur
     scorer: { name: string; photo: string | null } | null;
@@ -20,7 +23,7 @@ export interface RecapData {
     total: number;
   } | null;
   bonuses: Array<{ leagueId: string; leagueName: string; kind: BonusKind; points: number }>;
-  leagues: Array<{ leagueId: string; name: string; rank: number | null; points: number }>;
+  leagues: Array<{ leagueId: string; name: string; imageAt: number | null; rank: number | null; points: number }>;
 }
 
 export async function loadRecap(userId: string): Promise<RecapData | null> {
@@ -30,7 +33,7 @@ export async function loadRecap(userId: string): Promise<RecapData | null> {
     include: { homeTeam: true, awayTeam: true },
   });
   if (!match || !match.resultConfirmedAt) return null;
-  const [pred, result, uses, mode, board] = await Promise.all([
+  const [pred, result, uses, mode, board, goals] = await Promise.all([
     prisma.prediction.findUnique({
       where: { userId_matchId: { userId, matchId: match.id } },
       include: { scorer: { select: { name: true, photoUrl: true, externalId: true, officialPhotoUrl: true, customPhotoAt: true, id: true } } },
@@ -39,6 +42,7 @@ export async function loadRecap(userId: string): Promise<RecapData | null> {
     prisma.bonusUse.findMany({ where: { userId, matchId: match.id }, include: { league: { select: { name: true } } } }),
     clubLogosMode(),
     loadBoard(),
+    prisma.matchGoal.findMany({ where: { matchId: match.id }, orderBy: [{ minute: "asc" }, { extraMinute: "asc" }] }),
   ]);
   // Pas de pronostic sur ce match : pas d'animation
   if (!pred || !result) return null;
@@ -51,11 +55,20 @@ export async function loadRecap(userId: string): Promise<RecapData | null> {
         v.results,
       );
       const me = st.find((r) => r.userId === userId);
-      return { leagueId: v.key, name: v.name, rank: me?.rank ?? null, points: me?.totalPoints ?? 0 };
+      return { leagueId: v.key, name: v.name, imageAt: v.imageAt, rank: me?.rank ?? null, points: me?.totalPoints ?? 0 };
     });
 
   return {
     key: `${match.id}:${match.resultConfirmedAt.getTime()}`,
+    scorers: (() => {
+      const line = (g: (typeof goals)[number]) =>
+        `${shortPlayerName(g.scorerName)}${g.minute != null ? ` ${g.minute}’${g.extraMinute ? `+${g.extraMinute}` : ""}` : ""}${g.isOwnGoal ? " (csc)" : ""}`;
+      // un but compte pour Rennes ou pour l'adversaire : on le range du côté de l'équipe qui en profite
+      const rennesSide = match.rennesIsHome ? "home" : "away";
+      const out = { home: [] as string[], away: [] as string[] };
+      for (const g of goals) out[g.forRennes ? rennesSide : rennesSide === "home" ? "away" : "home"].push(line(g));
+      return out;
+    })(),
     // score affiché : après prolongation s'il y en a eu, sinon temps réglementaire
     home: { name: match.homeTeam.name, logo: clubLogo(match.homeTeam, mode), goals: match.aetHomeScore ?? match.regHomeScore! },
     away: { name: match.awayTeam.name, logo: clubLogo(match.awayTeam, mode), goals: match.aetAwayScore ?? match.regAwayScore! },

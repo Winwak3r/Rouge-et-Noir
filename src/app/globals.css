@@ -410,3 +410,20 @@ body::before {
 .invite-blue-text { color: #1d4ed8; }
 :root[data-theme="dark"] .invite-blue-bg { background-color: #3b82f6; }
 :root[data-theme="dark"] .invite-blue-text { color: #60a5fa; }
+
+/* Animation « fin de match » : élément qui apparaît en grand au centre puis se range à sa place */
+.recap-settle { animation: recap-settle 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes recap-settle {
+  0% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(calc(var(--big) * 0.8)); }
+  15% { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(var(--big)); }
+  45% { transform: translate(var(--dx), var(--dy)) scale(var(--big)); }
+  100% { opacity: 1; transform: none; }
+}
+.recap-pop { animation: recap-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes recap-pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recap-settle, .recap-pop { animation: none; }
+}

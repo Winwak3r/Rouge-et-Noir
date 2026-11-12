@@ -1,36 +1,74 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { RecapData } from "@/lib/match-recap";
-import { BONUS_INFO } from "@/lib/scoring/bonus";
 import { teamAbbr } from "@/lib/team-abbr";
 import { BonusIcon } from "./BonusIcon";
+import { LeagueAvatar } from "./LeagueAvatar";
 import { PlayerPhoto } from "./PlayerPhoto";
 
 /**
- * Animation « fin de match », plein écran, une seule fois par appareil et par compte à chaque publication d'un résultat.
- * Sifflet (sans son), puis : score final · mon prono et ses points · mes spécialités par ligue · total et rang par ligue.
- * Une fois terminée, un clic (ou une touche) la ferme.
+ * Élément qui « se range » : il apparaît en grand au centre de l'écran, puis glisse jusqu'à sa place (réservée
+ * d'avance dans la mise en page : rien ne bouge autour). « big » = agrandissement au centre.
+ */
+function Settle({ show, children, className = "", big = 1.6, hold = 0.45 }: { show: boolean; children: ReactNode; className?: string; big?: number; hold?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [vars, setVars] = useState<Record<string, string> | null>(null);
+  useLayoutEffect(() => {
+    if (!show || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    setVars({
+      "--dx": `${window.innerWidth / 2 - (r.left + r.width / 2)}px`,
+      "--dy": `${window.innerHeight / 2 - (r.top + r.height / 2)}px`,
+      "--big": String(big),
+      "--hold": `${Math.round(hold * 100)}%`,
+    });
+  }, [show, big, hold]);
+  return (
+    <div ref={ref} className={`${className} ${show && vars ? "recap-settle" : "invisible"}`} style={(vars ?? {}) as CSSProperties}>
+      {children}
+    </div>
+  );
+}
+
+/** Simple apparition (fondu + léger glissement), à sa place. */
+const pop = (show: boolean) => (show ? "recap-pop" : "invisible");
+
+/**
+ * Animation « fin de match », sur toute la page (au-dessus des menus), sans défilement, une seule fois par appareil
+ * et par compte à chaque publication d'un résultat. Sans son.
  */
 export function MatchRecap({ data, userId }: { data: RecapData; userId: string }) {
   const storageKey = `rn-recap:${userId}:${data.key}`;
   const [show, setShow] = useState(false);
-  const [step, setStep] = useState(0); // 0 sifflet · 1 score · 2 prono · 3 spécialités · 4 classement · 5 terminé
+  const [t, setT] = useState(0); // horloge de l'animation (ms écoulées, par paliers)
   const [closing, setClosing] = useState(false);
+  const nL = data.leagues.length;
+
+  // Chronologie (ms)
+  const T_SCORE = 2400;
+  const T_PRONO = T_SCORE + 1800;
+  const T_PTS_SCORE = T_PRONO + 1600;
+  const T_PTS_SCORER = T_PTS_SCORE + 1400;
+  const T_LEAGUES = T_PTS_SCORER + 1400;
+  const T_BONUS = T_LEAGUES + Math.max(1, nL) * 350 + 400;
+  const T_RANK = T_BONUS + 1000;
+  const T_DONE = T_RANK + 900;
 
   useEffect(() => {
     try {
       if (localStorage.getItem(storageKey)) return;
       localStorage.setItem(storageKey, String(Date.now())); // vue : ne sera plus rejouée sur cet appareil
     } catch {
-      return; // stockage indisponible : on ne risque pas de la rejouer en boucle
+      return;
     }
     setShow(true);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const times = reduce ? [0, 200, 400, 600, 800, 1000] : [0, 2600, 3600, 4800, 6200, 7600];
-    const ids = times.slice(1).map((t, i) => window.setTimeout(() => setStep(i + 1), t));
+    const marks = [T_SCORE, T_PRONO, T_PTS_SCORE, T_PTS_SCORER, ...data.leagues.map((_, i) => T_LEAGUES + i * 350), T_BONUS, T_RANK, T_DONE];
+    const ids = marks.map((m) => window.setTimeout(() => setT(m), reduce ? 50 : m));
     return () => ids.forEach(clearTimeout);
-  }, [storageKey]);
+  }, [storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!show) return;
@@ -42,29 +80,35 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
   }, [show]);
 
   if (!show) return null;
-  const done = step >= 5;
+  const done = t >= T_DONE;
   const close = () => {
     if (!done) return;
     setClosing(true);
-    window.setTimeout(() => setShow(false), 400);
+    window.setTimeout(() => setShow(false), 450);
   };
-  const cols = (n: number) => (n <= 1 ? "grid-cols-1" : n === 2 ? "grid-cols-2" : "grid-cols-3");
-  const block = (visible: boolean) =>
-    `rounded-2xl bg-black/45 p-4 text-white ring-1 ring-white/15 backdrop-blur-sm transition-all duration-700 ease-out ${
-      visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
-    }`;
-  const team = (t: RecapData["home"]) => (
-    <span className="flex min-w-0 flex-col items-center gap-1">
-      {t.logo && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={t.logo} alt="" className="h-12 w-12 object-contain sm:h-16 sm:w-16" />
-      )}
-      <span className="font-display text-lg font-bold uppercase tracking-wide sm:text-2xl">{teamAbbr(t.name)}</span>
-    </span>
-  );
   const my = data.my;
+  const cols = nL <= 1 ? "grid-cols-1" : nL === 2 ? "grid-cols-2" : "grid-cols-3";
+  const pts = (n: number) => (n > 0 ? `+${n}` : String(n));
+  const ptsColor = (n: number) => (n > 0 ? "text-green-400" : n < 0 ? "text-red-400" : "text-white/70");
+  const bonusOf = (leagueId: string) => data.bonuses.find((b) => b.leagueId === leagueId);
+  const team = (s: RecapData["home"], side: "home" | "away") => (
+    <div className={`flex min-w-0 flex-col items-center gap-[0.6vh]`}>
+      {s.logo && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={s.logo} alt="" className="h-[7vh] w-[7vh] object-contain" />
+      )}
+      <span className="font-display text-[3vh] font-bold uppercase leading-none tracking-wide">{teamAbbr(s.name)}</span>
+      <span className="max-w-full space-y-0 text-center text-[1.5vh] leading-tight text-white/75">
+        {data.scorers[side].map((g, i) => (
+          <span key={i} className="block truncate">
+            ⚽ {g}
+          </span>
+        ))}
+      </span>
+    </div>
+  );
 
-  return (
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -72,13 +116,13 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
       onClick={close}
       onKeyDown={(e) => (e.key === "Enter" || e.key === "Escape" || e.key === " ") && close()}
       tabIndex={-1}
-      className={`recap-bg fixed inset-0 z-[95] overflow-y-auto text-white transition-opacity duration-400 ${closing ? "opacity-0" : "opacity-100"} ${
+      className={`recap-bg fixed inset-0 z-[200] overflow-hidden text-white transition-opacity duration-500 ${closing ? "opacity-0" : "opacity-100"} ${
         done ? "cursor-pointer" : ""
       }`}
     >
-      {/* 1. Sifflet de fin de match (sans son) */}
-      {step < 2 && (
-        <div className={`pointer-events-none fixed inset-0 grid place-items-center ${step === 1 ? "recap-whistle-out" : ""}`}>
+      {/* Sifflet de fin de match (sans son) */}
+      {t < T_PRONO && (
+        <div className={`pointer-events-none fixed inset-0 z-10 grid place-items-center ${t >= T_SCORE ? "recap-whistle-out" : ""}`}>
           <div className="recap-whistle relative">
             <svg viewBox="0 0 120 80" width="180" height="120" aria-hidden>
               <rect x="4" y="22" width="40" height="18" rx="6" fill="#f5f5f5" />
@@ -87,7 +131,6 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
               <rect x="40" y="24" width="20" height="10" fill="#f5f5f5" />
               <circle cx="96" cy="20" r="6" fill="none" stroke="#f5f5f5" strokeWidth="4" />
             </svg>
-            {/* « son » : ondes qui partent du sifflet */}
             {[0, 1, 2].map((i) => (
               <span key={i} className="recap-wave absolute left-[-10px] top-[22px] h-6 w-6 rounded-full border-4 border-white/70" style={{ animationDelay: `${i * 0.35}s` }} />
             ))}
@@ -95,86 +138,85 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
         </div>
       )}
 
-      <div className="mx-auto flex min-h-full max-w-4xl flex-col justify-center gap-4 px-4 py-10">
-        {/* 1. Score final */}
-        <section className={block(step >= 1)}>
-          <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-white/70">Score final</p>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-            {team(data.home)}
-            <span className="font-club text-6xl font-semibold tabular-nums sm:text-8xl">
+      {/* Écran unique, sans défilement : chaque élément a sa place réservée */}
+      <div className="mx-auto flex h-[100dvh] max-w-3xl flex-col justify-between gap-[1.2vh] px-4 py-[2.5vh]">
+        {/* 1. Score final (avec les buteurs), rangé tout en haut */}
+        <Settle show={t >= T_SCORE} className="rounded-2xl bg-black/45 px-4 py-[1.6vh] ring-1 ring-white/15">
+          <p className="mb-[0.8vh] text-center text-[1.4vh] font-bold uppercase tracking-[0.25em] text-white/70">Score final</p>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+            {team(data.home, "home")}
+            <span className="self-center font-club text-[8vh] font-semibold leading-none tabular-nums">
               {data.home.goals} – {data.away.goals}
             </span>
-            {team(data.away)}
+            {team(data.away, "away")}
           </div>
-        </section>
+        </Settle>
 
-        {/* 2. Mon prono et ses points (sans les spécialités) */}
+        {/* 2. Ton prono, rangé sous le score final */}
         {my && (
-          <section className={block(step >= 2)}>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-white/70">Mon prono</p>
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="font-club text-4xl font-semibold tabular-nums">{my.score}</span>
+          <Settle show={t >= T_PRONO} big={1.4} className="rounded-2xl bg-black/35 px-4 py-[1.2vh] ring-1 ring-white/10">
+            <p className="mb-[0.6vh] text-center text-[1.4vh] font-bold uppercase tracking-[0.25em] text-white/70">Ton prono</p>
+            <div className="flex items-center justify-center gap-4">
+              <span className="font-club text-[5vh] font-semibold leading-none tabular-nums">{my.score}</span>
               {my.scorer ? (
-                <span className="flex items-center gap-2">
-                  <PlayerPhoto name={my.scorer.name} url={my.scorer.photo} size={40} shape="card" />
-                  <span className="font-semibold">{my.scorer.name}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <PlayerPhoto name={my.scorer.name} url={my.scorer.photo} size={44} shape="card" />
+                  <span className="truncate text-[2vh] font-semibold">{my.scorer.name}</span>
                 </span>
               ) : my.noScorer ? (
-                <span className="font-semibold">Aucun buteur rennais</span>
+                <span className="text-[2vh] font-semibold">Aucun buteur rennais</span>
               ) : null}
-              <span className="ml-auto flex flex-wrap items-center gap-2 text-sm">
-                <span className="rounded-lg bg-white/10 px-2.5 py-1">
-                  Score <strong>+{my.scorePoints}</strong>
-                </span>
-                <span className="rounded-lg bg-white/10 px-2.5 py-1">
-                  Buteur <strong>+{my.scorerPoints}</strong>
-                </span>
-                <span className="rounded-lg bg-green-600 px-2.5 py-1 font-bold">= {my.total} pts</span>
-              </span>
             </div>
-          </section>
+          </Settle>
         )}
 
-        {/* 3. Spécialités jouées, par ligue */}
-        {data.bonuses.length > 0 && (
-          <section className={block(step >= 3)}>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-white/70">Mes spécialités maison</p>
-            <div className={`grid gap-3 ${cols(data.bonuses.length)}`}>
-              {data.bonuses.map((b) => (
-                <div key={b.leagueId} className="flex items-center gap-3 rounded-xl bg-white/10 p-3">
-                  <BonusIcon kind={b.kind} size={40} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">{b.leagueName}</span>
-                    <span className="block text-xs text-white/70">{BONUS_INFO[b.kind].name}</span>
+        {/* 3. Points du score, puis du buteur : en grand au centre, puis rangés en petit */}
+        {my && (
+          <div className="flex items-center justify-center gap-6">
+            <Settle show={t >= T_PTS_SCORE} big={4} hold={0.5} className="text-center">
+              <span className={`block font-club text-[4.5vh] font-semibold leading-none tabular-nums ${ptsColor(my.scorePoints)}`}>{pts(my.scorePoints)}</span>
+              <span className="text-[1.4vh] uppercase tracking-widest text-white/70">Score</span>
+            </Settle>
+            <Settle show={t >= T_PTS_SCORER} big={4} hold={0.5} className="text-center">
+              <span className={`block font-club text-[4.5vh] font-semibold leading-none tabular-nums ${ptsColor(my.scorerPoints)}`}>{pts(my.scorerPoints)}</span>
+              <span className="text-[1.4vh] uppercase tracking-widest text-white/70">Buteur</span>
+            </Settle>
+          </div>
+        )}
+
+        {/* 4. Mes ligues, une par une ; 5. spécialités et points du match par ligue ; 6. classement */}
+        {nL > 0 && (
+          <div className={`grid gap-3 ${cols}`}>
+            {data.leagues.map((l, i) => {
+              const b = bonusOf(l.leagueId);
+              const matchPts = (my?.total ?? 0) + (b?.points ?? 0);
+              return (
+                <div key={l.leagueId} className={`flex min-w-0 flex-col items-center gap-[0.8vh] ${pop(t >= T_LEAGUES + i * 350)}`}>
+                  <div className="relative">
+                    <LeagueAvatar leagueId={l.leagueId} name={l.name} at={l.imageAt} size={64} radius={12} className="!h-[8vh] !w-[8vh] ring-2 ring-white/30" />
+                    {b && (
+                      <span className={`absolute -bottom-2 -right-3 ${pop(t >= T_BONUS)}`}>
+                        <BonusIcon kind={b.kind} size={34} />
+                      </span>
+                    )}
+                  </div>
+                  <span className="w-full truncate text-center text-[1.7vh] font-semibold">{l.name}</span>
+                  <span className={`font-club text-[3vh] font-semibold leading-none tabular-nums ${ptsColor(matchPts)} ${pop(t >= T_BONUS)}`}>
+                    {pts(matchPts)} pts
                   </span>
-                  <span className={`font-club text-2xl font-semibold tabular-nums ${b.points > 0 ? "text-green-400" : "text-white/60"}`}>+{b.points}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 4. Total et rang dans chaque ligue */}
-        {data.leagues.length > 0 && (
-          <section className={block(step >= 4)}>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-white/70">Classement</p>
-            <div className={`grid gap-3 ${cols(data.leagues.length)}`}>
-              {data.leagues.map((l) => (
-                <div key={l.leagueId} className="rounded-xl bg-white/10 p-3 text-center">
-                  <p className="truncate text-sm font-semibold">{l.name}</p>
-                  <p className="mt-1 font-display text-2xl font-bold uppercase sm:text-3xl">
+                  <span className={`w-full rounded-xl bg-white/10 px-2 py-[0.8vh] text-center font-display text-[2.6vh] font-bold uppercase leading-none ${pop(t >= T_RANK)}`}>
                     {l.rank ? (l.rank === 1 ? "1er" : `${l.rank}e`) : "—"} <span className="text-white/50">·</span> {l.points} pts
-                  </p>
+                  </span>
                 </div>
-              ))}
-            </div>
-          </section>
+              );
+            })}
+          </div>
         )}
 
-        <p className={`text-center text-sm text-white/80 transition-opacity duration-500 ${done ? "opacity-100" : "opacity-0"}`}>
-          Touche l’écran pour continuer
-        </p>
+        <p className={`text-center text-[1.8vh] text-white/80 transition-opacity duration-500 ${done ? "opacity-100" : "opacity-0"}`}>Touche l’écran pour continuer</p>
       </div>
     </div>
   );
+  // Rendue directement dans <body> : au-dessus de l'en-tête, des menus et du pied de page
+  return createPortal(content, document.body);
 }
