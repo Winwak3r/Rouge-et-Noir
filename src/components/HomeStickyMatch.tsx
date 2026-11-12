@@ -15,7 +15,8 @@ export function HomeStickyMatch(props: {
   only?: "mobile" | "desktop";
   /** noms complets des équipes (sinon sigles) */
   fullNames?: boolean;
-  watchId: string;
+  /** repère(s) à surveiller : le premier présent dans la page est utilisé */
+  watchId: string | string[];
   title: string;
   code: string;
   competitionLogo: string | null;
@@ -42,14 +43,15 @@ export function HomeStickyMatch(props: {
 
   // Visible dès que le bloc du match est passé sous l'en-tête
   useEffect(() => {
-    const el = document.getElementById(props.watchId);
+    const ids = Array.isArray(props.watchId) ? props.watchId : [props.watchId];
+    const el = ids.map((id) => document.getElementById(id)).find(Boolean) ?? null;
     if (!el) return;
     const io = new IntersectionObserver(([e]) => setShow(!e.isIntersecting && e.boundingClientRect.top < top), {
       rootMargin: `-${Math.round(top)}px 0px 0px 0px`,
     });
     io.observe(el);
     return () => io.disconnect();
-  }, [props.watchId, top]);
+  }, [JSON.stringify(props.watchId), top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!mounted) return null;
   const logo = (s: Side) =>

@@ -300,7 +300,7 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
   return (
     <Link
       href={href}
-      className={`match-head relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-300 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
+      className={`match-head relative flex h-full flex-col gap-1.5 rounded-lg border-y border-l-[6px] border-r border-y-neutral-200 border-r-neutral-200 p-3 shadow-sm transition-[transform,box-shadow] duration-500 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-2xl ${BORDER[h.competition]}`}
     >
       {/* Journée et compétition */}
       <span className="flex items-center gap-2">
@@ -332,11 +332,13 @@ export function MatchCard({ h, href }: { h: MatchHeader; href: string }) {
       </span>
       <span className="block pl-3 text-xs text-neutral-500">{h.dateLabel}</span>
       {h.myPick ? (
-        <span className="mt-auto border-t border-neutral-300 pl-3 pt-2">
+        <span className="mt-auto flex min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2">
           <MyPick p={h.myPick} open={false} variant="pc" />
         </span>
       ) : (
-        <span className="mt-auto border-t border-neutral-300 pl-3 pt-2 text-xs font-semibold text-rouge">Pronostiquer ce match →</span>
+        <span className="mt-auto flex min-h-[3.6rem] items-center border-t border-neutral-300 pl-3 pt-2 text-xs font-semibold text-rouge">
+          Pronostiquer ce match →
+        </span>
       )}
     </Link>
   );

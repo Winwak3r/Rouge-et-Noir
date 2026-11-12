@@ -537,6 +537,7 @@ export default async function HomePage() {
     );
     const pronosSection = comparisonNode ? (
       <>
+        <span id={`points-${m.id}`} aria-hidden className="block" />
         <LeagueComparison
           title={title("Pronostics et points")}
           views={views}
@@ -547,7 +548,7 @@ export default async function HomePage() {
         {noLeagueNote}
       </>
     ) : (
-      <section>
+      <section id={`points-${m.id}`}>
         {title("Pronostics et points")}
         {emptyNode}
         {noLeagueNote}
@@ -679,7 +680,7 @@ export default async function HomePage() {
 
         {top && (
           <section id="home-top-match" className="space-y-3" data-tour={live ? "top-match" : undefined}>
-            <h2 className="text-xs font-bold uppercase tracking-wide text-noir">{live ? "Match en cours" : "Match terminé"}</h2>
+            <h2 className="font-display text-xl font-bold uppercase tracking-wide text-noir">{live ? "Match en cours" : "Match terminé"}</h2>
             {renderMatch(top, { layout: "top" })}
           </section>
         )}
@@ -688,12 +689,12 @@ export default async function HomePage() {
           <>
             {/* Mobile : le prochain match */}
             <section id="home-next-match" className="space-y-3 lg:hidden" data-tour="next-match">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochain match</h2>
+              <h2 className="font-display text-xl font-bold uppercase tracking-wide text-noir">Prochain match</h2>
               {renderMatch(next, { layout: "next" })}
             </section>
             {/* Ordinateur : les trois prochains matchs, en cartes qui ouvrent la page du match */}
             <section id="home-next-cards" className="hidden space-y-3 lg:block" data-tour="next-match">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Prochains matchs</h2>
+              <h2 className="font-display text-xl font-bold uppercase tracking-wide text-noir">Prochains matchs</h2>
               <div className="grid grid-cols-3 gap-7 px-1">
                 {upcoming.map((m) => {
                   const h = headersById.get(m.id);
@@ -727,7 +728,7 @@ export default async function HomePage() {
             <>
               <HomeStickyMatch
                 only="mobile"
-                watchId={top ? "home-top-match" : "home-next-match"}
+                watchId={isLive ? [`points-${featured.id}`, "home-top-match"] : top ? "home-top-match" : "home-next-match"}
                 title={isLive ? "Match en direct" : featured.status === "FINISHED" ? "Match terminé" : "Prochain match"}
                 code={fh.code}
                 competitionLogo={fh.competitionLogo}
@@ -743,7 +744,7 @@ export default async function HomePage() {
                 <HomeStickyMatch
                   only="desktop"
                   fullNames
-                  watchId="home-top-match"
+                  watchId={[`points-${featured.id}`, "home-top-match"]}
                   title="Match en direct"
                   code={fh.code}
                   competitionLogo={fh.competitionLogo}
@@ -776,7 +777,7 @@ export default async function HomePage() {
         })()}
 
         <section className="space-y-3" data-tour="calendar">
-          <h2 className="text-xs font-bold uppercase tracking-wide text-noir">Calendrier 2026/2027</h2>
+          <h2 className="font-display text-xl font-bold uppercase tracking-wide text-noir">Calendrier 2026/2027</h2>
           <CompetitionTabs
             defaultCode={(next ?? top)?.competition ?? "LIGUE_1"}
             tabs={ORDER.map((code) => {
