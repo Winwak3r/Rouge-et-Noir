@@ -161,21 +161,59 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
         done ? "cursor-pointer" : ""
       }`}
     >
-      {/* Sifflet de fin de match (sans son) */}
+      {/* Sifflet de fin de match (sans son) : sifflet chromé en relief qui vibre, ondes sonores, « FIN DU MATCH ! » */}
       {t < T_PRONO && (
-        <div className={`pointer-events-none fixed inset-0 z-10 grid place-items-center ${t >= T_SCORE ? "recap-whistle-out" : ""}`}>
-          <div className="recap-whistle relative">
-            <svg viewBox="0 0 120 80" width="180" height="120" aria-hidden>
-              <rect x="4" y="22" width="40" height="18" rx="6" fill="#f5f5f5" />
-              <circle cx="70" cy="44" r="30" fill="#f5f5f5" />
-              <circle cx="70" cy="44" r="12" fill="#111" />
-              <rect x="40" y="24" width="20" height="10" fill="#f5f5f5" />
-              <circle cx="96" cy="20" r="6" fill="none" stroke="#f5f5f5" strokeWidth="4" />
-            </svg>
-            {[0, 1, 2].map((i) => (
-              <span key={i} className="recap-wave absolute left-[-10px] top-[22px] h-6 w-6 rounded-full border-4 border-white/70" style={{ animationDelay: `${i * 0.35}s` }} />
+        <div className={`pointer-events-none fixed inset-0 z-10 flex flex-col items-center justify-center gap-[3vh] ${t >= T_SCORE ? "recap-whistle-out" : ""}`}>
+          <div className="recap-whistle3d relative" style={{ perspective: "900px" }}>
+            <div className="recap-whistle-body">
+              <svg viewBox="0 0 320 220" className="h-[22vh] w-auto drop-shadow-[0_18px_25px_rgba(0,0,0,0.55)]" aria-hidden>
+                <defs>
+                  <linearGradient id="chromeV" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#ffffff" />
+                    <stop offset="0.18" stopColor="#d9dde2" />
+                    <stop offset="0.45" stopColor="#8e959d" />
+                    <stop offset="0.62" stopColor="#c9ced4" />
+                    <stop offset="0.85" stopColor="#5d646c" />
+                    <stop offset="1" stopColor="#2f3439" />
+                  </linearGradient>
+                  <radialGradient id="chromeR" cx="0.38" cy="0.32" r="0.75">
+                    <stop offset="0" stopColor="#ffffff" />
+                    <stop offset="0.25" stopColor="#e3e7eb" />
+                    <stop offset="0.6" stopColor="#8c939b" />
+                    <stop offset="0.85" stopColor="#4a5057" />
+                    <stop offset="1" stopColor="#23272b" />
+                  </radialGradient>
+                  <linearGradient id="slot" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#0b0c0d" />
+                    <stop offset="1" stopColor="#3a3f44" />
+                  </linearGradient>
+                  <radialGradient id="ground" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0" stopColor="rgba(0,0,0,0.45)" />
+                    <stop offset="1" stopColor="rgba(0,0,0,0)" />
+                  </radialGradient>
+                </defs>
+                <ellipse cx="170" cy="205" rx="120" ry="12" fill="url(#ground)" />
+                {/* embout */}
+                <path d="M18 78 Q12 78 12 90 L12 110 Q12 122 24 122 L150 122 L150 78 Z" fill="url(#chromeV)" />
+                <rect x="16" y="84" width="128" height="6" rx="3" fill="#ffffff" opacity="0.55" />
+                {/* chambre ronde */}
+                <circle cx="196" cy="128" r="76" fill="url(#chromeR)" />
+                <circle cx="196" cy="128" r="76" fill="none" stroke="#1f2327" strokeOpacity="0.5" strokeWidth="2" />
+                <ellipse cx="170" cy="92" rx="34" ry="16" fill="#ffffff" opacity="0.55" transform="rotate(-25 170 92)" />
+                {/* lumière (ouverture) */}
+                <path d="M122 78 L170 78 L166 90 L126 90 Z" fill="url(#slot)" />
+                {/* anneau du cordon */}
+                <path d="M236 66 L254 52 L262 62 L246 76 Z" fill="url(#chromeV)" />
+                <circle cx="262" cy="46" r="15" fill="none" stroke="url(#chromeV)" strokeWidth="8" />
+                <path d="M274 54 Q312 84 304 150 Q300 180 286 196" fill="none" stroke="#e1001a" strokeWidth="6" strokeLinecap="round" />
+              </svg>
+            </div>
+            {/* ondes sonores qui partent de la lumière */}
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="recap-sound absolute left-[38%] top-[8%] h-[6vh] w-[6vh] rounded-full border-[0.5vh] border-white/80 border-b-transparent border-l-transparent" style={{ animationDelay: `${i * 0.28}s` }} />
             ))}
           </div>
+          <p className="recap-final font-display text-[7vh] font-bold uppercase leading-none tracking-wide text-white sm:text-[9vh]">Fin du match !</p>
         </div>
       )}
 
@@ -198,10 +236,13 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
           <Settle show={t >= T_PRONO} big={1.4} className="relative mb-[2vh] rounded-2xl bg-black/35 px-4 pb-[2.4vh] pt-[1vh] ring-1 ring-white/10">
             <p className="mb-[0.6vh] text-center text-[1.3vh] font-bold uppercase tracking-[0.25em] text-white/70">Ton prono</p>
             <div className="grid grid-cols-2 items-center gap-3">
-              <div className="relative flex justify-center">
+              <div className="relative flex flex-col items-center gap-[0.4vh]">
+                <span className="text-[1.3vh] font-semibold uppercase tracking-widest text-white/60">Score</span>
                 <span className="font-club text-[4.5vh] font-semibold leading-none tabular-nums">{my.score}</span>
               </div>
-              <div className="relative flex min-w-0 items-center justify-center gap-2">
+              <div className="relative flex min-w-0 flex-col items-center gap-[0.4vh]">
+                <span className="text-[1.3vh] font-semibold uppercase tracking-widest text-white/60">Buteur</span>
+                <span className="flex min-w-0 items-center justify-center gap-2">
                 {my.scorer ? (
                   <>
                     <PlayerPhoto name={my.scorer.name} url={my.scorer.photo} size={40} shape="card" />
@@ -212,6 +253,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                 ) : (
                   <span className="text-[1.9vh] italic text-white/70">Pas de buteur</span>
                 )}
+                </span>
               </div>
             </div>
             {/* Points du score et du buteur : en grand au centre, puis rangés sous chacun, à cheval sur la tuile */}
@@ -232,7 +274,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
 
         {/* 3. Mon total de points (score + buteur), sans tuile, avec incrémentation */}
         {my && (
-          <p className={`text-center text-[2.2vh] font-semibold ${pop(t >= T_TOTAL)}`}>
+          <p className={`my-[1.5vh] text-center text-[2.2vh] font-semibold ${pop(t >= T_TOTAL)}`}>
             Mon total : <span className={`font-club text-[3.6vh] tabular-nums ${ptsColor(base)}`}>
               <CountUp from={0} to={base} start={t >= T_TOTAL} />
             </span>{" "}
@@ -267,7 +309,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                     </span>
                     {b && (
                       <span
-                        className={`absolute left-full ml-2 whitespace-nowrap rounded-md bg-amber-400 px-1.5 py-0.5 text-[1.5vh] font-bold uppercase text-black shadow ${
+                        className={`absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-amber-400 px-1.5 py-0.5 text-[1.5vh] font-bold uppercase text-black shadow sm:left-full sm:top-auto sm:ml-2 sm:mt-0 sm:translate-x-0 ${
                           flashOn ? "recap-flash" : "invisible"
                         }`}
                       >
