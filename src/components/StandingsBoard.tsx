@@ -52,6 +52,52 @@ function computeRows(view: BoardView, selected: CompetitionCode[]): BoardRow[] {
 
 const td = "px-2 py-2 sm:px-2 sm:py-2.5";
 
+// Médailles (tons des Jeux de Paris 2024) : or, argent, bronze
+const MEDAL: Record<number, string> = { 1: "#C9A24A", 2: "#B6BCC4", 3: "#A86B45" };
+
+/** Rang : chiffre entouré d'un cercle or / argent / bronze pour les 3 premiers. */
+function RankMark({ rank }: { rank: number }) {
+  const c = MEDAL[rank];
+  if (!c) return <>{rank}</>;
+  return (
+    <span className="inline-grid h-7 w-7 place-items-center rounded-full border-[3px] leading-none" style={{ borderColor: c }}>
+      {rank}
+    </span>
+  );
+}
+
+/** Podium (Général R&N) : 2e à gauche, 1er au centre (plus haut), 3e à droite (plus bas que le 2e). */
+function Podium({ rows, me }: { rows: BoardRow[]; me: string | null }) {
+  const [first, second, third] = rows;
+  const place = (r: BoardRow | undefined, rank: 1 | 2 | 3, step: string, size: number) =>
+    r ? (
+      <div className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
+        <Link href={`/joueur/${r.userId}`} title={`Voir le profil de ${r.pseudo}`} className="flex min-w-0 flex-col items-center gap-1">
+          <span className="rounded-full border-4 p-0.5" style={{ borderColor: MEDAL[rank] }}>
+            <Avatar userId={r.userId} pseudo={r.pseudo} at={r.avatarAt} size={size} />
+          </span>
+          <span className={`max-w-full truncate text-sm font-semibold ${r.userId === me ? "text-rouge" : ""}`}>{r.pseudo}</span>
+          <span className="font-display text-lg font-bold leading-none">{r.totalPoints} pts</span>
+        </Link>
+        <div
+          className={`grid w-full place-items-start justify-center rounded-t-lg border-x-4 border-t-4 bg-[var(--color-surface)] pt-1 font-display text-3xl font-black ${step}`}
+          style={{ borderColor: MEDAL[rank] }}
+        >
+          {rank}
+        </div>
+      </div>
+    ) : (
+      <div className="flex-1" />
+    );
+  return (
+    <div className="flex items-end gap-2 px-1 sm:gap-4 sm:px-6">
+      {place(second, 2, "h-16", 60)}
+      {place(first, 1, "h-24", 76)}
+      {place(third, 3, "h-10", 56)}
+    </div>
+  );
+}
+
 /** Classements des ligues et général : changement instantané (tout est déjà chargé), avec glissement. */
 export function StandingsBoard({
   views,
@@ -193,9 +239,10 @@ export function StandingsBoard({
             })}
             </span>
           </fieldset>
+          {view.key === "general" && rows.length > 0 && <Podium rows={rows.slice(0, 3)} me={me} />}
           {rows.length === 0 ? (
             <p className="card text-sm text-neutral-600">Aucun participant pour le moment.</p>
-          ) : (
+          ) : view.key === "general" && rows.length <= 3 ? null : (
             <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-surface shadow-sm">
               <table className="w-full text-sm sm:min-w-[640px]">
                 <thead className="whitespace-nowrap bg-neutral-50 text-left text-[10px] uppercase tracking-wide text-neutral-500">
@@ -211,10 +258,10 @@ export function StandingsBoard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100">
-                  {rows.map((s) => (
+                  {(view.key === "general" ? rows.slice(3) : rows).map((s) => (
                     <tr key={s.userId} className={s.userId === me ? "bg-red-50/60" : undefined}>
                       <td className={`${td} font-display text-lg font-bold`}>
-                        {s.rank}
+                        <RankMark rank={s.rank} />
                         {s.tied && <span className="ml-1 text-xs font-normal text-neutral-500">ex æquo</span>}
                       </td>
                       <td className={`${td} font-medium`}>
