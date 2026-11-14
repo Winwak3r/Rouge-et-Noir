@@ -66,34 +66,39 @@ function RankMark({ rank }: { rank: number }) {
   );
 }
 
-/** Podium (Général R&N) : 2e à gauche, 1er au centre (plus haut), 3e à droite (plus bas que le 2e). */
+/** Podium (Général R&N), sans marches : 2e à gauche, 1er au centre (plus haut), 3e à droite (plus bas que le 2e). */
 function Podium({ rows, me }: { rows: BoardRow[]; me: string | null }) {
   const [first, second, third] = rows;
-  const place = (r: BoardRow | undefined, rank: 1 | 2 | 3, step: string, size: number) =>
+  const place = (r: BoardRow | undefined, rank: 1 | 2 | 3, lift: string, size: number) =>
     r ? (
-      <div className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
-        <Link href={`/joueur/${r.userId}`} title={`Voir le profil de ${r.pseudo}`} className="flex min-w-0 flex-col items-center gap-1">
-          <span className="rounded-full border-4 p-0.5" style={{ borderColor: MEDAL[rank] }}>
-            <Avatar userId={r.userId} pseudo={r.pseudo} at={r.avatarAt} size={size} />
+      <Link
+        href={`/joueur/${r.userId}`}
+        title={`Voir le profil de ${r.pseudo}`}
+        className={`flex w-28 min-w-0 flex-col items-center gap-1 sm:w-32 ${lift}`}
+      >
+        <span className="rounded-full border-4 p-0.5" style={{ borderColor: MEDAL[rank] }}>
+          <Avatar userId={r.userId} pseudo={r.pseudo} at={r.avatarAt} size={size} />
+        </span>
+        <span className="flex max-w-full items-center gap-1.5">
+          <span
+            className="grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 font-display text-xs font-bold leading-none"
+            style={{ borderColor: MEDAL[rank] }}
+          >
+            {rank}
           </span>
-          <span className={`max-w-full truncate text-sm font-semibold ${r.userId === me ? "text-rouge" : ""}`}>{r.pseudo}</span>
-          <span className="font-display text-lg font-bold leading-none">{r.totalPoints} pts</span>
-        </Link>
-        <div
-          className={`grid w-full place-items-start justify-center rounded-t-lg border-x-4 border-t-4 bg-[var(--color-surface)] pt-1 font-display text-3xl font-black ${step}`}
-          style={{ borderColor: MEDAL[rank] }}
-        >
-          {rank}
-        </div>
-      </div>
+          <span className={`truncate text-sm font-semibold ${r.userId === me ? "text-rouge" : ""}`}>{r.pseudo}</span>
+        </span>
+        <span className="font-display text-lg font-bold leading-none">{r.totalPoints} pts</span>
+      </Link>
     ) : (
-      <div className="flex-1" />
+      <span className="w-28 sm:w-32" />
     );
+  // hauteurs : le 1er le plus haut, puis le 2e, puis le 3e
   return (
-    <div className="flex items-end gap-2 px-1 sm:gap-4 sm:px-6">
-      {place(second, 2, "h-16", 60)}
-      {place(first, 1, "h-24", 76)}
-      {place(third, 3, "h-10", 56)}
+    <div className="flex items-end justify-center gap-1 pb-2 sm:gap-2">
+      {place(second, 2, "mb-6", 60)}
+      {place(first, 1, "mb-12", 76)}
+      {place(third, 3, "mb-0", 56)}
     </div>
   );
 }
