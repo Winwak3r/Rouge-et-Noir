@@ -67,7 +67,7 @@ function RankMark({ rank }: { rank: number }) {
 }
 
 /** Podium (Général R&N), sans marches : 2e à gauche, 1er au centre (plus haut), 3e à droite (plus bas que le 2e). */
-function Podium({ rows, me }: { rows: BoardRow[]; me: string | null }) {
+function Podium({ rows, all, me }: { rows: BoardRow[]; all: BoardRow[]; me: string | null }) {
   const [first, second, third] = rows;
   const place = (r: BoardRow | undefined, rank: 1 | 2 | 3, lift: string, size: number) =>
     r ? (
@@ -93,12 +93,35 @@ function Podium({ rows, me }: { rows: BoardRow[]; me: string | null }) {
     ) : (
       <span className="w-28 sm:w-32" />
     );
+  // Ma place : tuile à droite du podium (contour neutre, ou or / argent / bronze si je suis sur le podium)
+  const mine = me ? all.find((r) => r.userId === me) : undefined;
+  const medal = mine ? MEDAL[mine.rank] : undefined;
   // hauteurs : le 1er le plus haut, puis le 2e, puis le 3e
   return (
-    <div className="flex items-end justify-center gap-1 pb-2 sm:gap-2">
-      {place(second, 2, "mb-6", 60)}
-      {place(first, 1, "mb-12", 76)}
-      {place(third, 3, "mb-0", 56)}
+    <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:items-stretch sm:justify-center sm:gap-6">
+      <div className="flex items-end justify-center gap-1 pb-2 sm:gap-2">
+        {place(second, 2, "mb-6", 60)}
+        {place(first, 1, "mb-12", 76)}
+        {place(third, 3, "mb-0", 56)}
+      </div>
+      {mine && (
+        <Link
+          href={`/joueur/${mine.userId}`}
+          title="Mon classement"
+          className="flex w-44 flex-col items-center justify-center gap-1 rounded-xl border-4 bg-[var(--color-surface)] px-3 py-3 text-center shadow-sm"
+          style={{ borderColor: medal ?? "var(--color-neutral-200)" }}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Ma place</span>
+          <Avatar userId={mine.userId} pseudo={mine.pseudo} at={mine.avatarAt} size={44} />
+          <span className="font-display text-3xl font-black leading-none">
+            {mine.rank === 1 ? "1er" : `${mine.rank}e`}
+            {mine.tied && <span className="ml-1 align-middle text-xs font-normal text-neutral-500">ex æquo</span>}
+          </span>
+          <span className="max-w-full truncate text-sm font-semibold text-rouge">{mine.pseudo}</span>
+          <span className="font-display text-lg font-bold leading-none">{mine.totalPoints} pts</span>
+          <span className="text-[10px] text-neutral-500">sur {all.length} joueur{all.length > 1 ? "s" : ""}</span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -244,7 +267,7 @@ export function StandingsBoard({
             })}
             </span>
           </fieldset>
-          {view.key === "general" && rows.length > 0 && <Podium rows={rows.slice(0, 3)} me={me} />}
+          {view.key === "general" && rows.length > 0 && <Podium rows={rows.slice(0, 3)} all={rows} me={me} />}
           {rows.length === 0 ? (
             <p className="card text-sm text-neutral-600">Aucun participant pour le moment.</p>
           ) : view.key === "general" && rows.length <= 3 ? null : (
