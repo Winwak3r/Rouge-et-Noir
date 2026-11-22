@@ -1,5 +1,6 @@
 // Données de la page d'un match à pronostiquer (/match/[id]) : formulaire, ligues et bonus, composition.
 import { prisma } from "@/lib/db";
+import { estimatedOddsFor } from "@/lib/estimated-odds";
 import { bonusQuotas, bonusStock } from "@/lib/bonus-data";
 import { clubLogo } from "@/lib/club-logo";
 import { clubLogosMode } from "@/lib/club-logo-mode";
@@ -36,7 +37,9 @@ export async function loadMatchSheet(matchId: string, userId: string) {
       orderBy: { joinedAt: "asc" },
     }),
   ]);
-  const oddsOf = new Map(odds.map((o) => [o.playerId, Number(o.odds)]));
+  // Vraies cotes (environ 48 h avant le match) ; avant leur publication : cotes estimées
+  const estimated = odds.length === 0;
+  const oddsOf = estimated ? await estimatedOddsFor(match) : new Map(odds.map((o) => [o.playerId, Number(o.odds)]));
   const lineupOf = match.lineupAt ? new Map(lineup.map((l) => [l.playerId, l.starter])) : null;
   const fallback = rules.scorerFallback.mode === "FIXED" ? rules.scorerFallback.fixedBonus : 0;
 
@@ -96,6 +99,7 @@ export async function loadMatchSheet(matchId: string, userId: string) {
       maxGoals: maxPredictedGoals(),
       noScorerBonus: rules.noScorerBonus,
       scorers,
+      oddsEstimated: estimated && oddsOf.size > 0,
       lineupPublished: Boolean(lineupOf),
       savedScorerOut: lineupOf && my?.scorerId && !lineupOf.has(my.scorerId) ? (my.scorer?.name ?? "Ton buteur") : null,
       initial: my ? { rennesGoals: my.rennesGoals, opponentGoals: my.opponentGoals, scorerId: my.scorerId, noScorerPick: my.noScorerPick } : null,

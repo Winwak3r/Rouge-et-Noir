@@ -2,6 +2,7 @@
 // Tout est idempotent : relancer la même synchro ne change rien et n'ajoute jamais de points.
 import { Prisma, type Match } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { estimatedOddsFor } from "@/lib/estimated-odds";
 import { createEspnProvider } from "@/lib/providers/espn";
 import { matchPlayerName } from "@/lib/providers/names";
 import type { FootballProvider, ProviderTeam } from "@/lib/providers/types";
@@ -386,12 +387,19 @@ export async function lockPredictions(matchId: string): Promise<number> {
   const preds = await prisma.prediction.findMany({ where: { matchId, lockedAt: null } });
   if (preds.length === 0) return 0;
   const odds = await prisma.playerOdds.findMany({ where: { matchId } });
+  // Aucune vraie cote publiée avant le coup d'envoi : on fige la cote estimée (moyenne des 5 derniers matchs)
+  let estimate: Map<string, number> | null = null;
+  if (odds.length === 0) {
+    const m = await prisma.match.findUnique({ where: { id: matchId }, select: { seasonId: true, kickoffAt: true } });
+    if (m) estimate = await estimatedOddsFor(m);
+  }
   const now = new Date();
   for (const p of preds) {
     const o = p.scorerId ? odds.find((x) => x.playerId === p.scorerId) : undefined;
+    const est = !o && p.scorerId ? (estimate?.get(p.scorerId) ?? null) : null;
     await prisma.prediction.update({
       where: { id: p.id },
-      data: { lockedAt: now, scorerOdds: o?.odds ?? null, scorerOddsSource: o?.source ?? null },
+      data: { lockedAt: now, scorerOdds: o?.odds ?? est, scorerOddsSource: o?.source ?? null },
     });
   }
   return preds.length;

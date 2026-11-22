@@ -18,6 +18,7 @@ import { announceCookie, effectiveContent, shouldShowAnnouncement } from "@/lib/
 import { endOfNextDayParis, formatDateTime, formatShortNumeric } from "@/lib/dates";
 import { getLeagueLogos } from "@/lib/league-logos";
 import { PHASE, buildMatchRows, matchPhase } from "@/lib/match-view";
+import { averageOdds, oddsHistory } from "@/lib/estimated-odds";
 import { getActiveRules } from "@/lib/scoring/active-rules";
 import { arePredictionsPublic, canEditPrediction, lockTime, oddsToBonus } from "@/lib/scoring/engine";
 import { buildStandings } from "@/lib/scoring/ranking";
@@ -175,6 +176,16 @@ export default async function HomePage() {
   for (const o of odds) {
     if (!oddsBy.has(o.matchId)) oddsBy.set(o.matchId, new Map());
     oddsBy.get(o.matchId)!.set(o.playerId, Number(o.odds));
+  }
+  // Matchs ouverts sans vraies cotes (publiées environ 48 h avant) : cotes estimées (moyenne des 5 derniers matchs)
+  const needEstimate = matches.filter((m) => canEditPrediction(m, now) && !oddsBy.has(m.id));
+  if (needEstimate.length > 0) {
+    const histories = new Map<string, Awaited<ReturnType<typeof oddsHistory>>>();
+    for (const m of needEstimate) {
+      if (!histories.has(m.seasonId)) histories.set(m.seasonId, await oddsHistory(m.seasonId));
+      const est = averageOdds(histories.get(m.seasonId)!, m.kickoffAt);
+      if (est.size > 0) oddsBy.set(m.id, est);
+    }
   }
   const fallbackBonus = rules.scorerFallback.mode === "FIXED" ? rules.scorerFallback.fixedBonus : 0;
   /** Points gagnables avec un choix de buteur : cote figée si elle existe, sinon cote actuelle, sinon bonus de secours. */

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { BONUS_INFO, BONUS_KINDS, bonusChoiceError, type BonusKind } from "@/lib/scoring/bonus";
 import { bonusStock } from "@/lib/bonus-data";
 import { prisma } from "@/lib/db";
+import { estimatedOddsFor } from "@/lib/estimated-odds";
 import { getCurrentUser } from "@/lib/auth/session";
 import { canEditPrediction } from "@/lib/scoring/engine";
 import { maxPredictedGoals } from "@/lib/settings";
@@ -77,7 +78,12 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
       prisma.playerOdds.findUnique({ where: { matchId_playerId: { matchId: match.id, playerId: player.id } }, select: { id: true } }),
       prisma.prediction.findUnique({ where: { userId_matchId: { userId: user.id, matchId: match.id } }, select: { scorerId: true } }),
     ]);
-    if (!hasOdds && previous?.scorerId !== player.id) return { error: "Ce joueur n’a pas de cote pour ce match : choisis-en un autre." };
+    // Avant la publication des vraies cotes : les cotes estimées (moyenne des 5 derniers matchs) suffisent
+    const allowed =
+      hasOdds ||
+      previous?.scorerId === player.id ||
+      ((await prisma.playerOdds.count({ where: { matchId: match.id } })) === 0 && (await estimatedOddsFor(match)).has(player.id));
+    if (!allowed) return { error: "Ce joueur n’a pas de cote pour ce match : choisis-en un autre." };
     // Feuille de match publiée : seuls les joueurs convoqués peuvent être choisis.
     if (match.lineupAt) {
       const inLineup = await prisma.matchLineup.findUnique({

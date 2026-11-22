@@ -30,6 +30,8 @@ export function PredictionSheet(props: {
   maxGoals: number;
   noScorerBonus: number;
   scorers: ScorerOption[];
+  /** Cotes estimées (moyenne des 5 derniers matchs) : les vraies arrivent environ 48 h avant le match */
+  oddsEstimated?: boolean;
   lineupPublished: boolean;
   savedScorerOut: string | null;
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
@@ -416,6 +418,12 @@ export function PredictionSheet(props: {
         {tab === "scorer" && (
           <div className="space-y-2">
             <h4 className="font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Buteur rennais</h4>
+            {props.oddsEstimated && (
+              <p className="rounded-lg bg-amber-100 px-3 py-2 text-xs text-amber-900">
+                <strong>Cotes estimées</strong> (moyenne des 5 derniers matchs). Les vraies cotes arrivent environ 48 h avant le match et
+                remplacent celles-ci : les points de ton buteur pourront changer.
+              </p>
+            )}
             {scorer === NO_SCORER && (
               <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-surface)] p-3 ring-1 ring-neutral-200">
                 <PlayerPhoto name="Aucun buteur rennais" url="/brand/aucun-buteur.png" size={96} shape="card" number={null} />
