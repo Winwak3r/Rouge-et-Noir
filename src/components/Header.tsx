@@ -152,7 +152,7 @@ export async function Header() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-clair.png" alt="Rouge & Noir" width={860} height={160} className="logo-clair h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/logo-sombre.png" alt="Rouge & Noir" width={858} height={160} className="logo-sombre h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
+            <img src="/brand/logo-sombre.png" alt="Rouge & Noir" width={1296} height={240} className="logo-sombre h-[22px] w-auto min-[400px]:h-7 sm:h-10" />
           </Link>
           <div className="col-start-3 row-span-2 row-start-1 flex min-w-0 flex-col items-end gap-1 justify-self-end sm:contents">
             <div className="flex items-center gap-2 sm:contents">

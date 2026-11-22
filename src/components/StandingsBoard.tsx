@@ -58,7 +58,8 @@ const MEDAL: Record<number, string> = { 1: "#C9A24A", 2: "#B6BCC4", 3: "#A86B45"
 /** Rang : chiffre entouré d'un cercle or / argent / bronze pour les 3 premiers. */
 function RankMark({ rank }: { rank: number }) {
   const c = MEDAL[rank];
-  if (!c) return <>{rank}</>;
+  // 4e et suivants : même emplacement (centré, même largeur), sans cercle
+  if (!c) return <span className="inline-grid h-7 w-7 place-items-center leading-none">{rank}</span>;
   return (
     <span className="inline-grid h-7 w-7 place-items-center rounded-full border-[3px] leading-none" style={{ borderColor: c }}>
       {rank}
