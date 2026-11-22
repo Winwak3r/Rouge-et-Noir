@@ -419,7 +419,8 @@ export function PredictionSheet(props: {
           <div className="space-y-2">
             <h4 className="font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Buteur rennais</h4>
             {props.oddsEstimated && (
-              <p className="rounded-lg bg-amber-100 px-3 py-2 text-xs text-amber-900">
+              // jaune d'avertissement et texte brun foncé, identiques dans les deux thèmes
+              <p className="rounded-lg border px-3 py-2 text-xs" style={{ backgroundColor: "#FDE047", color: "#3B2600", borderColor: "#EAB308" }}>
                 <strong>Cotes estimées</strong> (moyenne des 5 derniers matchs). Les vraies cotes arrivent environ 48 h avant le match et
                 remplacent celles-ci : les points de ton buteur pourront changer.
               </p>
