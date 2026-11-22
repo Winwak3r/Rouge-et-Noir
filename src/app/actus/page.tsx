@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import { PageTabs } from "@/components/PageTabs";
 import { formatShortNumeric } from "@/lib/dates";
@@ -53,11 +54,17 @@ function RauzyCard({ video }: { video: VideoItem | null }) {
 function NewsList({ items, empty, video }: { items: NewsItem[] | null; empty: string; video?: VideoItem | null }) {
   if (!items) return <p className="card text-sm text-neutral-600">Fil indisponible pour le moment.</p>;
   if (items.length === 0 && video === undefined) return <p className="card text-sm text-neutral-600">{empty}</p>;
+  // Position de la vidéo dans le fil (du plus récent au plus ancien)
+  const vt = video?.date?.getTime();
+  const found = vt === undefined ? -1 : items.findIndex((n) => (n.date?.getTime() ?? 0) < vt);
+  const rauzyAt = found === -1 ? items.length : found;
   return (
     <ul className="space-y-3">
-      {video !== undefined && <RauzyCard video={video} />}
-      {items.map((n) => (
-        <li key={n.link}>
+      {items.map((n, i) => (
+        <Fragment key={n.link}>
+          {/* « Le lundi, c'est Rauzy » : à sa place dans l'ordre chronologique (avant le 1er article plus ancien) */}
+          {video !== undefined && i === rauzyAt && <RauzyCard video={video} />}
+        <li>
           <a href={n.link} target="_blank" rel="noopener noreferrer" className="card flex flex-col gap-3 p-3 transition-colors hover:border-neutral-400 sm:flex-row sm:gap-4">
             {n.image ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -78,7 +85,10 @@ function NewsList({ items, empty, video }: { items: NewsItem[] | null; empty: st
             </span>
           </a>
         </li>
+        </Fragment>
       ))}
+      {/* vidéo plus ancienne que tous les articles (ou sans date) : en fin de fil */}
+      {video !== undefined && rauzyAt === items.length && <RauzyCard video={video} />}
     </ul>
   );
 }

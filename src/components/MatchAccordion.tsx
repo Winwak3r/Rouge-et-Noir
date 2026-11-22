@@ -22,7 +22,7 @@ const TEXT: Record<CompetitionCode, string> = { LIGUE_1: "text-l1-txt", EUROPA_L
 // Match ouvert : l'en-tête et le cadre prennent la couleur de la compétition.
 const OPEN: Record<CompetitionCode, { bg: string; border: string; text: string }> = {
   LIGUE_1: { bg: "bg-l1", border: "border-y-l1 border-r-l1", text: "text-l1" },
-  EUROPA_LEAGUE: { bg: "bg-[#EA7600]", border: "border-y-[#EA7600] border-r-[#EA7600]", text: "text-[#c2410c]" },
+  EUROPA_LEAGUE: { bg: "bg-[#C25400]", border: "border-y-[#C25400] border-r-[#C25400]", text: "text-[#c2410c]" },
   COUPE_DE_FRANCE: { bg: "bg-cdf", border: "border-y-cdf border-r-cdf", text: "text-cdf" },
 };
 
