@@ -37,5 +37,5 @@ export const DEFAULT_RULES: ScoringRules = {
   scorerBonus: { oddsDivisor: 2, minBonus: 1, maxBonus: 6 },
   noScorerBonus: 2,
   scorerFallback: { mode: "FIXED", fixedBonus: 1 },
-  bonusQuotas: { MENHIRS: 3, CREPE_FLAMBEE: 3, BIGOUDEN: 2 },
+  bonusQuotas: { MENHIRS: 2, CREPE_FLAMBEE: 2, BIGOUDEN: 2 },
 };

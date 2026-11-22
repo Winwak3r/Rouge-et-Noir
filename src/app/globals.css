@@ -529,3 +529,7 @@ body::before {
 
 /* Date des cartes : blanche au survol (thème clair compris, sur la couleur de la compétition) */
 .group:hover .card-date { color: #ffffff; }
+
+/* Mes Ligues : « Bonus disponibles » sous « Mes Trésors du Terroir » */
+.hint-white { color: #737373; }
+:root[data-theme="dark"] .hint-white { color: #ffffff; }

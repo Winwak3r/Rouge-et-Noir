@@ -103,6 +103,8 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
         bonus: stock ? (
           <section className="card space-y-2">
             <h2 className="whitespace-nowrap font-display text-base font-bold uppercase tracking-normal text-rouge">Mes Trésors du Terroir</h2>
+            {/* blanc en thème sombre, gris en thème clair (le blanc y serait invisible sur le bloc blanc) */}
+            <p className="hint-white -mt-1 text-xs italic">Bonus disponibles</p>
             <ul className="space-y-2">
               {BONUS_KINDS.map((k) => (
                 <li key={k} className="flex items-center gap-2 text-sm">

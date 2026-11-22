@@ -6,7 +6,7 @@
 export type BonusKind = "MENHIRS" | "CREPE_FLAMBEE" | "BIGOUDEN";
 export const BONUS_KINDS: BonusKind[] = ["MENHIRS", "CREPE_FLAMBEE", "BIGOUDEN"];
 export type BonusQuotas = Record<BonusKind, number>;
-export const DEFAULT_BONUS_QUOTAS: BonusQuotas = { MENHIRS: 3, CREPE_FLAMBEE: 3, BIGOUDEN: 2 };
+export const DEFAULT_BONUS_QUOTAS: BonusQuotas = { MENHIRS: 2, CREPE_FLAMBEE: 2, BIGOUDEN: 2 };
 
 /** Nom de la famille de bonus, affiché partout sur le site */
 export const BONUS_FAMILY = "Les Trésors du Terroir";

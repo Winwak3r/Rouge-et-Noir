@@ -17,15 +17,15 @@ describe("Les Trésors du Terroir : points", () => {
 });
 
 describe("Les Trésors du Terroir : stock et règles", () => {
-  it("3 Menhirs, 3 Crêpes flambées et 2 Bigoudens par ligue ; anciens réglages remplacés", () => {
-    expect(DEFAULT_BONUS_QUOTAS).toEqual({ MENHIRS: 3, CREPE_FLAMBEE: 3, BIGOUDEN: 2 });
-    expect(normalizeQuotas({ KOUIGN_AMANN: 1, GALETTE_SAUCISSE: 4 })).toEqual({ MENHIRS: 3, CREPE_FLAMBEE: 3, BIGOUDEN: 2 });
+  it("2 bonus de chaque par ligue ; anciens réglages remplacés", () => {
+    expect(DEFAULT_BONUS_QUOTAS).toEqual({ MENHIRS: 2, CREPE_FLAMBEE: 2, BIGOUDEN: 2 });
+    expect(normalizeQuotas({ KOUIGN_AMANN: 1, GALETTE_SAUCISSE: 4 })).toEqual({ MENHIRS: 2, CREPE_FLAMBEE: 2, BIGOUDEN: 2 });
     expect(normalizeQuotas({ MENHIRS: 1, CREPE_FLAMBEE: 4, BIGOUDEN: 5 })).toEqual({ MENHIRS: 1, CREPE_FLAMBEE: 4, BIGOUDEN: 5 });
   });
   it("stock restant : saison + ajouts de l'admin − bonus joués", () => {
     expect(remainingBonuses(DEFAULT_BONUS_QUOTAS, [{ kind: "CREPE_FLAMBEE" }], [{ kind: "BIGOUDEN", delta: 1 }])).toEqual({
-      MENHIRS: 3,
-      CREPE_FLAMBEE: 2,
+      MENHIRS: 2,
+      CREPE_FLAMBEE: 1,
       BIGOUDEN: 3,
     });
   });
