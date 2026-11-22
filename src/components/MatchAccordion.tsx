@@ -22,7 +22,7 @@ const TEXT: Record<CompetitionCode, string> = { LIGUE_1: "text-l1-txt", EUROPA_L
 // Match ouvert : l'en-tête et le cadre prennent la couleur de la compétition.
 const OPEN: Record<CompetitionCode, { bg: string; border: string; text: string }> = {
   LIGUE_1: { bg: "bg-l1", border: "border-y-l1 border-r-l1", text: "text-l1" },
-  EUROPA_LEAGUE: { bg: "bg-[#C25400]", border: "border-y-[#C25400] border-r-[#C25400]", text: "text-[#c2410c]" },
+  EUROPA_LEAGUE: { bg: "bg-[#C25400]", border: "border-y-[#C25400] border-r-[#C25400]", text: "text-[#c25400]" },
   COUPE_DE_FRANCE: { bg: "bg-cdf", border: "border-y-cdf border-r-cdf", text: "text-cdf" },
 };
 
@@ -174,7 +174,7 @@ export function MatchAccordion({ h, children, href }: { h: MatchHeader; children
 
   const tone = open
     ? h.statusTone === "orange"
-      ? "bg-white text-[#c2410c]"
+      ? "bg-white text-[#c25400]"
       : "bg-black/25 text-white"
     : {
         green: "bg-green-100 text-green-800",

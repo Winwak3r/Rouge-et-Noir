@@ -11,7 +11,7 @@ export function MatchResult(props: {
   score: { home: number; away: number; pens: string | null };
   goals: MatchGoal[];
   cards: MatchCard[];
-  /** Cartons jaunes et remplacements */
+  /** Cartons jaunes, penalties manqués et remplacements */
   events?: MatchEvent[];
   rennesIsHome: boolean;
 }) {
@@ -33,9 +33,32 @@ export function MatchResult(props: {
         {content}
       </>
     );
-  // Jaunes puis remplacements, chacun dans l'ordre du match
+  /** Penalty manqué : ballon barré d'une croix rouge */
+  const MissedPen = () => (
+    <span aria-label="penalty manqué" className="relative inline-block">
+      ⚽
+      <span aria-hidden className="absolute inset-0 grid place-items-center text-[10px] font-black leading-none text-[#E53935]">
+        ✕
+      </span>
+    </span>
+  );
+  // Penalties manqués, jaunes puis remplacements, chacun dans l'ordre du match
   const extras = (home: boolean) => (
     <>
+      {side(home)
+        .filter((e) => e.kind === "PEN_MISSED" || e.kind === "PEN_SAVED")
+        .map((e) => (
+          <li key={e.id}>
+            {row(
+              home,
+              <MissedPen />,
+              <>
+                <PlayerName name={e.playerName} /> {mn(e)}
+                <span className="italic"> ({e.kind === "PEN_SAVED" ? "pen. arrêté" : "pen. manqué"})</span>
+              </>,
+            )}
+          </li>
+        ))}
       {side(home)
         .filter((e) => e.kind === "YELLOW")
         .map((e) => (

@@ -12,15 +12,15 @@
   /* Thème clair : fond des blocs gris clair un peu plus marqué (le thème sombre a sa propre valeur) */
   --color-neutral-50: #efefef;
   --color-l1: #1d4ed8;
-  --color-uel: #ea7600;
-  --color-uel-fonce: #c2410c; /* orange plus soutenu : texte blanc lisible sur l'en-tête ouvert */
+  --color-uel: #c25400;
+  --color-uel-fonce: #c25400; /* orange plus soutenu : texte blanc lisible sur l'en-tête ouvert */
   --color-cdf: #c8102e;
 
   /* Jetons qui changent avec le thème (voir [data-theme="dark"] plus bas) */
   --color-page: #ffffff;
   --color-surface: #ffffff;
   --color-l1-txt: #1d4ed8;
-  --color-uel-txt: #ea7600;
+  --color-uel-txt: #c25400;
   --color-cdf-txt: #c8102e;
 }
 
@@ -58,7 +58,7 @@
   --color-orange-700: #fb923c;
   --color-orange-800: #fdba74;
   --color-l1-txt: #93b4ff;
-  --color-uel-txt: #fdba74;
+  --color-uel-txt: #c25400;
   --color-cdf-txt: #fca5a5;
   --hbtn-bg: #272727;
   --hbtn-fg: #ffffff;

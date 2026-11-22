@@ -260,6 +260,15 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
           extraMinute: y.extraMinute,
           playerName: y.playerName,
         })),
+        ...(d.missedPenalties ?? []).map((m) => ({
+          matchId: match.id,
+          externalEventKey: `p-${m.key}`,
+          kind: m.saved ? "PEN_SAVED" : "PEN_MISSED",
+          forRennes: m.teamExternalId === rennesId,
+          minute: m.minute,
+          extraMinute: m.extraMinute,
+          playerName: m.playerName,
+        })),
         ...d.substitutions.map((x) => ({
           matchId: match.id,
           externalEventKey: `s-${x.key}`,

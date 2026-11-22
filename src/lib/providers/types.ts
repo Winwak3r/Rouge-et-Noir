@@ -68,6 +68,16 @@ export interface ProviderYellowCard {
   extraMinute: number | null;
 }
 
+export interface ProviderMissedPenalty {
+  key: string;
+  teamExternalId: number | null;
+  playerName: string;
+  minute: number | null;
+  extraMinute: number | null;
+  /** Arrêté par le gardien (sinon : à côté, sur le poteau…) */
+  saved: boolean;
+}
+
 export interface ProviderSubstitution {
   key: string;
   teamExternalId: number | null;
@@ -104,6 +114,8 @@ export interface ProviderMatchDetail {
   goals: ProviderGoal[];
   redCards: ProviderCard[];
   yellowCards: ProviderYellowCard[];
+  /** Penalties manqués ou arrêtés pendant le match (hors séance de tirs au but) */
+  missedPenalties: ProviderMissedPenalty[];
   substitutions: ProviderSubstitution[];
   phases: ProviderPhases;
   matchOdds: ProviderMatchOdds | null;

@@ -13,7 +13,7 @@ import type {
   ProviderPhases,
   ProviderSubstitution,
   ProviderTeam,
-  ProviderYellowCard,
+  ProviderYellowCard, ProviderMissedPenalty,
 } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -197,6 +197,32 @@ export function parseYellowCards(summary: Json): ProviderYellowCard[] {
   return out;
 }
 
+/** Penalties manqués ou arrêtés pendant le match (la séance de tirs au but est exclue). */
+export function parseMissedPenalties(summary: Json): ProviderMissedPenalty[] {
+  const out: ProviderMissedPenalty[] = [];
+  for (const k of summary?.keyEvents ?? []) {
+    const typeText = `${k?.type?.type ?? ""} ${k?.type?.text ?? ""}`.toLowerCase();
+    const text = String(k?.text ?? "").toLowerCase();
+    if (k?.scoringPlay === true) continue;
+    if (k?.shootout === true || int(k?.period?.number) === 5) continue;
+    // ESPN : « Penalty - Missed », « Penalty - Saved » (le texte détaille parfois : poteau, transversale…)
+    const isPen = /penalty/.test(typeText);
+    const missed = /miss|saved/.test(typeText) || (/penalty.*(miss|saved|hits the (bar|post|crossbar))/.test(text) && !/scored|goal!/.test(text));
+    if (!isPen || !missed) continue;
+    const player = k?.participants?.[0]?.athlete;
+    const clock = parseClock(k?.clock?.displayValue);
+    out.push({
+      key: String(k?.id ?? `p-${clock.minute}-${player?.id ?? "?"}`),
+      teamExternalId: int(k?.team?.id),
+      playerName: String(player?.displayName ?? "?"),
+      minute: clock.minute,
+      extraMinute: clock.extra,
+      saved: /saved/.test(typeText) || /\bsaved\b/.test(text),
+    });
+  }
+  return out;
+}
+
 /** Remplacements : « Substitution, Équipe. Entrant replaces Sortant. » (participants : entrant puis sortant). */
 export function parseSubstitutions(summary: Json): ProviderSubstitution[] {
   const out: ProviderSubstitution[] = [];
@@ -368,6 +394,7 @@ export function parseSummary(summary: Json): ProviderMatchDetail {
     goals,
     redCards: parseRedCards(summary),
     yellowCards: parseYellowCards(summary),
+    missedPenalties: parseMissedPenalties(summary),
     substitutions: parseSubstitutions(summary),
     phases: parsePhases(summary),
     matchOdds: parseMatchOdds(summary),

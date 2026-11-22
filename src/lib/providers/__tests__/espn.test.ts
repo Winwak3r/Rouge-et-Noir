@@ -194,3 +194,32 @@ describe("ESPN : cartons jaunes, remplacements, déroulé (vrai match Juventus �
     expect(d.phases).toEqual({ kickoff: true, halftime: true, secondHalf: true });
   });
 });
+
+describe("parseMissedPenalties", () => {
+  const ev = (id: string, type: string, period = 1, extra: Record<string, unknown> = {}) => ({
+    id,
+    type: { type: type.toLowerCase().replace(/\s+/g, "-"), text: type },
+    period: { number: period },
+    clock: { displayValue: "34'" },
+    team: { id: "94" },
+    participants: [{ athlete: { id: "1", displayName: "Ludovic Blas" } }],
+    ...extra,
+  });
+  it("garde les penalties manqués / arrêtés hors séance de tirs au but", async () => {
+    const { parseMissedPenalties } = await import("../espn-parse");
+    const out = parseMissedPenalties({
+      keyEvents: [
+        ev("a", "Penalty - Missed"),
+        ev("b", "Penalty - Saved", 2),
+        ev("c", "Penalty - Scored", 1, { scoringPlay: true }),
+        ev("d", "Penalty - Saved", 5),
+        ev("e", "Yellow Card"),
+      ],
+    });
+    expect(out.map((p) => [p.key, p.saved])).toEqual([
+      ["a", false],
+      ["b", true],
+    ]);
+    expect(out[0]).toMatchObject({ playerName: "Ludovic Blas", minute: 34, teamExternalId: 94 });
+  });
+});
