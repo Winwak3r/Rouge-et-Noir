@@ -24,7 +24,7 @@ export const metadata: Metadata = { title: "Mes Ligues" };
 
 const H = "font-display text-lg font-bold uppercase tracking-wide text-rouge";
 
-/** « Mes Ligues » : classement de la ligue choisie + ses infos, gestion, spécialités restantes et invitation. */
+/** « Mes Ligues » : classement de la ligue choisie + ses infos, gestion, Trésors du Terroir restants et invitation. */
 export default async function MyLeaguesPage({ searchParams }: { searchParams: Promise<{ rejoint?: string; invitation?: string; vue?: string }> }) {
   const user = await requireUser();
   const q = await searchParams;
@@ -102,7 +102,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
         ),
         bonus: stock ? (
           <section className="card space-y-2">
-            <h2 className="whitespace-nowrap font-display text-base font-bold uppercase tracking-normal text-rouge">Mes spécialités maison</h2>
+            <h2 className="whitespace-nowrap font-display text-base font-bold uppercase tracking-normal text-rouge">Mes Trésors du Terroir</h2>
             <ul className="space-y-2">
               {BONUS_KINDS.map((k) => (
                 <li key={k} className="flex items-center gap-2 text-sm">
@@ -126,7 +126,7 @@ export default async function MyLeaguesPage({ searchParams }: { searchParams: Pr
       <section className="card space-y-2">
         <p className="font-display text-xl font-bold uppercase tracking-wide text-noir">Général R&amp;N</p>
         <p className="text-sm text-neutral-600">
-          Tous les joueurs inscrits dans une ligue et ayant pronostiqué au moins un match, sur toute la saison. Les spécialités maison n’y
+          Tous les joueurs inscrits dans une ligue et ayant pronostiqué au moins un match, sur toute la saison. Les Trésors du Terroir n’y
           comptent pas.
         </p>
       </section>

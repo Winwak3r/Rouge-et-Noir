@@ -581,8 +581,9 @@ model MatchEvent {
 // ─── « Les Spécialités Maison » : bonus joués dans UNE ligue ────────────────
 
 enum BonusKind {
-  KOUIGN_AMANN
-  GALETTE_SAUCISSE
+  MENHIRS
+  CREPE_FLAMBEE
+  BIGOUDEN
 }
 
 model BonusUse {

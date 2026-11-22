@@ -50,7 +50,7 @@ export async function Header() {
             where: { user: { isActive: true }, userId: { in: [...(ids ?? [])] }, ...scopeResultFilter(scope) },
             select: { userId: true, matchId: true, category: true, totalPoints: true, correctScorer: true },
           }),
-          // Ligue : ses bonus « Spécialités Maison » s'ajoutent (pas dans le Général R&N)
+          // Ligue : ses bonus « Trésors du Terroir » s'ajoutent (pas dans le Général R&N)
           scope && !scope.general ? leagueBonusPoints(scope.leagueId) : Promise.resolve([]),
         ]).then(([users, rows, bonuses]) => buildStandings(users.map((u) => ({ userId: u.id, pseudo: u.pseudo })), withBonuses(rows, bonuses)))
       : Promise.resolve(null),

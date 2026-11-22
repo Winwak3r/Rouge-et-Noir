@@ -1,4 +1,4 @@
-// Données de l'animation « fin de match » : dernier résultat publié, mon prono, mes spécialités, mon rang par ligue.
+// Données de l'animation « fin de match » : dernier résultat publié, mon prono, mes trésors, mon rang par ligue.
 import { prisma } from "@/lib/db";
 import { loadBoard } from "@/lib/board-data";
 import { clubLogo } from "@/lib/club-logo";

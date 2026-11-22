@@ -107,9 +107,9 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Les Spécialités Maison</h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Les Trésors du Terroir</h2>
         <p className="text-sm text-neutral-700">
-          Deux bonus à jouer pendant la saison, <strong>dans chacune de tes ligues</strong> : chaque ligue te donne son propre stock.
+          Trois bonus à jouer pendant la saison, <strong>dans chacune de tes ligues</strong> : chaque ligue te donne son propre stock.
         </p>
         <ul className="space-y-3">
           {BONUS_KINDS.map((k) => (
@@ -117,8 +117,9 @@ export default async function RulesPage() {
               <BonusIcon kind={k} size={44} />
               <span className="text-sm text-neutral-700">
                 <strong className="text-noir">{BONUS_INFO[k].name}</strong> ({normalizeQuotas(r.bonusQuotas)[k]} par saison et par ligue) :{" "}
-                {k === "KOUIGN_AMANN" && "tous les points du match sont doublés, score ET buteur. Un pronostic à 0 point reste à 0 : le bonus est perdu."}
-                {k === "GALETTE_SAUCISSE" && "les points de ton buteur sont doublés s’il marque (il faut avoir choisi un buteur rennais)."}
+                {k === "MENHIRS" && "+2 points si le Stade Rennais n’encaisse aucun but (score final du match), quel que soit ton pronostic."}
+                {k === "CREPE_FLAMBEE" && "les points de ton buteur sont doublés s’il marque (il faut avoir choisi un buteur rennais)."}
+                {k === "BIGOUDEN" && "les points de ton score sont doublés (exact 4 → 8, bon écart 2 → 4, bon résultat 1 → 2). Un mauvais score n’est pas doublé."}
                 <span className="block italic text-neutral-500">« {BONUS_INFO[k].tagline} »</span>
               </span>
             </li>
@@ -127,7 +128,7 @@ export default async function RulesPage() {
         <ul className="list-disc space-y-1 pl-5 text-sm text-neutral-700">
           <li>Un bonus se joue dans le formulaire du pronostic, avant le verrouillage du match, et s’applique à la <strong>ligue affichée</strong>.</li>
           <li>Un seul bonus par match et par ligue. Tant que le match n’est pas verrouillé, tu peux le retirer ou en changer : il t’est rendu.</li>
-          <li>Il faut un pronostic de score ; la Galette-Saucisse demande aussi un buteur (pas « Aucun buteur rennais »).</li>
+          <li>Il faut un pronostic de score ; la Crêpe flambée demande aussi un buteur (pas « Aucun buteur rennais »).</li>
           <li>Match annulé : le bonus est rendu. Les bonus non utilisés sont perdus en fin de saison.</li>
           <li>Les points des bonus comptent dans le classement de la ligue où ils ont été joués, pas dans le classement Général R&amp;N.</li>
         </ul>

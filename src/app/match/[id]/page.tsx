@@ -10,7 +10,7 @@ import { loadMatchSheet } from "@/lib/match-sheet";
 export const metadata: Metadata = { title: "Mon pronostic" };
 export const dynamic = "force-dynamic";
 
-/** Page dédiée d'un match à pronostiquer : score en en-tête, puis Avant-match · Le buteur · Les spécialités maison. */
+/** Page dédiée d'un match à pronostiquer : score en en-tête, puis Avant-match · Le buteur · Les Trésors du Terroir. */
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getCurrentUser();

@@ -31,14 +31,14 @@ const STEPS: Step[] = [
     page: "home",
     target: "next-match",
     title: "Les pronostics",
-    text: "Ouvre un match du calendrier pour connaître les stats de la rencontre, pronostiquer le score, et un buteur rennais : plus il est improbable, plus il rapporte ! Si tu es gourmand, tu peux aussi goûter aux spécialités maison ! 😋",
+    text: "Ouvre un match du calendrier pour connaître les stats de la rencontre, pronostiquer le score, et un buteur rennais : plus il est improbable, plus il rapporte ! Et pour pimenter le tout, joue les Trésors du Terroir ! 🗿🔥",
   },
   {
     group: 3,
     page: "home",
     target: "leagues",
     title: "Mes Ligues",
-    text: "Le classement de chacune de tes ligues, leurs infos et tes spécialités maison restantes. Crée une ligue, rejoins-en une avec un code, gère les tiennes et invite tes amis.",
+    text: "Le classement de chacune de tes ligues, leurs infos et tes Trésors du Terroir restants. Crée une ligue, rejoins-en une avec un code, gère les tiennes et invite tes amis.",
   },
   {
     group: 4,

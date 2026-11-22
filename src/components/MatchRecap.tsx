@@ -6,6 +6,7 @@ import type { RecapData } from "@/lib/match-recap";
 import { teamAbbr } from "@/lib/team-abbr";
 import { shortPlayerName } from "@/lib/player-name";
 import { BonusIcon } from "./BonusIcon";
+import { BONUS_INFO } from "@/lib/scoring/bonus";
 import { LeagueAvatar } from "./LeagueAvatar";
 import { PlayerPhoto } from "./PlayerPhoto";
 
@@ -82,7 +83,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
   const LEAGUE_STEP = 450;
   const bonusLeagues = data.leagues.filter((l) => data.bonuses.some((b) => b.leagueId === l.leagueId));
   const T_BONUS0 = T_LEAGUES + Math.max(1, nL) * LEAGUE_STEP + 300;
-  const BONUS_STEP = 2400; // par spécialité : icône (0) › « ×2 » (+500, 1 s) › nouveau total (+1500)
+  const BONUS_STEP = 2400; // par trésor : icône (0) › « ×2 » (+500, 1 s) › nouveau total (+1500)
   const bonusStart = (leagueId: string) => {
     const i = bonusLeagues.findIndex((l) => l.leagueId === leagueId);
     return i < 0 ? null : T_BONUS0 + i * BONUS_STEP;
@@ -350,7 +351,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
           </p>
         )}
 
-        {/* 4. Ligues une par une (avec ce total) ; 5. spécialités et nouveaux totaux ; 6. classement */}
+        {/* 4. Ligues une par une (avec ce total) ; 5. trésors et nouveaux totaux ; 6. classement */}
         {nL > 0 && (
           <div className={`grid gap-3 ${cols}`}>
             {data.leagues.map((l, i) => {
@@ -386,7 +387,7 @@ export function MatchRecap({ data, userId }: { data: RecapData; userId: string }
                           flashOn ? "recap-flash" : "invisible"
                         }`}
                       >
-                        {b.kind === "KOUIGN_AMANN" ? "Total ×2" : "Buteur ×2"}
+                        {BONUS_INFO[b.kind].flash}
                       </span>
                     )}
                   </span>

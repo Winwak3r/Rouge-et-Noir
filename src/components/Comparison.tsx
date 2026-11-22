@@ -103,7 +103,7 @@ export function Comparison({ rows, live = false }: { rows: CompRow[]; live?: boo
                   <Status label="Buteur" s={r.scorerStatus} />
                 </span>
                 <span className="col-start-2 row-span-2 row-start-1 shrink-0 text-right text-xs text-neutral-500 sm:col-start-3 sm:row-span-1">
-                  {/* Spécialité maison jouée dans cette ligue */}
+                  {/* Trésor du Terroir joué dans cette ligue */}
                   {r.bonus && (
                     <span
                       className="mr-2 inline-flex items-center gap-1 align-middle"

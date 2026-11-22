@@ -6,7 +6,7 @@ import { formatShortNumeric } from "@/lib/dates";
 import { BONUS_INFO, BONUS_KINDS } from "@/lib/scoring/bonus";
 import { PageTitle } from "@/components/PageTitle";
 
-/** « Les Spécialités Maison » : bonus joués (et rendus), ajouts aux joueurs. */
+/** « Les Trésors du Terroir » : bonus joués (et rendus), ajouts aux joueurs. */
 export default async function AdminBonusPage() {
   const [uses, members] = await Promise.all([
     prisma.bonusUse.findMany({
@@ -27,7 +27,7 @@ export default async function AdminBonusPage() {
 
   return (
     <div className="space-y-6">
-      <PageTitle className="page-title">Les Spécialités Maison</PageTitle>
+      <PageTitle className="page-title">Les Trésors du Terroir</PageTitle>
 
       <section className="card space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Ajouter ou retirer un bonus</h2>

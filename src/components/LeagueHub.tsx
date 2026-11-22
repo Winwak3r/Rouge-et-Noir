@@ -20,14 +20,14 @@ const MOVE_MS = 500; // 2) la tuile de la nouvelle ligue glisse tout à gauche
 // 3) puis ses infos se déroulent (INFO_MS)
 const INFO_MS = 1000; // durée du déroulé des infos
 const RANK_DELAY = 350; // Classement : délai après que la tuile de la ligue est passée tout à gauche
-const BONUS_DELAY = 950; // Mes spécialités maison : idem
+const BONUS_DELAY = 950; // Mes Trésors du Terroir : idem
 const REVEAL_MS = 600; // durée de leur apparition
 const T = "mb-2 font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl";
 
 /**
  * « Mes Ligues ».
  *  - Ordinateur : la ligue choisie se place toujours en premier à gauche (les autres glissent à sa droite) et ses infos
- *    apparaissent sur la même ligne ; puis « Classement » (80 %) et enfin « Mes spécialités maison » (20 %).
+ *    apparaissent sur la même ligne ; puis « Classement » (80 %) et enfin « Mes Trésors du Terroir » (20 %).
  *  - Mobile : tuiles des ligues, puis « Classement » / « Infos de ligue ».
  *  - Au défilement : barres fixes (ligues, puis Classement / Infos sur mobile).
  */
@@ -56,7 +56,7 @@ export function LeagueHub(props: {
   //  2. la tuile de la nouvelle ligue glisse aussitôt tout à gauche ;
   //  3. ses infos se déroulent et repoussent les autres tuiles vers la droite.
   const [shown, setShown] = useState(sel); // ligue placée en premier (avec ses infos)
-  const [boardSel, setBoardSel] = useState(sel); // ligue du classement / des spécialités (ordinateur)
+  const [boardSel, setBoardSel] = useState(sel); // ligue du classement / des trésors (ordinateur)
   const [infoOpen, setInfoOpen] = useState(true);
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -78,7 +78,7 @@ export function LeagueHub(props: {
   }, [props.views.length]);
 
   const firstStage = useRef(true);
-  // Étapes d'apparition (ordinateur) : 0 ligues + infos · 1 Classement · 2 Spécialités
+  // Étapes d'apparition (ordinateur) : 0 ligues + infos · 1 Classement · 2 Trésors
   const [stage, setStage] = useState(0);
   useEffect(() => {
     setStage(0);
@@ -101,7 +101,7 @@ export function LeagueHub(props: {
     if (key === sel) return;
     timers.current.forEach(clearTimeout);
     setSel(key); // mobile : suit aussitôt
-    setStage(0); // ordinateur : classement et spécialités s'effacent (toujours ceux de l'ancienne ligue)…
+    setStage(0); // ordinateur : classement et trésors s'effacent (toujours ceux de l'ancienne ligue)…
     setInfoOpen(false); // 1. repli des infos de la ligue affichée
     timers.current = [
       window.setTimeout(() => {
@@ -252,7 +252,7 @@ export function LeagueHub(props: {
   );
 
   const panel = props.panels[sel] ?? { info: null, bonus: null, invite: null };
-  // Bord haut des spécialités aligné sur le bord haut du tableau du classement (sa taille reste celle de son contenu)
+  // Bord haut des trésors aligné sur le bord haut du tableau du classement (sa taille reste celle de son contenu)
   const rankCol = useRef<HTMLDivElement>(null);
   const [tableTop, setTableTop] = useState<number | null>(null);
   useEffect(() => {
@@ -325,7 +325,7 @@ export function LeagueHub(props: {
         </div>
       </div>
 
-      {/* Ordinateur : Classement (80 %) puis Mes spécialités maison (20 %), l'un après l'autre */}
+      {/* Ordinateur : Classement (80 %) puis Mes Trésors du Terroir (20 %), l'un après l'autre */}
       <div className="hidden items-start gap-4 lg:flex">
         <div ref={rankCol} className={`min-w-0 ${pcBonus ? "w-4/5" : "w-full"} ${appear(stage >= 1)}`} style={{ transitionDuration: `${REVEAL_MS}ms` }}>
           <h2 className={T}>Classement</h2>

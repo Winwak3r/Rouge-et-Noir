@@ -29,7 +29,7 @@ export function MyPrediction(props: {
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
   /** Encart « Score / Buteur » affiché quand le formulaire est replié. */
   summary?: ReactNode;
-  /** « Les Spécialités Maison » : bonus jouable dans la ligue affichée (absent pour le Général R&N ou sans ligue) */
+  /** « Les Trésors du Terroir » : bonus jouable dans la ligue affichée (absent pour le Général R&N ou sans ligue) */
   bonus?: {
     leagueId: string;
     leagueName: string;
@@ -78,7 +78,7 @@ export function MyPrediction(props: {
   useEffect(() => {
     if (!rennesZero) return;
     if (v.scorer && v.scorer !== NO_SCORER) setV((c) => ({ ...c, scorer: "" }));
-    if (bonusKind === "GALETTE_SAUCISSE") setBonusKind("");
+    if (bonusKind === "CREPE_FLAMBEE") setBonusKind("");
   }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
   const half = (v.home === "") !== (v.away === "");
 
@@ -138,7 +138,7 @@ export function MyPrediction(props: {
       {extra}
     </p>
   );
-  const SHORT: Record<BonusKind, string> = { KOUIGN_AMANN: "Kouign-Amann", GALETTE_SAUCISSE: "Galette-Saucisse" };
+  const SHORT: Record<BonusKind, string> = { MENHIRS: "Menhirs", CREPE_FLAMBEE: "Crêpe flambée", BIGOUDEN: "Bigouden" };
 
   return (
     <form action={action} className="space-y-3">
@@ -202,7 +202,7 @@ export function MyPrediction(props: {
         <div>
           {step(
             3,
-            "Spécialité maison",
+            "Trésor du Terroir",
             <span
               className="font-normal normal-case tracking-normal text-neutral-500"
               title="Un seul bonus par match. Il ne vaut que pour cette ligue : pour tes autres ligues, change de ligue et joue-le aussi là-bas."
@@ -214,11 +214,11 @@ export function MyPrediction(props: {
           <input type="hidden" name="bonusKind" value={bonusKind} />
           {/* Les trois bonus en pastilles compactes ; le second buteur apparaît à côté si besoin */}
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
-            <div role="radiogroup" aria-label="Spécialité maison" className="flex flex-wrap gap-2">
+            <div role="radiogroup" aria-label="Trésor du Terroir" className="flex flex-wrap gap-2">
               {BONUS_KINDS.map((k) => {
                 const left = props.bonus!.stock[k];
                 const on = bonusKind === k;
-                const needsScorer = k === "GALETTE_SAUCISSE" && (v.scorer === "" || v.scorer === NO_SCORER);
+                const needsScorer = k === "CREPE_FLAMBEE" && (v.scorer === "" || v.scorer === NO_SCORER);
                 const disabled = !on && (left <= 0 || needsScorer);
                 return (
                   <button
@@ -262,7 +262,7 @@ export function MyPrediction(props: {
                 <em>« {BONUS_INFO[bonusKind].tagline} »</em>
               </>
             ) : (
-              "Touche une spécialité pour la jouer sur ce match (le chiffre indique combien il t’en reste)."
+              "Touche un trésor pour le jouer sur ce match (le chiffre indique combien il t’en reste)."
             )}
           </p>
         </div>

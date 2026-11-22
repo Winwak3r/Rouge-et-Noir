@@ -102,7 +102,7 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
     return { error: "Tu as pronostiqué 0 but pour le Stade Rennais : tu ne peux pas choisir de buteur rennais." };
   }
 
-  // « Les Spécialités Maison » : bonus joué dans la ligue affichée (vérifié AVANT d'enregistrer)
+  // « Les Trésors du Terroir » : bonus joué dans la ligue affichée (vérifié AVANT d'enregistrer)
   const bonus = await checkBonus(form, { userId: user.id, match, scorerId, noScorerPick });
   if ("error" in bonus) return { error: bonus.error };
 

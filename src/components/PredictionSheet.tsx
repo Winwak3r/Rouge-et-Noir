@@ -18,7 +18,7 @@ type Side = { name: string; logo: string | null; rennes: boolean; rank?: number 
 
 /**
  * Mobile : fiche plein écran d'un match à pronostiquer. En-tête fixe avec le score à saisir,
- * puis trois onglets (Avant-match · La spécialité maison · Le buteur), et « Enregistrer » toujours en bas.
+ * puis trois onglets (Avant-match · Le buteur · Les Trésors du Terroir), et « Enregistrer » toujours en bas.
  */
 export function PredictionSheet(props: {
   matchId: string;
@@ -35,7 +35,7 @@ export function PredictionSheet(props: {
   lineupPublished: boolean;
   savedScorerOut: string | null;
   initial: { rennesGoals: number; opponentGoals: number; scorerId: string | null; noScorerPick: boolean } | null;
-  /** Nombre de chaque spécialité par saison (dans chaque ligue) */
+  /** Nombre de chaque trésor par saison (dans chaque ligue) */
   quotas: BonusQuotas;
   /** Mes ligues : un bonus peut s'appliquer à une ou plusieurs d'entre elles */
   leagues: Array<{ id: string; name: string; stock: BonusQuotas; current: { kind: BonusKind } | null }>;
@@ -48,7 +48,7 @@ export function PredictionSheet(props: {
   const [home, setHome] = useState(init ? String(props.rennesIsHome ? init.rennesGoals : init.opponentGoals) : "");
   const [away, setAway] = useState(init ? String(props.rennesIsHome ? init.opponentGoals : init.rennesGoals) : "");
   const [scorer, setScorer] = useState(init?.scorerId ?? (init?.noScorerPick ? NO_SCORER : ""));
-  // Bonus de chaque ligue sur ce match (une spécialité au plus par ligue)
+  // Bonus de chaque ligue sur ce match (une trésor au plus par ligue)
   const [perLeague, setPerLeague] = useState<Record<string, BonusKind | "">>(() =>
     Object.fromEntries(props.leagues.map((l) => [l.id, l.current?.kind ?? ""])),
   );
@@ -153,7 +153,7 @@ export function PredictionSheet(props: {
   useEffect(() => {
     if (!rennesZero) return;
     if (scorer && scorer !== NO_SCORER) setScorer("");
-    setPerLeague((cur) => Object.fromEntries(Object.entries(cur).map(([k, v]) => [k, v === "GALETTE_SAUCISSE" ? "" : v])));
+    setPerLeague((cur) => Object.fromEntries(Object.entries(cur).map(([k, v]) => [k, v === "CREPE_FLAMBEE" ? "" : v])));
   }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const lastName = (full: string) => full.trim().split(/\s+/).slice(1).join(" ") || full;
@@ -204,7 +204,7 @@ export function PredictionSheet(props: {
         </>
       )}
       {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
-        // Mobile : les spécialités en dessous du buteur, une par ligne (icône + ligue, 20 caractères au plus)
+        // Mobile : les trésors en dessous du buteur, une par ligne (icône + ligue, 20 caractères au plus)
         <span
           className={`pointer-events-none absolute top-full flex flex-col gap-1 sm:hidden ${chosen || scorer === NO_SCORER ? "mt-4" : "mt-1.5"} ${
             props.rennesIsHome ? "right-0 items-end" : "left-0 items-start"
@@ -222,7 +222,7 @@ export function PredictionSheet(props: {
         </span>
       )}
       {name === "rennesGoals" && !compact && appliedBonuses.length > 0 && (
-        // Ordinateur : la 1re spécialité juste au-dessus du nom du buteur, les suivantes empilées au-dessus
+        // Ordinateur : la 1re trésor juste au-dessus du nom du buteur, les suivantes empilées au-dessus
         // (icône + ligue, 20 caractères au plus, 3 au maximum)
         <span
           className={`pointer-events-none absolute bottom-7 hidden flex-col-reverse gap-0.5 sm:flex ${
@@ -286,7 +286,7 @@ export function PredictionSheet(props: {
   const TABS = [
     ["pre", "Avant-match"],
     ["scorer", "Le buteur"],
-    ["bonus", "Les spécialités maison"],
+    ["bonus", "Les Trésors du Terroir"],
   ] as const;
 
   return (
@@ -304,7 +304,7 @@ export function PredictionSheet(props: {
           de défilement (sinon le navigateur recale le défilement et l'animation se répète) */}
       <div ref={topRef} className="absolute inset-x-0 top-0 z-10">
       <div className="sheet-head w-full bg-[var(--header-bg)] shadow-sm" style={{ "--p": progress } as CSSProperties}>
-      {/* Mobile : place réservée sous les cases pour les spécialités affichées sous le buteur */}
+      {/* Mobile : place réservée sous les cases pour les trésors affichées sous le buteur */}
       <div
         className={`mx-auto w-full max-w-5xl px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] ${
           !compact && appliedBonuses.length > 0 ? ["", "max-sm:pb-10", "max-sm:pb-14", "max-sm:pb-[4.5rem]"][Math.min(3, appliedBonuses.length)] : ""
@@ -375,11 +375,11 @@ export function PredictionSheet(props: {
           (props.leagues.length ? (
             <div className="space-y-3">
               <h4 className="font-display text-xl font-bold uppercase tracking-wide text-rouge sm:text-2xl">Les bonus</h4>
-              <p className="text-sm text-neutral-600">Facultatif · une spécialité par match et par ligue.</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <p className="text-sm text-neutral-600">Facultatif · un trésor par match et par ligue.</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {BONUS_KINDS.map((k) => {
                 const applied = props.leagues.filter((l) => perLeague[l.id] === k);
-                const needsScorer = k === "GALETTE_SAUCISSE" && (scorer === "" || scorer === NO_SCORER);
+                const needsScorer = k === "CREPE_FLAMBEE" && (scorer === "" || scorer === NO_SCORER);
                 return (
                   <button
                     key={k}
@@ -412,7 +412,7 @@ export function PredictionSheet(props: {
 
             </div>
           ) : (
-            <p className="text-sm text-neutral-600">Rejoins ou crée une ligue pour jouer les Spécialités Maison.</p>
+            <p className="text-sm text-neutral-600">Rejoins ou crée une ligue pour jouer les Trésors du Terroir.</p>
           ))}
 
         {tab === "scorer" && (
@@ -533,7 +533,7 @@ export function PredictionSheet(props: {
                         <span className="flex items-center gap-2">
                           <span className="truncate font-semibold">{l.name}</span>
                           <span
-                            title="Spécialités restantes cette saison dans cette ligue"
+                            title="Trésors restants cette saison dans cette ligue"
                             className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${l.stock[popup] > 0 ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-500"}`}
                           >
                             {l.stock[popup]}/{props.quotas[popup]}

@@ -48,8 +48,8 @@ export type ChipTone = "exact" | "diff" | "outcome" | "wrong" | "neutral";
 export type RowStatus = "ok" | "todo" | "missing";
 
 export interface CompRow {
-  /** « Spécialité maison » jouée dans la ligue affichée (visible après le coup d'envoi) */
-  bonus?: { kind: "KOUIGN_AMANN" | "GALETTE_SAUCISSE"; points: number | null };
+  /** « Trésor du Terroir » joué dans la ligue affichée (visible après le coup d'envoi) */
+  bonus?: { kind: "MENHIRS" | "CREPE_FLAMBEE" | "BIGOUDEN"; points: number | null };
   userId: string;
   pseudo: string;
   avatarAt: number | null;

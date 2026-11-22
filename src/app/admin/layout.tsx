@@ -12,7 +12,7 @@ const LINKS = [
   ["/admin/joueurs", "Joueurs"],
   ["/admin/cotes", "Cotes"],
   ["/admin/bareme", "Barème"],
-  ["/admin/bonus", "Spécialités Maison"],
+  ["/admin/bonus", "Trésors du Terroir"],
   ["/admin/logos", "Logos"],
   ["/admin/messages", "Messages push"],
   ["/admin/simulation", "Simulation"],

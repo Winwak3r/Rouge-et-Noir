@@ -331,7 +331,7 @@ body::before {
 .match-code { color: #7a7a7a; }
 :root[data-theme="dark"] .match-code { color: #a3a3a3; }
 
-/* Page du match : blocs des spécialités maison (blancs en thème clair, noirs en thème sombre) */
+/* Page du match : blocs des Trésors du Terroir (blancs en thème clair, noirs en thème sombre) */
 .bonus-card { background-color: #ffffff; color: #111111; border-color: #e5e5e5; }
 .bonus-card-muted { color: #525252; }
 .bonus-card-warn { color: #c2410c; }
@@ -429,7 +429,7 @@ body::before {
   .recap-settle, .recap-pop { animation: none; }
 }
 
-/* Spécialité qui se pose sur la vignette de la ligue (« coup de tampon ») */
+/* Trésor qui se pose sur la vignette de la ligue (« coup de tampon ») */
 .recap-stamp { animation: recap-stamp 0.55s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
 @keyframes recap-stamp {
   0% { opacity: 0; transform: scale(2.4) rotate(-25deg); }
@@ -475,7 +475,7 @@ body::before {
   .recap-whistle3d, .recap-whistle-body, .recap-sound, .recap-final { animation: none; }
 }
 
-/* Total d'une ligue qui grossit pendant que les points de la spécialité s'ajoutent */
+/* Total d'une ligue qui grossit pendant que les points de la trésor s'ajoutent */
 .recap-grow { animation: recap-grow 1.1s ease-out both; transform-origin: center; }
 @keyframes recap-grow {
   0% { transform: scale(1); }

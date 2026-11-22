@@ -446,7 +446,7 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
 
   const ops: Prisma.PrismaPromise<unknown>[] = [];
   let scored = 0;
-  const computed = new Map<string, { total: number; scorerPoints: number; scorerId: string | null }>();
+  const computed = new Map<string, { total: number; scorePoints: number; scorerPoints: number; scorerId: string | null }>();
   for (const u of users) {
     const p = byUser.get(u.id);
     const s = scoreParticipantForMatch(
@@ -477,7 +477,7 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
       continue;
     }
     scored++;
-    computed.set(u.id, { total: s.totalPoints, scorerPoints: s.scorerPoints, scorerId: p?.scorerId ?? null });
+    computed.set(u.id, { total: s.totalPoints, scorePoints: s.scorePoints, scorerPoints: s.scorerPoints, scorerId: p?.scorerId ?? null });
     const data = {
       predictionId: p?.id ?? null,
       category: s.category,
@@ -498,11 +498,12 @@ export async function scoreMatch(matchId: string, opts: { useActiveRules?: boole
       }),
     );
   }
-  // « Les Spécialités Maison » : points ajoutés par chaque bonus joué (dans sa ligue)
+  // « Les Trésors du Terroir » : points ajoutés par chaque bonus joué (dans sa ligue)
+  const cleanSheet = (result.afterExtraTime ?? result.regulation).opponent === 0; // le SRFC n'a encaissé aucun but
   const bonuses = await prisma.bonusUse.findMany({ where: { matchId } });
   for (const b of bonuses) {
     const c = computed.get(b.userId);
-    const points = c ? bonusPoints({ kind: b.kind, matchTotal: c.total, scorerPoints: c.scorerPoints }) : 0;
+    const points = c ? bonusPoints({ kind: b.kind, scorePoints: c.scorePoints, scorerPoints: c.scorerPoints, cleanSheet }) : 0;
     ops.push(prisma.bonusUse.update({ where: { id: b.id }, data: { points } }));
   }
   ops.push(prisma.match.update({ where: { id: matchId }, data: { scoredAt: new Date(), rulesVersion: rules.version } }));

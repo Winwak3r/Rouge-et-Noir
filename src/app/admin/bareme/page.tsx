@@ -68,9 +68,10 @@ export default async function RulesAdminPage() {
             </label>
           </fieldset>
           <fieldset className="card space-y-2 p-4">
-            <legend className="px-1 text-sm font-semibold">Les Spécialités Maison (par saison, dans chaque ligue)</legend>
-            <Num name="quotaKouign" label="Le Kouign-Amann" value={normalizeQuotas(r.bonusQuotas).KOUIGN_AMANN} />
-            <Num name="quotaGalette" label="La Galette-Saucisse" value={normalizeQuotas(r.bonusQuotas).GALETTE_SAUCISSE} />
+            <legend className="px-1 text-sm font-semibold">Les Trésors du Terroir (par saison, dans chaque ligue)</legend>
+            <Num name="quotaMenhirs" label="Les Menhirs bretons" value={normalizeQuotas(r.bonusQuotas).MENHIRS} />
+            <Num name="quotaCrepe" label="La Crêpe flambée" value={normalizeQuotas(r.bonusQuotas).CREPE_FLAMBEE} />
+            <Num name="quotaBigouden" label="La Bigouden" value={normalizeQuotas(r.bonusQuotas).BIGOUDEN} />
           </fieldset>
           <fieldset className="card space-y-2 p-4">
             <legend className="px-1 text-sm font-semibold">Bonus buteur</legend>

@@ -46,7 +46,7 @@ export interface MatchHeader {
   playersTotal?: number; // joueurs inscrits sur le site
   /** complete : tout validé · score : score validé, aucun buteur à choisir · scorer : buteurs disponibles, à choisir · incomplete : rien */
   mine: "complete" | "score" | "scorer" | "incomplete" | null;
-  /** Mon pronostic, rappelé dans l'en-tête : score, buteur (photo) et spécialités jouées (avec la ligue) */
+  /** Mon pronostic, rappelé dans l'en-tête : score, buteur (photo) et trésors jouées (avec la ligue) */
   myPick?: {
     score: string;
     scorer: { name: string; short: string; photo: string | null; number: number | null } | null;
@@ -55,7 +55,7 @@ export interface MatchHeader {
   } | null;
 }
 
-/** Spécialités jouées : l'icône du bonus, avec la photo de la ligue en médaillon. */
+/** Trésors jouées : l'icône du bonus, avec la photo de la ligue en médaillon. */
 function PickBonuses({ list, size }: { list: NonNullable<MatchHeader["myPick"]>["bonuses"]; size: number }) {
   return (
     <span className="flex items-center gap-1">
@@ -100,7 +100,7 @@ function MyPick({ p, open, variant }: { p: NonNullable<MatchHeader["myPick"]>; o
     );
 
   if (variant === "pc") {
-    // Ordinateur : photo (avec numéro) · MON PRONO / score / nom du buteur · spécialités
+    // Ordinateur : photo (avec numéro) · MON PRONO / score / nom du buteur · trésors
     return (
       <span className="flex w-[19rem] items-center gap-3">
         {photo(40, true)}

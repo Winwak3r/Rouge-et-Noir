@@ -82,7 +82,7 @@ export default async function HomePage() {
     prisma.prediction.groupBy({ by: ["matchId"], where: inScope ? { userId: inScope } : {}, _count: { _all: true } }),
     getLeagueLogos(),
   ]);
-  // « Les Spécialités Maison » de la ligue affichée (le Général R&N n'en a pas)
+  // « Les Trésors du Terroir » de la ligue affichée (le Général R&N n'en a pas)
   const bonusLeague = user && scope && !scope.general ? { id: scope.leagueId, name: scope.name } : null;
   const currentSeasonId = matches[0]?.seasonId ?? null;
   const leagueBonuses: LeagueBonus[] = bonusLeague ? await loadLeagueBonuses(bonusLeague.id, matches.map((x) => x.id)) : [];
@@ -238,7 +238,7 @@ export default async function HomePage() {
           : m.competition === "EUROPA_LEAGUE"
             ? (m.stage?.split(" ")[0] ?? "UEL")
             : "L1";
-    // Rappel de mon pronostic dans l'en-tête du match (score, buteur, spécialités jouées et leurs ligues)
+    // Rappel de mon pronostic dans l'en-tête du match (score, buteur, Trésors du Terroir joués et leurs ligues)
     const myPick: MatchHeader["myPick"] = my
       ? {
           score: m.rennesIsHome ? `${my.rennesGoals} - ${my.opponentGoals}` : `${my.opponentGoals} - ${my.rennesGoals}`,
@@ -419,7 +419,7 @@ export default async function HomePage() {
           <div className="flex items-center gap-2 border-neutral-200 md:border-l md:pl-5">
             <BonusIcon kind={myBonusUse.kind} size={40} />
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Spécialité maison</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">Trésor du Terroir</p>
               <p className="whitespace-nowrap font-semibold">{BONUS_INFO[myBonusUse.kind].name}</p>
             </div>
           </div>
@@ -505,7 +505,7 @@ export default async function HomePage() {
         ) : null
     );
     // le bonus des autres n'est visible qu'après le coup d'envoi (le mien, toujours)
-    const withBonusChip = (rs: typeof rows, br: ReadonlyArray<{ userId: string; kind: "KOUIGN_AMANN" | "GALETTE_SAUCISSE"; points: number | null }>) =>
+    const withBonusChip = (rs: typeof rows, br: ReadonlyArray<{ userId: string; kind: "MENHIRS" | "CREPE_FLAMBEE" | "BIGOUDEN"; points: number | null }>) =>
       rs.map((r) => {
         const b = br.find((x) => x.userId === r.userId);
         return b && (isPublic || r.mine) ? { ...r, bonus: { kind: b.kind, points: b.points } } : r;
@@ -846,7 +846,7 @@ function isPlayed(m: { status: string }) {
   return m.status === "FINISHED" || m.status === "CANCELLED";
 }
 
-/** Bonus « Spécialités Maison » joués dans une ligue, sur les matchs affichés. */
+/** Bonus « Trésors du Terroir » joués dans une ligue, sur les matchs affichés. */
 async function loadLeagueBonuses(leagueId: string, matchIds: string[]) {
   return prisma.bonusUse.findMany({
     where: { leagueId, matchId: { in: matchIds } },
