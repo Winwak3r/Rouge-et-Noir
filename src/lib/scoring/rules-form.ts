@@ -26,7 +26,7 @@ export function parseRulesForm(f: Input): { ok: true; rules: Omit<ScoringRules, 
     maxBonus: int("maxBonus", 1, 50, "Bonus maximum"),
     quotaMenhirs: int("quotaMenhirs", 0, 20, "Menhirs bretons par saison"),
     quotaCrepe: int("quotaCrepe", 0, 20, "Crêpes flambées par saison"),
-    quotaBigouden: int("quotaBigouden", 0, 20, "Bigoudens par saison"),
+    quotaBigouden: int("quotaBigouden", 0, 20, "Bigoudènes par saison"),
     fixedBonus: int("fixedBonus", 0, 20, "Bonus sans cote"),
     noScorerBonus: int("noScorerBonus", 0, 20, "Bonus « Aucun buteur »"),
   };

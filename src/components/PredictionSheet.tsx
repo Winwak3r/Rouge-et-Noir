@@ -155,6 +155,12 @@ export function PredictionSheet(props: {
     if (scorer && scorer !== NO_SCORER) setScorer("");
     setPerLeague((cur) => Object.fromEntries(Object.entries(cur).map(([k, v]) => [k, v === "CREPE_FLAMBEE" ? "" : v])));
   }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Rennes encaisse au moins un but selon le pronostic : pas de clean sheet, les Menhirs sont retirés
+  const rennesConcedes = Number((props.rennesIsHome ? away : home) || 0) > 0;
+  useEffect(() => {
+    if (!rennesConcedes) return;
+    setPerLeague((cur) => Object.fromEntries(Object.entries(cur).map(([k, v]) => [k, v === "MENHIRS" ? "" : v])));
+  }, [rennesConcedes]);
 
   const lastName = (full: string) => full.trim().split(/\s+/).slice(1).join(" ") || full;
   const appliedBonuses = props.leagues
@@ -380,11 +386,12 @@ export function PredictionSheet(props: {
               {BONUS_KINDS.map((k) => {
                 const applied = props.leagues.filter((l) => perLeague[l.id] === k);
                 const needsScorer = k === "CREPE_FLAMBEE" && (scorer === "" || scorer === NO_SCORER);
+                const needsCleanSheet = k === "MENHIRS" && rennesConcedes;
                 return (
                   <button
                     key={k}
                     type="button"
-                    disabled={needsScorer && applied.length === 0}
+                    disabled={(needsScorer || needsCleanSheet) && applied.length === 0}
                     onClick={() => openPopup(k)}
                     className={`bonus-card flex h-full w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors enabled:hover:border-rouge disabled:opacity-40 ${
                       applied.length ? "!border-rouge" : ""
@@ -395,6 +402,9 @@ export function PredictionSheet(props: {
                       <span className="block font-bold">{BONUS_INFO[k].name}</span>
                       <span className="bonus-card-muted block text-xs">{BONUS_INFO[k].effect}</span>
                       {needsScorer && <span className="bonus-card-warn block text-xs">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      {needsCleanSheet && (
+                        <span className="bonus-card-warn block text-xs">Ton score fait encaisser un but au SRFC : pas de clean sheet possible</span>
+                      )}
                       {applied.length > 0 && (
                         <span className="mt-1 flex flex-wrap gap-1">
                           {applied.map((l) => (
@@ -421,8 +431,8 @@ export function PredictionSheet(props: {
             {props.oddsEstimated && (
               // jaune d'avertissement et texte brun foncé, identiques dans les deux thèmes
               <p className="rounded-lg border px-3 py-2 text-xs" style={{ backgroundColor: "#FDE047", color: "#3B2600", borderColor: "#EAB308" }}>
-                <strong>Cotes estimées</strong> (moyenne des 5 derniers matchs). Les vraies cotes arrivent environ 48 h avant le match et
-                remplacent celles-ci : les points de ton buteur pourront changer.
+                <strong>Points estimés</strong> (moyenne des 5 derniers matchs). Les vrais points arrivent environ 48 h avant le match et
+                remplacent ceux-ci : les points de ton buteur pourront changer.
               </p>
             )}
             {scorer === NO_SCORER && (

@@ -10,7 +10,7 @@ describe("Les Trésors du Terroir : points", () => {
     expect(bonusPoints({ kind: "CREPE_FLAMBEE", scorePoints: 4, scorerPoints: 3, cleanSheet: false })).toBe(3);
     expect(bonusPoints({ kind: "CREPE_FLAMBEE", scorePoints: 4, scorerPoints: 0, cleanSheet: false })).toBe(0);
   });
-  it("Bigouden : les points du score doublés (le −1 n'est pas doublé)", () => {
+  it("Bigoudène : les points du score doublés (le −1 n'est pas doublé)", () => {
     expect(bonusPoints({ kind: "BIGOUDEN", scorePoints: 4, scorerPoints: 3, cleanSheet: false })).toBe(4);
     expect(bonusPoints({ kind: "BIGOUDEN", scorePoints: -1, scorerPoints: 0, cleanSheet: false })).toBe(0);
   });
@@ -34,6 +34,8 @@ describe("Les Trésors du Terroir : stock et règles", () => {
     expect(bonusChoiceError({ kind: "BIGOUDEN", hasScore: true, scorerId: null, noScorerPick: true })).toBeNull();
     expect(bonusChoiceError({ kind: "CREPE_FLAMBEE", hasScore: true, scorerId: null, noScorerPick: true })).toContain("buteur");
     expect(bonusChoiceError({ kind: "CREPE_FLAMBEE", hasScore: true, scorerId: "dia", noScorerPick: false })).toBeNull();
+    expect(bonusChoiceError({ kind: "MENHIRS", hasScore: true, scorerId: null, noScorerPick: false, opponentGoals: 1 })).toContain("clean sheet");
+    expect(bonusChoiceError({ kind: "MENHIRS", hasScore: true, scorerId: null, noScorerPick: false, opponentGoals: 0 })).toBeNull();
   });
   it("classement d'une ligue : les points des bonus s'ajoutent au bon match", () => {
     const r = withBonuses(

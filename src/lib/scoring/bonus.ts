@@ -1,7 +1,7 @@
 // « Les Trésors du Terroir » : bonus joués dans UNE ligue (fonctions pures, testées).
 //  - Les Menhirs bretons : +2 points si le Stade Rennais n'encaisse aucun but (clean sheet) ;
 //  - La Crêpe flambée : les points du buteur sont doublés ;
-//  - La Bigouden : les points du score sont doublés.
+//  - La Bigoudène : les points du score sont doublés.
 
 export type BonusKind = "MENHIRS" | "CREPE_FLAMBEE" | "BIGOUDEN";
 export const BONUS_KINDS: BonusKind[] = ["MENHIRS", "CREPE_FLAMBEE", "BIGOUDEN"];
@@ -29,8 +29,8 @@ export const BONUS_INFO: Record<BonusKind, { name: string; short: string; effect
     flash: "Buteur ×2",
   },
   BIGOUDEN: {
-    name: "La Bigouden",
-    short: "Bigouden",
+    name: "La Bigoudène",
+    short: "Bigoudène",
     effect: "Points du score doublés",
     tagline: "Pas besoin de biniou pour faire les fous, vos points de score doublent d’un coup !",
     flash: "Score ×2",
@@ -73,8 +73,16 @@ export function remainingBonuses(
 }
 
 /** Bonus jouable avec ce pronostic ? Renvoie un message d'erreur, ou null. */
-export function bonusChoiceError(i: { kind: BonusKind; hasScore: boolean; scorerId: string | null; noScorerPick: boolean }): string | null {
+export function bonusChoiceError(i: {
+  kind: BonusKind;
+  hasScore: boolean;
+  scorerId: string | null;
+  noScorerPick: boolean;
+  /** Buts de l'adversaire pronostiqués : les Menhirs demandent un clean sheet (0) */
+  opponentGoals?: number | null;
+}): string | null {
   if (!i.hasScore) return "Enregistre d’abord un score pour jouer un bonus.";
+  if (i.kind === "MENHIRS" && (i.opponentGoals ?? 0) > 0) return "Les Menhirs : pronostique un clean sheet du Stade Rennais (0 but encaissé).";
   if (i.kind === "CREPE_FLAMBEE" && (i.noScorerPick || !i.scorerId)) return "La Crêpe flambée : choisis d’abord un buteur rennais.";
   return null;
 }

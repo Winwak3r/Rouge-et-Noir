@@ -21,7 +21,7 @@ export default async function RulesPage() {
   ] as const;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Règles du jeu</PageTitle>
 
       <section className="card space-y-3">
@@ -48,7 +48,7 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le buteur rennais (facultatif)</h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le buteur rennais</h2>
         <p className="text-sm text-neutral-700">
           Choisis un joueur rennais. S’il marque, tu gagnes un bonus égal à sa cote « buteur » divisée par{" "}
           {r.scorerBonus.oddsDivisor}, arrondie à l’entier le plus proche (minimum {pts(r.scorerBonus.minBonus)}, maximum{" "}

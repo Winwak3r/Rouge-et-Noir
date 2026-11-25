@@ -103,7 +103,7 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
   }
 
   // « Les Trésors du Terroir » : bonus joué dans la ligue affichée (vérifié AVANT d'enregistrer)
-  const bonus = await checkBonus(form, { userId: user.id, match, scorerId, noScorerPick });
+  const bonus = await checkBonus(form, { userId: user.id, match, scorerId, noScorerPick, opponentGoals });
   if ("error" in bonus) return { error: bonus.error };
 
   try {
@@ -145,7 +145,7 @@ type BonusChoice = { leagueId: string; kind: BonusKind | null };
  */
 async function checkBonus(
   form: FormData,
-  ctx: { userId: string; match: { id: string; seasonId: string }; scorerId: string | null; noScorerPick: boolean },
+  ctx: { userId: string; match: { id: string; seasonId: string }; scorerId: string | null; noScorerPick: boolean; opponentGoals: number },
 ): Promise<{ error: string } | { choices: BonusChoice[] }> {
   const wanted: Array<{ leagueId: string; raw: string }> = [];
   const multi = String(form.get("bonusLeagues") ?? "");
@@ -170,7 +170,7 @@ async function checkBonus(
     }
     if (!BONUS_KINDS.includes(w.raw as BonusKind)) return { error: "Bonus inconnu." };
     const kind = w.raw as BonusKind;
-    const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick });
+    const err = bonusChoiceError({ kind, hasScore: true, scorerId: ctx.scorerId, noScorerPick: ctx.noScorerPick, opponentGoals: ctx.opponentGoals });
     if (err) return { error: err };
     const stock = await bonusStock(ctx.userId, w.leagueId, ctx.match.seasonId, ctx.match.id);
     if (stock[kind] <= 0) return { error: `Plus de « ${BONUS_INFO[kind].name} » dans la ligue ${member.league.name} cette saison.` };

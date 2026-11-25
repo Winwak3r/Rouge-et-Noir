@@ -80,6 +80,11 @@ export function MyPrediction(props: {
     if (v.scorer && v.scorer !== NO_SCORER) setV((c) => ({ ...c, scorer: "" }));
     if (bonusKind === "CREPE_FLAMBEE") setBonusKind("");
   }, [rennesZero]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Rennes encaisse au moins un but selon le pronostic : pas de clean sheet, les Menhirs sont retirés
+  const rennesConcedes = Number((props.rennesIsHome ? v.away : v.home) || 0) > 0;
+  useEffect(() => {
+    if (rennesConcedes && bonusKind === "MENHIRS") setBonusKind("");
+  }, [rennesConcedes]); // eslint-disable-line react-hooks/exhaustive-deps
   const half = (v.home === "") !== (v.away === "");
 
   const scoreSelect = (field: "home" | "away", name: string, label: string) => (
@@ -138,7 +143,7 @@ export function MyPrediction(props: {
       {extra}
     </p>
   );
-  const SHORT: Record<BonusKind, string> = { MENHIRS: "Menhirs", CREPE_FLAMBEE: "Crêpe flambée", BIGOUDEN: "Bigouden" };
+  const SHORT: Record<BonusKind, string> = { MENHIRS: "Menhirs", CREPE_FLAMBEE: "Crêpe flambée", BIGOUDEN: "Bigoudène" };
 
   return (
     <form action={action} className="space-y-3">
@@ -219,7 +224,8 @@ export function MyPrediction(props: {
                 const left = props.bonus!.stock[k];
                 const on = bonusKind === k;
                 const needsScorer = k === "CREPE_FLAMBEE" && (v.scorer === "" || v.scorer === NO_SCORER);
-                const disabled = !on && (left <= 0 || needsScorer);
+                const needsCleanSheet = k === "MENHIRS" && rennesConcedes;
+                const disabled = !on && (left <= 0 || needsScorer || needsCleanSheet);
                 return (
                   <button
                     key={k}
@@ -231,6 +237,8 @@ export function MyPrediction(props: {
                     title={
                       needsScorer
                         ? `${BONUS_INFO[k].name} : choisis d’abord un buteur rennais`
+                        : needsCleanSheet
+                          ? `${BONUS_INFO[k].name} : ton score fait encaisser un but au SRFC`
                         : left <= 0
                           ? `${BONUS_INFO[k].name} : plus aucun dans cette ligue cette saison`
                           : `${BONUS_INFO[k].name} : ${BONUS_INFO[k].effect}`
