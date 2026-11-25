@@ -131,9 +131,10 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
       {/* 3. Statistiques */}
       <section aria-label="Les statistiques" className="space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide text-rouge">Les statistiques</h2>
-        <div className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3 lg:grid-cols-5">
-          {stats.map((s) => (
-            <div key={s.label} className="card text-center">
+        {/* Téléphone : Score exact sur toute la largeur, puis deux tuiles par ligne ; ordinateur : 5 tuiles sur une ligne */}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+          {stats.map((s, i) => (
+            <div key={s.label} className={`card text-center ${i === 0 ? "col-span-2 lg:col-span-1" : ""}`}>
               <p className="text-sm font-semibold text-neutral-500">{s.label}</p>
               <p className="mt-1 font-display text-4xl font-bold tabular-nums">{s.value}</p>
             </div>
