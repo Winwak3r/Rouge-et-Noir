@@ -66,7 +66,9 @@ const STEPS: Step[] = [
 
 const isMobile = () => typeof window !== "undefined" && !window.matchMedia("(min-width: 640px)").matches;
 const targetOf = (s: Step) => (isMobile() && s.mobileTarget ? s.mobileTarget : s.target);
-const textOf = (s: Step) => (isMobile() && s.mobileText ? s.mobileText : s.text);
+// Ordinateur : « Stade Rennais F.C. »
+const textOf = (s: Step) =>
+  isMobile() ? (s.mobileText ?? s.text) : s.text.replace(/Stade Rennais(?: F\.?C\.?)?/g, "Stade Rennais F.C.");
 
 /** Premier élément visible portant ce repère (certains existent en double : en-tête et barre du bas). */
 const findTarget = (t: string) =>

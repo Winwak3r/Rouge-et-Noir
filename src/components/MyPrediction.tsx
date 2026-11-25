@@ -6,6 +6,7 @@ import { NO_SCORER, ScorerSelect, type ScorerOption } from "./ScorerSelect";
 import { BonusIcon } from "./BonusIcon";
 import { BONUS_INFO, BONUS_KINDS, type BonusKind, type BonusQuotas } from "@/lib/scoring/bonus";
 import { TeamLabel } from "./TeamLabel";
+import { Srfc } from "@/components/Srfc";
 
 export type { ScorerOption };
 
@@ -170,7 +171,7 @@ export function MyPrediction(props: {
           </span>
           {rennesZero && (
             <p role="alert" className="mb-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-xs text-orange-800">
-              ⚠️ 0 but pronostiqué pour le Stade Rennais : le choix d’un buteur est bloqué (seul « Aucun buteur rennais » reste possible).
+              ⚠️ 0 but pronostiqué pour le <Srfc /> : le choix d’un buteur est bloqué (seul « Aucun buteur rennais » reste possible).
             </p>
           )}
           <ScorerSelect
@@ -196,7 +197,7 @@ export function MyPrediction(props: {
           )}
           {v.scorer === NO_SCORER && rennesGoals >= 1 && (
             <p role="alert" className="mt-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-xs text-orange-800">
-              ⚠️ Tu prévois au moins un but du Stade Rennais avec « Aucun buteur rennais » : cela signifie que le ou les buts rennais
+              ⚠️ Tu prévois au moins un but du <Srfc /> avec « Aucun buteur rennais » : cela signifie que le ou les buts rennais
               seraient des buts contre leur camp de l’équipe adverse.
             </p>
           )}
@@ -238,7 +239,7 @@ export function MyPrediction(props: {
                       needsScorer
                         ? `${BONUS_INFO[k].name} : choisis d’abord un buteur rennais`
                         : needsCleanSheet
-                          ? `${BONUS_INFO[k].name} : ton score fait encaisser un but au SRFC`
+                          ? `${BONUS_INFO[k].name} : ton prono prévoit que le Stade Rennais F.C. encaisse un but ; pas de clean sheet possible`
                         : left <= 0
                           ? `${BONUS_INFO[k].name} : plus aucun dans cette ligue cette saison`
                           : `${BONUS_INFO[k].name} : ${BONUS_INFO[k].effect}`

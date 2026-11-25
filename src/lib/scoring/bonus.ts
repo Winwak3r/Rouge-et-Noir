@@ -82,7 +82,7 @@ export function bonusChoiceError(i: {
   opponentGoals?: number | null;
 }): string | null {
   if (!i.hasScore) return "Enregistre d’abord un score pour jouer un bonus.";
-  if (i.kind === "MENHIRS" && (i.opponentGoals ?? 0) > 0) return "Les Menhirs : pronostique un clean sheet du Stade Rennais (0 but encaissé).";
+  if (i.kind === "MENHIRS" && (i.opponentGoals ?? 0) > 0) return "Les Menhirs : ton prono prévoit que le Stade Rennais F.C. encaisse un but ; pas de clean sheet possible.";
   if (i.kind === "CREPE_FLAMBEE" && (i.noScorerPick || !i.scorerId)) return "La Crêpe flambée : choisis d’abord un buteur rennais.";
   return null;
 }

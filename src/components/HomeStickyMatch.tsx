@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { teamAbbr } from "@/lib/team-abbr";
+import { desktopTeamName } from "@/lib/team-names";
 
 type Side = { name: string; logo: string | null; rennes: boolean };
 
@@ -120,11 +121,11 @@ export function HomeStickyMatch(props: {
         </span>
         {/* Le match */}
         <span className="flex min-w-0 flex-1 items-center justify-center gap-1.5 font-semibold">
-          <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? props.home.name : teamAbbr(props.home.name)}</span>
+          <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? (props.only === "desktop" ? desktopTeamName(props.home.name, props.home.rennes) : props.home.name) : teamAbbr(props.home.name)}</span>
           {logo(props.home)}
           <span className="shrink-0 px-1 font-club text-base font-semibold tabular-nums">{props.score ?? "–"}</span>
           {logo(props.away)}
-          <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? props.away.name : teamAbbr(props.away.name)}</span>
+          <span className="font-display text-base font-bold uppercase tracking-wide">{props.fullNames ? (props.only === "desktop" ? desktopTeamName(props.away.name, props.away.rennes) : props.away.name) : teamAbbr(props.away.name)}</span>
         </span>
         {/* Date et heure, ou minute de jeu (ordinateur) */}
         {props.when && (

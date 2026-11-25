@@ -42,6 +42,7 @@ import { bonusStock } from "@/lib/bonus-data";
 import { TeamLabel } from "@/components/TeamLabel";
 import { ScorerPlaceholder } from "@/components/ScorerPlaceholder";
 import { activeLeagueScope } from "@/lib/leagues";
+import { Srfc } from "@/components/Srfc";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // laisse le temps à la synchro d'arrière-plan
@@ -810,7 +811,7 @@ export default async function HomePage() {
                   list.length === 0 ? (
                     <p className="text-sm text-neutral-500">
                       {code === "COUPE_DE_FRANCE"
-                        ? "Aucune rencontre programmée pour l’instant : le Stade Rennais entre en lice en hiver."
+                        ? <>Aucune rencontre programmée pour l’instant : le <Srfc /> entre en lice en hiver.</>
                         : "Aucune autre rencontre programmée pour l’instant."}
                     </p>
                   ) : (

@@ -99,7 +99,7 @@ export async function savePredictionAction(_: PredictionState, form: FormData): 
   if (rennesGoals === null || opponentGoals === null) return { error: "Choisis un score pour les deux équipes." };
 
   if (rennesGoals === 0 && scorerId) {
-    return { error: "Tu as pronostiqué 0 but pour le Stade Rennais : tu ne peux pas choisir de buteur rennais." };
+    return { error: "Tu as pronostiqué 0 but pour le Stade Rennais F.C. : tu ne peux pas choisir de buteur rennais." };
   }
 
   // « Les Trésors du Terroir » : bonus joué dans la ligue affichée (vérifié AVANT d'enregistrer)

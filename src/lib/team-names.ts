@@ -16,6 +16,11 @@ const SHORT: Record<string, string> = {
 
 const norm = (s: string) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
+/** Nom complet sur ordinateur : « Stade Rennais F.C. » pour Rennes, sinon le nom tel quel. */
+export function desktopTeamName(name: string, isRennes = false): string {
+  return isRennes || /^(stade rennais( fc)?|rennes)$/.test(norm(name)) ? "Stade Rennais F.C." : name;
+}
+
 /** Nom court sur mobile, ou null s'il n'y en a pas (le nom complet est alors gardé). */
 export function mobileTeamName(name: string, isRennes = false): string | null {
   if (isRennes) return "SRFC";

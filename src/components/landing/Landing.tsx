@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SitePreview } from "./SitePreview";
+import { Srfc } from "@/components/Srfc";
 
 const title = "font-display font-bold uppercase leading-[0.95] tracking-wide";
 
@@ -82,7 +83,7 @@ export function Landing() {
             </h2>
             <p className="text-xl font-semibold sm:text-2xl">Du foot, des potes et un classement à défendre !</p>
             <p className="mx-auto max-w-xl text-lg text-white/75 lg:mx-0">
-              Rejoins une ligue pour défier tes amis, ta famille ou tes collègues sur toutes les compétitions du Stade Rennais.
+              Rejoins une ligue pour défier tes amis, ta famille ou tes collègues sur toutes les compétitions du <Srfc />.
             </p>
             <Buttons />
           </div>

@@ -4,6 +4,7 @@ import { BonusIcon } from "@/components/BonusIcon";
 import { BONUS_INFO, BONUS_KINDS, normalizeQuotas } from "@/lib/scoring/bonus";
 import { oddsToBonus } from "@/lib/scoring/engine";
 import { PageTitle } from "@/components/PageTitle";
+import { Srfc } from "@/components/Srfc";
 
 export const metadata: Metadata = { title: "Règles du jeu" };
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export default async function RulesPage() {
       <section className="card space-y-3">
         <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le score</h2>
         <p className="text-sm text-neutral-700">
-          Pour chaque match du Stade Rennais, pronostique le nombre de buts de Rennes et de l’adversaire.
+          Pour chaque match du <Srfc />, pronostique le nombre de buts de Rennes et de l’adversaire.
           Les catégories ne se cumulent pas : un score exact rapporte {r.points.exact} points au total.
         </p>
         <table className="w-full text-sm">
@@ -117,7 +118,9 @@ export default async function RulesPage() {
               <BonusIcon kind={k} size={44} />
               <span className="text-sm text-neutral-700">
                 <strong className="text-noir">{BONUS_INFO[k].name}</strong> ({normalizeQuotas(r.bonusQuotas)[k]} par saison et par ligue) :{" "}
-                {k === "MENHIRS" && "+2 points si le Stade Rennais n’encaisse aucun but (score final du match), quel que soit ton pronostic."}
+                {k === "MENHIRS" && (
+                  <>+2 points si le <Srfc /> n’encaisse aucun but (score final du match), quel que soit ton pronostic.</>
+                )}
                 {k === "CREPE_FLAMBEE" && "les points de ton buteur sont doublés s’il marque (il faut avoir choisi un buteur rennais)."}
                 {k === "BIGOUDEN" && "les points de ton score sont doublés (exact 4 → 8, bon écart 2 → 4, bon résultat 1 → 2). Un mauvais score n’est pas doublé."}
                 <span className="block italic text-neutral-500">« {BONUS_INFO[k].tagline} »</span>

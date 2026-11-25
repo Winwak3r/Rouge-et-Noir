@@ -6,6 +6,7 @@ import { fetchNews, type NewsItem } from "@/lib/news";
 import { RAUZY_PLAYLIST, fetchRauzyLatest, type VideoItem } from "@/lib/video";
 import { PageTitle } from "@/components/PageTitle";
 import { CLUB_LINKS, ClubLinks } from "@/components/ZoneMixte";
+import { Srfc } from "@/components/Srfc";
 
 export const metadata: Metadata = { title: "La zone mixte" };
 export const revalidate = 600;
@@ -41,7 +42,7 @@ function RauzyCard({ video }: { video: VideoItem | null }) {
         <span className="mb-1 inline-block rounded bg-rouge px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Vidéo · Le lundi, c’est Rauzy</span>
         <span className="block font-semibold leading-snug">{video ? video.title : "Tous les épisodes de l’émission"}</span>
         <span className="mt-1 block text-sm text-neutral-600">
-          Chaque lundi, François Rauzy débriefe l’actualité du Stade Rennais avec des supporters et d’anciens joueurs.
+          Chaque lundi, François Rauzy débriefe l’actualité du <Srfc /> avec des supporters et d’anciens joueurs.
         </span>
         <span className="mt-1 block text-xs text-neutral-500">
           ICI Armorique{video?.date ? ` · ${ago(video.date)}` : ""}

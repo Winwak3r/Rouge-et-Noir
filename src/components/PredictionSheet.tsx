@@ -10,6 +10,7 @@ import { TeamLabel } from "./TeamLabel";
 import { PlayerPhoto } from "./PlayerPhoto";
 import { teamAbbr } from "@/lib/team-abbr";
 import { shortPlayerName } from "@/lib/player-name";
+import { Srfc } from "@/components/Srfc";
 
 /** Fermeture de la fiche, fournie par l'accordéon qui l'ouvre. */
 export const SheetContext = createContext<{ close: () => void; done?: () => void } | null>(null);
@@ -405,9 +406,12 @@ export function PredictionSheet(props: {
                     <span className="min-w-0 flex-1">
                       <span className={`block font-bold ${blocked ? "opacity-40" : ""}`}>{BONUS_INFO[k].name}</span>
                       <span className={`bonus-card-muted block text-xs ${blocked ? "opacity-40" : ""}`}>{BONUS_INFO[k].effect}</span>
-                      {needsScorer && <span className="bonus-card-warn block text-xs">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      {needsScorer && <span className="bonus-card-warn">⚠️ Choisis d’abord un buteur (onglet « Le buteur »)</span>}
                       {needsCleanSheet && (
-                        <span className="bonus-card-warn block text-xs">Ton score fait encaisser un but au SRFC : pas de clean sheet possible</span>
+                        <span className="bonus-card-warn">
+                          ⚠️ Ton prono prévoit que le <span className="max-sm:hidden">Stade Rennais F.C.</span>
+                          <span className="sm:hidden">SRFC</span> encaisse un but ; pas de clean sheet possible
+                        </span>
                       )}
                       {applied.length > 0 && (
                         <span className="mt-1 flex flex-wrap gap-1">
@@ -466,7 +470,7 @@ export function PredictionSheet(props: {
             </span>
             {rennesZero && (
               <p role="alert" className="rounded-lg border border-orange-300 bg-orange-100 px-3 py-2 text-sm text-orange-800">
-                ⚠️ Tu as pronostiqué <strong>0 but</strong> pour le Stade Rennais : aucun joueur rennais ne peut marquer, le choix d’un
+                ⚠️ Tu as pronostiqué <strong>0 but</strong> pour le <Srfc /> : aucun joueur rennais ne peut marquer, le choix d’un
                 buteur est donc bloqué. Tu peux seulement parier « Aucun buteur rennais ».
               </p>
             )}
