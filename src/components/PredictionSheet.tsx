@@ -406,11 +406,11 @@ export function PredictionSheet(props: {
                     <span className="min-w-0 flex-1">
                       <span className={`block font-bold ${blocked ? "opacity-40" : ""}`}>{BONUS_INFO[k].name}</span>
                       <span className={`bonus-card-muted block text-xs ${blocked ? "opacity-40" : ""}`}>{BONUS_INFO[k].effect}</span>
-                      {needsScorer && <span className="bonus-card-warn">⚠️ Choisis d’abord un buteur (onglet « Le buteur »)</span>}
+                      {needsScorer && <span className="bonus-card-warn">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
                       {needsCleanSheet && (
                         <span className="bonus-card-warn">
-                          ⚠️ Ton prono prévoit que le <span className="max-sm:hidden">Stade Rennais F.C.</span>
-                          <span className="sm:hidden">SRFC</span> encaisse un but ; pas de clean sheet possible
+                          Ton prono prévoit que le <span className="max-sm:hidden">Stade Rennais F.C.</span>
+                          <span className="sm:hidden">SRFC</span> encaisse un but ; pas de clean sheet possible.
                         </span>
                       )}
                       {applied.length > 0 && (
