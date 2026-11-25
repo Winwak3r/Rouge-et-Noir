@@ -533,3 +533,6 @@ body::before {
 /* Mes Ligues : « Bonus disponibles » sous « Mes Trésors du Terroir » */
 .hint-white { color: #737373; }
 :root[data-theme="dark"] .hint-white { color: #ffffff; }
+
+/* Menu du bas (mobile) : couche graphique propre, collée au bas de l'écran sans à-coups pendant le défilement */
+.bottom-nav { transform: translate3d(0, 0, 0); backface-visibility: hidden; will-change: transform; contain: layout paint; }

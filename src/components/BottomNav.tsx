@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Avatar } from "./Avatar";
 import { setNavDirection } from "@/lib/nav-direction";
 
@@ -24,6 +25,9 @@ const icon = (d: ReactNode) => (
  */
 export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt: number | null }; rennesLogo: string | null }) {
   const path = usePathname();
+  // Rendue directement dans <body> : hors de l'en-tête sticky et des pages animées, la barre ne suit plus le défilement
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const on = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const item = (href: string, label: string, glyph: ReactNode, tour?: string) => (
     <Link
@@ -38,10 +42,10 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
     </Link>
   );
 
-  return (
+  const nav = (
     <nav
       aria-label="Navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:hidden"
+      className="bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:hidden"
     >
       <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-start px-1">
         {/* 1. Actus : actualités du Stade Rennais (infos, transferts, classements, effectif) */}
@@ -119,4 +123,5 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
       </div>
     </nav>
   );
+  return mounted ? createPortal(nav, document.body) : nav;
 }

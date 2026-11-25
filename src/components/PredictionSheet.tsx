@@ -387,20 +387,24 @@ export function PredictionSheet(props: {
                 const applied = props.leagues.filter((l) => perLeague[l.id] === k);
                 const needsScorer = k === "CREPE_FLAMBEE" && (scorer === "" || scorer === NO_SCORER);
                 const needsCleanSheet = k === "MENHIRS" && rennesConcedes;
+                const blocked = (needsScorer || needsCleanSheet) && applied.length === 0;
                 return (
                   <button
                     key={k}
                     type="button"
-                    disabled={(needsScorer || needsCleanSheet) && applied.length === 0}
+                    disabled={blocked}
                     onClick={() => openPopup(k)}
-                    className={`bonus-card flex h-full w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors enabled:hover:border-rouge disabled:opacity-40 ${
+                    className={`bonus-card flex h-full w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors enabled:hover:border-rouge disabled:cursor-not-allowed ${
                       applied.length ? "!border-rouge" : ""
                     }`}
                   >
-                    <BonusIcon kind={k} size={48} />
+                    {/* Bonus indisponible : seuls l'icône, le titre et la description sont grisés */}
+                    <span className={`shrink-0 ${blocked ? "opacity-40" : ""}`}>
+                      <BonusIcon kind={k} size={48} />
+                    </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block font-bold">{BONUS_INFO[k].name}</span>
-                      <span className="bonus-card-muted block text-xs">{BONUS_INFO[k].effect}</span>
+                      <span className={`block font-bold ${blocked ? "opacity-40" : ""}`}>{BONUS_INFO[k].name}</span>
+                      <span className={`bonus-card-muted block text-xs ${blocked ? "opacity-40" : ""}`}>{BONUS_INFO[k].effect}</span>
                       {needsScorer && <span className="bonus-card-warn block text-xs">Choisis d’abord un buteur (onglet « Le buteur »)</span>}
                       {needsCleanSheet && (
                         <span className="bonus-card-warn block text-xs">Ton score fait encaisser un but au SRFC : pas de clean sheet possible</span>
