@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { scrollPageTop } from "@/lib/page-scroll";
 
 /** Onglets de page, de même largeur, sans arrondi (comme sur la page d'un match). */
 type Tab = {
@@ -75,7 +76,7 @@ export function PageTabs({ tabs, initial }: { tabs: Tab[]; initial?: string }) {
                 aria-selected={tab === t.key}
                 onClick={() => {
                   setTab(t.key);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  scrollPageTop("smooth");
                   window.history.replaceState(window.history.state, "", `?onglet=${t.key}`);
                 }}
                 style={{ fontSize: "clamp(10px, 2.9vw, 13px)" }}

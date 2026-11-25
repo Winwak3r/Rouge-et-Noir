@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { teamAbbr } from "@/lib/team-abbr";
 import { desktopTeamName } from "@/lib/team-names";
+import { onPageScroll, scrollPageTop } from "@/lib/page-scroll";
 
 type Side = { name: string; logo: string | null; rennes: boolean };
 
@@ -71,12 +72,12 @@ export function HomeStickyMatch(props: {
       });
     };
     check();
-    window.addEventListener("scroll", check, { passive: true });
+    const offScroll = onPageScroll(check);
     window.addEventListener("resize", check);
     window.addEventListener("click", check); // ouverture / fermeture d'un accordéon
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", check);
+      offScroll();
       window.removeEventListener("resize", check);
       window.removeEventListener("click", check);
     };
@@ -94,7 +95,7 @@ export function HomeStickyMatch(props: {
       type="button"
       aria-hidden={!show}
       tabIndex={show ? 0 : -1}
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() => scrollPageTop("smooth")}
       title="Revenir en haut"
       className={`fixed inset-x-0 z-[25] w-full border-b ${props.only === "mobile" ? "block lg:hidden" : props.only === "desktop" ? "hidden lg:block" : "block"} border-neutral-200 bg-[var(--header-bg)] text-left shadow-sm transition-all duration-300 ${
         show ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"

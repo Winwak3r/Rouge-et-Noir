@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { completeTutorialAction } from "@/app/actions/auth";
+import { onPageScroll } from "@/lib/page-scroll";
 
 interface Step {
   group: number; // numéro d'étape affiché (1 à 7)
@@ -181,11 +182,11 @@ export function Tutorial({ waitForEvent, points }: { waitForEvent?: string; poin
     if (el && !el.closest("nav, header")) el.scrollIntoView({ block: "center", behavior: "smooth" });
     const t = setTimeout(measure, 350);
     window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, { passive: true });
+    const offScroll = onPageScroll(measure);
     return () => {
       clearTimeout(t);
       window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure);
+      offScroll();
     };
   }, [step, measure, found]);
 

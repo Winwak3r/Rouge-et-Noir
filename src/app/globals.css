@@ -536,4 +536,10 @@ body::before {
 :root[data-theme="dark"] .hint-white { color: #ffffff; }
 
 /* Menu du bas (mobile) : couche graphique propre, collée au bas de l'écran sans à-coups pendant le défilement */
-.bottom-nav { transform: translate3d(0, 0, 0); backface-visibility: hidden; will-change: transform; contain: layout paint; }
+.bottom-nav { transform: translateZ(0); }
+/* Téléphone : la page défile dans #app-scroll (plein écran, hauteur fixe) et non dans la fenêtre.
+   La fenêtre ne défile plus : la barre d'adresse ne se replie plus et le menu du bas ne bouge plus d'un pixel. */
+@media (max-width: 639.98px) {
+  html, body { height: 100%; overflow: hidden; }
+  #app-scroll { position: fixed; inset: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+}

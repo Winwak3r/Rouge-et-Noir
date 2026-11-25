@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import type { CompetitionCode } from "@/lib/competitions";
 import { LeagueAvatar } from "./LeagueAvatar";
 import { StandingsBoard, type BoardView } from "./StandingsBoard";
+import { onPageScroll } from "@/lib/page-scroll";
 
 /** Panneau d'une ligue, en trois parties (placées différemment sur ordinateur et sur mobile). */
 export interface LeaguePanel {
@@ -154,11 +155,11 @@ export function LeagueHub(props: {
       });
     };
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const offScroll = onPageScroll(onScroll);
     window.addEventListener("resize", onScroll);
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      offScroll();
       window.removeEventListener("resize", onScroll);
     };
   }, [top, sel]);

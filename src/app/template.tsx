@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { scrollPageTop } from "@/lib/page-scroll";
 import { takeNavDirection } from "@/lib/nav-direction";
 
 /**
@@ -16,5 +17,9 @@ export default function Template({ children }: { children: ReactNode }) {
     const d = takeNavDirection();
     return d ? `slide-from-${d}` : "page-enter";
   });
+  // Nouvelle page : on repart du haut (la page défile dans #app-scroll sur téléphone)
+  useEffect(() => {
+    if (!window.location.hash) scrollPageTop();
+  }, []);
   return <div className={fullScreen ? undefined : cls}>{children}</div>;
 }

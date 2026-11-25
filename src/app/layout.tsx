@@ -33,11 +33,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable}`}>
       <body className="min-h-screen overflow-x-clip bg-page font-sans text-neutral-900 antialiased">
-        <Header />
-        <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:pb-16">
-          <ScrollTopOnLoad />
-{children}</main>
-        <Footer />
+        {/* Téléphone : la page défile dans ce conteneur, le menu du bas (posé dans <body>) ne bouge jamais */}
+        <div id="app-scroll">
+          <Header />
+          <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:pb-16">
+            <ScrollTopOnLoad />
+            {children}
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

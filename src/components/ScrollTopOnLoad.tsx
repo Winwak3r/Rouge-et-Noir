@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { scrollPageTop } from "@/lib/page-scroll";
 
 /**
  * Au chargement (ou au rafraîchissement) d'une page : on affiche toujours le haut de la page,
@@ -9,7 +10,7 @@ import { useEffect } from "react";
 export function ScrollTopOnLoad() {
   useEffect(() => {
     if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
-    if (!window.location.hash) window.scrollTo(0, 0);
+    if (!window.location.hash) scrollPageTop();
   }, []);
   return null;
 }
