@@ -24,7 +24,7 @@ export function ProfileLeagues({ rows }: { rows: ProfileLeagueRow[] }) {
   const current = rows.find((r) => r.key === sel) ?? rows[0];
   if (!current) return null;
   return (
-    <section aria-label="Classements" className="card grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+    <div className="card grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
       <ul className="space-y-2">
         {rows.map((r) => {
           const on = r.key === current.key;
@@ -69,6 +69,6 @@ export function ProfileLeagues({ rows }: { rows: ProfileLeagueRow[] }) {
         </p>
         <RankSparkline points={current.history} />
       </div>
-    </section>
+    </div>
   );
 }

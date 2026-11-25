@@ -119,20 +119,26 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
       </header>
 
       {/* 2. Ligues : position et évolution */}
-      {leagueRows.length > 0 ? (
-        <ProfileLeagues rows={leagueRows} />
-      ) : (
-        <p className="card text-sm text-neutral-600">{u.pseudo} ne fait partie d’aucune ligue pour l’instant.</p>
-      )}
+      <section aria-label="Les classements" className="space-y-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide text-rouge">Les classements</h2>
+        {leagueRows.length > 0 ? (
+          <ProfileLeagues rows={leagueRows} />
+        ) : (
+          <p className="card text-sm text-neutral-600">{u.pseudo} ne fait partie d’aucune ligue pour l’instant.</p>
+        )}
+      </section>
 
       {/* 3. Statistiques */}
-      <section aria-label="Statistiques" className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3 lg:grid-cols-5">
-        {stats.map((s) => (
-          <div key={s.label} className="card text-center">
-            <p className="text-sm font-semibold text-neutral-500">{s.label}</p>
-            <p className="mt-1 font-display text-4xl font-bold tabular-nums">{s.value}</p>
-          </div>
-        ))}
+      <section aria-label="Les statistiques" className="space-y-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide text-rouge">Les statistiques</h2>
+        <div className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3 lg:grid-cols-5">
+          {stats.map((s) => (
+            <div key={s.label} className="card text-center">
+              <p className="text-sm font-semibold text-neutral-500">{s.label}</p>
+              <p className="mt-1 font-display text-4xl font-bold tabular-nums">{s.value}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* 4. Les Trésors du Terroir restants dans chaque ligue */}
