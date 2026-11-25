@@ -151,10 +151,11 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
                     const left = stock[k];
                     const total = Math.max(quotas[k], left);
                     return (
-                      <li key={league.id} className="flex items-center gap-2 text-sm">
+                      <li key={league.id} className="grid grid-cols-[auto_minmax(0,1fr)_6.75rem] items-center gap-2 text-sm">
                         <LeagueAvatar leagueId={league.id} name={league.name} at={league.imageUpdatedAt?.getTime() ?? null} size={24} />
                         <span className="min-w-0 flex-1 truncate">{league.name}</span>
-                        <span className={`whitespace-nowrap font-semibold tabular-nums ${left > 0 ? "" : "text-neutral-400"}`}>
+                        {/* Colonne de largeur fixe : « 1/2 restant » et « 2/2 restants » commencent au même endroit */}
+                        <span className={`whitespace-nowrap text-left font-semibold tabular-nums ${left > 0 ? "" : "text-neutral-400"}`}>
                           {left}/{total} restant{left > 1 ? "s" : ""}
                         </span>
                       </li>

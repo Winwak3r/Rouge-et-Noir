@@ -65,7 +65,7 @@ export function ProfileLeagues({ rows }: { rows: ProfileLeagueRow[] }) {
       </ul>
       <div className="text-neutral-800 md:border-l md:border-neutral-200 md:pl-5">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.06em] text-neutral-500">
-          {current.name} · 5 derniers matchs
+          Position · 5 derniers matchs
         </p>
         <RankSparkline points={current.history} />
       </div>
