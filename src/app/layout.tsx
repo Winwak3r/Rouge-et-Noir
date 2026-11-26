@@ -34,6 +34,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="fr" data-theme={theme} className={`${inter.variable} ${barlow.variable}`}>
       <body className="min-h-screen overflow-x-clip bg-page font-sans text-neutral-900 antialiased">
         {/* Téléphone : la page défile dans ce conteneur, le menu du bas (posé dans <body>) ne bouge jamais */}
+        {/* iPhone : bande opaque sous la barre d'état ; Safari ne floute plus le contenu qui passe dessous */}
+        <div aria-hidden className="status-cap" />
         <div id="app-scroll">
           <Header />
           <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:pb-16">

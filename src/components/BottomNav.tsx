@@ -123,5 +123,7 @@ export function BottomNav(props: { user: { id: string; pseudo: string; avatarAt:
       </div>
     </nav>
   );
+  // Page d'un match : la barre « Enregistrer mon pronostic » prend la place du menu
+  if (path.startsWith("/match/")) return null;
   return mounted ? createPortal(nav, document.body) : nav;
 }
