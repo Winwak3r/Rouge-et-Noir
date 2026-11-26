@@ -14,7 +14,7 @@ const pts = (n: number) => `${n > 0 ? "+" : ""}${n} point${Math.abs(n) > 1 ? "s"
 /** Icône ronde d'une rubrique des règles (public/brand/regles). */
 function RuleIcon({ name, size = 36 }: { name: string; size?: number }) {
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={`/brand/regles/${name}.png`} alt="" width={size} height={size} className="shrink-0 rounded-full" style={{ width: size, height: size }} />;
+  return <img src={`/brand/regles/${name}.png`} alt="" width={size} height={size} className="rule-icon shrink-0 rounded-full" style={{ width: size, height: size }} />;
 }
 
 export default async function RulesPage() {
@@ -29,10 +29,7 @@ export default async function RulesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <RuleIcon name="regles" size={48} />
-        <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Règles du jeu</PageTitle>
-      </div>
+      <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Règles du jeu</PageTitle>
 
       <section className="card space-y-3">
         <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
@@ -90,14 +87,35 @@ export default async function RulesPage() {
 
       <section className="card space-y-3">
         <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="verrouillage" />
-          Verrouillage et confidentialité
+          <RuleIcon name="tresors" />
+          Les Trésors du Terroir
         </h2>
         <p className="text-sm text-neutral-700">
-          Tu peux modifier ton pronostic jusqu’au coup d’envoi officiel. Ensuite, il est verrouillé et les
-          pronostics de tous les participants deviennent visibles. En cas de report, la nouvelle heure fait foi.
-          Les matchs joués avant ton inscription ne comptent pas.
+          Trois bonus à jouer pendant la saison, <strong>dans chacune de tes ligues</strong> : chaque ligue te donne son propre stock.
         </p>
+        <ul className="space-y-3">
+          {BONUS_KINDS.map((k) => (
+            <li key={k} className="flex items-start gap-3">
+              <BonusIcon kind={k} size={44} />
+              <span className="text-sm text-neutral-700">
+                <strong className="text-noir">{BONUS_INFO[k].name}</strong> ({normalizeQuotas(r.bonusQuotas)[k]} par saison et par ligue) :{" "}
+                {k === "MENHIRS" && (
+                  <>+2 points si le <Srfc /> n’encaisse aucun but (score final du match), quel que soit ton pronostic.</>
+                )}
+                {k === "CREPE_FLAMBEE" && "les points de ton buteur sont doublés s’il marque (il faut avoir choisi un buteur rennais)."}
+                {k === "BIGOUDEN" && "les points de ton score sont doublés (exact 4 → 8, bon écart 2 → 4, bon résultat 1 → 2). Un mauvais score n’est pas doublé."}
+                <span className="block italic text-neutral-500">« {BONUS_INFO[k].tagline} »</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <ul className="list-disc space-y-1 pl-5 text-sm text-neutral-700">
+          <li>Un bonus se joue dans le formulaire du pronostic, avant le verrouillage du match, et s’applique à la <strong>ligue affichée</strong>.</li>
+          <li>Un seul bonus par match et par ligue. Tant que le match n’est pas verrouillé, tu peux le retirer ou en changer : il t’est rendu.</li>
+          <li>Il faut un pronostic de score ; la Crêpe flambée demande aussi un buteur (pas « Aucun buteur rennais »).</li>
+          <li>Match annulé : le bonus est rendu. Les bonus non utilisés sont perdus en fin de saison.</li>
+          <li>Les points des bonus comptent dans le classement de la ligue où ils ont été joués, pas dans le classement Général R&amp;N.</li>
+        </ul>
       </section>
 
       <section className="card space-y-3">
@@ -130,35 +148,14 @@ export default async function RulesPage() {
 
       <section className="card space-y-3">
         <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="tresors" />
-          Les Trésors du Terroir
+          <RuleIcon name="verrouillage" />
+          Verrouillage et confidentialité
         </h2>
         <p className="text-sm text-neutral-700">
-          Trois bonus à jouer pendant la saison, <strong>dans chacune de tes ligues</strong> : chaque ligue te donne son propre stock.
+          Tu peux modifier ton pronostic jusqu’au coup d’envoi officiel. Ensuite, il est verrouillé et les
+          pronostics de tous les participants deviennent visibles. En cas de report, la nouvelle heure fait foi.
+          Les matchs joués avant ton inscription ne comptent pas.
         </p>
-        <ul className="space-y-3">
-          {BONUS_KINDS.map((k) => (
-            <li key={k} className="flex items-start gap-3">
-              <BonusIcon kind={k} size={44} />
-              <span className="text-sm text-neutral-700">
-                <strong className="text-noir">{BONUS_INFO[k].name}</strong> ({normalizeQuotas(r.bonusQuotas)[k]} par saison et par ligue) :{" "}
-                {k === "MENHIRS" && (
-                  <>+2 points si le <Srfc /> n’encaisse aucun but (score final du match), quel que soit ton pronostic.</>
-                )}
-                {k === "CREPE_FLAMBEE" && "les points de ton buteur sont doublés s’il marque (il faut avoir choisi un buteur rennais)."}
-                {k === "BIGOUDEN" && "les points de ton score sont doublés (exact 4 → 8, bon écart 2 → 4, bon résultat 1 → 2). Un mauvais score n’est pas doublé."}
-                <span className="block italic text-neutral-500">« {BONUS_INFO[k].tagline} »</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-        <ul className="list-disc space-y-1 pl-5 text-sm text-neutral-700">
-          <li>Un bonus se joue dans le formulaire du pronostic, avant le verrouillage du match, et s’applique à la <strong>ligue affichée</strong>.</li>
-          <li>Un seul bonus par match et par ligue. Tant que le match n’est pas verrouillé, tu peux le retirer ou en changer : il t’est rendu.</li>
-          <li>Il faut un pronostic de score ; la Crêpe flambée demande aussi un buteur (pas « Aucun buteur rennais »).</li>
-          <li>Match annulé : le bonus est rendu. Les bonus non utilisés sont perdus en fin de saison.</li>
-          <li>Les points des bonus comptent dans le classement de la ligue où ils ont été joués, pas dans le classement Général R&amp;N.</li>
-        </ul>
       </section>
 
       <section className="card space-y-3">
