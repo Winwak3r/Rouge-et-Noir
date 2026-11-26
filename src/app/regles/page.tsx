@@ -11,10 +11,17 @@ export const dynamic = "force-dynamic";
 
 const pts = (n: number) => `${n > 0 ? "+" : ""}${n} point${Math.abs(n) > 1 ? "s" : ""}`;
 
-/** Icône ronde d'une rubrique des règles (public/brand/regles). */
+/**
+ * Icône ronde d'une rubrique des règles : disque de la couleur de fond du site (blanc ou noir selon le thème)
+ * et dessin dans la couleur du texte (masque public/brand/regles).
+ */
 function RuleIcon({ name, size = 36 }: { name: string; size?: number }) {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={`/brand/regles/${name}.png`} alt="" width={size} height={size} className="rule-icon shrink-0 rounded-full" style={{ width: size, height: size }} />;
+  const mask = `url(/brand/regles/${name}.png) center / contain no-repeat`;
+  return (
+    <span aria-hidden className="relative inline-block shrink-0 rounded-full bg-[var(--color-surface)] text-neutral-900" style={{ width: size, height: size }}>
+      <span className="absolute inset-0 bg-current" style={{ mask, WebkitMask: mask }} />
+    </span>
+  );
 }
 
 export default async function RulesPage() {

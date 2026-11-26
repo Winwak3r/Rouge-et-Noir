@@ -548,7 +548,3 @@ body::before {
 
 /* Bande opaque sous la barre d'état de l'iPhone (couleur de l'en-tête) : plus de flou en haut de l'écran */
 .status-cap { position: fixed; inset: 0 0 auto 0; height: max(1px, env(safe-area-inset-top)); z-index: 35; background-color: var(--header-bg); pointer-events: none; }
-
-/* Icônes des règles : disque de la couleur du fond (blanc en thème clair, noir en thème sombre) */
-.rule-icon { filter: invert(1); }
-:root[data-theme="dark"] .rule-icon { filter: none; }
