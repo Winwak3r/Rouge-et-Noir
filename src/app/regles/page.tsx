@@ -11,19 +11,6 @@ export const dynamic = "force-dynamic";
 
 const pts = (n: number) => `${n > 0 ? "+" : ""}${n} point${Math.abs(n) > 1 ? "s" : ""}`;
 
-/**
- * Icône ronde d'une rubrique des règles : disque de la couleur de fond du site (blanc ou noir selon le thème)
- * et dessin dans la couleur du texte (masque public/brand/regles).
- */
-function RuleIcon({ name, size = 36 }: { name: string; size?: number }) {
-  const mask = `url(/brand/regles/${name}.png) center / contain no-repeat`;
-  return (
-    <span aria-hidden className="relative inline-block shrink-0 rounded-full bg-[var(--color-surface)] text-neutral-900" style={{ width: size, height: size }}>
-      <span className="absolute inset-0 bg-current" style={{ mask, WebkitMask: mask }} />
-    </span>
-  );
-}
-
 export default async function RulesPage() {
   const r = await getActiveRules();
   const rows = [
@@ -39,10 +26,7 @@ export default async function RulesPage() {
       <PageTitle className="font-display text-4xl font-bold uppercase tracking-wide text-rouge sm:text-5xl">Règles du jeu</PageTitle>
 
       <section className="card space-y-3">
-        <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="score" />
-          Le score
-        </h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le score</h2>
         <p className="text-sm text-neutral-700">
           Pour chaque match du <Srfc />, pronostique le nombre de buts de Rennes et de l’adversaire.
           Les catégories ne se cumulent pas : un score exact rapporte {r.points.exact} points au total.
@@ -65,10 +49,7 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="buteur" />
-          Le buteur rennais
-        </h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Le buteur rennais</h2>
         <p className="text-sm text-neutral-700">
           Choisis un joueur rennais. S’il marque, tu gagnes un bonus égal à sa cote « buteur » divisée par{" "}
           {r.scorerBonus.oddsDivisor}, arrondie à l’entier le plus proche (minimum {pts(r.scorerBonus.minBonus)}, maximum{" "}
@@ -93,10 +74,15 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="tresors" />
-          Les Trésors du Terroir
-        </h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Classement</h2>
+        <p className="text-sm text-neutral-700">
+          Classement par points. En cas d’égalité : 1) le plus de scores exacts, 2) le plus de buteurs trouvés,
+          3) le plus de bons écarts. Si l’égalité persiste, les participants sont ex æquo.
+        </p>
+      </section>
+
+      <section className="card space-y-3">
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Les Trésors du Terroir</h2>
         <p className="text-sm text-neutral-700">
           Trois bonus à jouer pendant la saison, <strong>dans chacune de tes ligues</strong> : chaque ligue te donne son propre stock.
         </p>
@@ -126,10 +112,7 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="ligue" />
-          Ligues
-        </h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Ligues</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-neutral-700">
           <li>
             Les pronostics se jouent entre amis, dans des <strong>ligues</strong>. Tu peux participer à <strong>3 ligues au maximum</strong>,
@@ -154,10 +137,7 @@ export default async function RulesPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="verrouillage" />
-          Verrouillage et confidentialité
-        </h2>
+        <h2 className="font-display text-xl font-bold uppercase tracking-wide">Verrouillage et confidentialité</h2>
         <p className="text-sm text-neutral-700">
           Tu peux modifier ton pronostic jusqu’au coup d’envoi officiel. Ensuite, il est verrouillé et les
           pronostics de tous les participants deviennent visibles. En cas de report, la nouvelle heure fait foi.
@@ -165,16 +145,6 @@ export default async function RulesPage() {
         </p>
       </section>
 
-      <section className="card space-y-3">
-        <h2 className="flex items-center gap-3 font-display text-xl font-bold uppercase tracking-wide">
-          <RuleIcon name="classement" />
-          Classement
-        </h2>
-        <p className="text-sm text-neutral-700">
-          Classement par points. En cas d’égalité : 1) le plus de scores exacts, 2) le plus de buteurs trouvés,
-          3) le plus de bons écarts. Si l’égalité persiste, les participants sont ex æquo.
-        </p>
-      </section>
     </div>
   );
 }
