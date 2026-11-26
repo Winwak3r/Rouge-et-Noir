@@ -294,6 +294,9 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
 
   // 2. Feuille de match rennaise (titulaires + remplaçants), dès sa publication
   const lineup = d.lineups[rennesId] ?? [];
+  // ESPN publie parfois le groupe (sans titulaires) plusieurs jours avant : la feuille de match n'est « publiée »
+  // (date, notification) qu'une fois les titulaires connus
+  const hasStarters = lineup.some((l) => l.starter);
   if (lineup.length > 0) {
     const rows: Array<{ matchId: string; playerId: string; starter: boolean }> = [];
     for (const l of lineup) {
@@ -307,9 +310,9 @@ export async function syncMatchDetail(provider: FootballProvider, match: Match):
     await prisma.$transaction([
       prisma.matchLineup.deleteMany({ where: { matchId: match.id } }),
       prisma.matchLineup.createMany({ data: rows }),
-      ...(match.lineupAt ? [] : [prisma.match.update({ where: { id: match.id }, data: { lineupAt: now } })]),
+      ...(match.lineupAt || !hasStarters ? [] : [prisma.match.update({ where: { id: match.id }, data: { lineupAt: now } })]),
     ]);
-    if (!match.lineupAt) {
+    if (!match.lineupAt && hasStarters) {
       notes.push(`feuille de match : ${lineup.filter((l) => l.starter).length} titulaires, ${lineup.filter((l) => !l.starter).length} remplaçants`);
       await notifyPrematch("lineup", match, await matchLabel(match)).catch(() => 0);
     }
@@ -608,6 +611,7 @@ export async function runSmartSync(opts: { force?: boolean; reason: string; budg
         ],
       },
       orderBy: { kickoffAt: "asc" },
+      include: { _count: { select: { lineup: { where: { starter: true } } } } },
     });
     // Priorités : 1) en cours, 2) à venir (cotes, feuille de match), 3) résultats à confirmer, 4) vérifications
     const rank = (m: (typeof candidates)[number]) =>
@@ -624,7 +628,7 @@ export async function runSmartSync(opts: { force?: boolean; reason: string; budg
       const upcoming = m.status === "SCHEDULED" && m.kickoffAt > now;
       const age = m.lastSyncedAt ? now.getTime() - m.lastSyncedAt.getTime() : Infinity;
       // Juste avant le match et sans feuille de match : on vérifie plus souvent.
-      const awaitingLineup = upcoming && !m.lineupAt && m.kickoffAt.getTime() - now.getTime() <= SYNC_INTERVALS.lineupWindow;
+      const awaitingLineup = upcoming && (!m.lineupAt || m._count.lineup === 0) && m.kickoffAt.getTime() - now.getTime() <= SYNC_INTERVALS.lineupWindow;
       const interval = awaitingLineup ? SYNC_INTERVALS.lineupRefresh : SYNC_INTERVALS.oddsRefresh;
       if (upcoming && !opts.force && age < interval) continue;
       const confirmedRecently = m.status === "FINISHED" && m.resultConfirmedAt;

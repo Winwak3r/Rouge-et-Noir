@@ -40,7 +40,8 @@ export async function loadMatchSheet(matchId: string, userId: string) {
   // Vraies cotes (environ 48 h avant le match) ; avant leur publication : cotes estimées
   const estimated = odds.length === 0;
   const oddsOf = estimated ? await estimatedOddsFor(match) : new Map(odds.map((o) => [o.playerId, Number(o.odds)]));
-  const lineupOf = match.lineupAt ? new Map(lineup.map((l) => [l.playerId, l.starter])) : null;
+  // Feuille de match publiée = titulaires connus (un simple groupe sans titulaires ne compte pas)
+  const lineupOf = match.lineupAt && lineup.some((l) => l.starter) ? new Map(lineup.map((l) => [l.playerId, l.starter])) : null;
   const fallback = rules.scorerFallback.mode === "FIXED" ? rules.scorerFallback.fixedBonus : 0;
 
   // Buteurs proposés : une cote ET (si elle est publiée) sur la feuille de match ; le choix enregistré reste visible
